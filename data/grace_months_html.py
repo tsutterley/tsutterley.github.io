@@ -138,7 +138,7 @@ def grace_months(RL04=False):
 	print >> fid, '\t<title>%s</title>' % filename
 	print >> fid, '\t</head>'
 	print >> fid, '\t<body id="preview">'
-	print >> fid, '\t\t<table>'
+	print >> fid, '\t\t<table border="1">'
 	#-- print table header
 	print >> fid, '\t\t<thead>'
 	print >> fid, '\t\t<tr>'
