@@ -1,0 +1,43 @@
+PROC	CSR		#-- Processing Center
+DREL	RL06			#-- Data Release
+DSET	GSM		#-- Data Product
+LMIN	1			#-- Minimum spherical harmonic degree
+LMAX	60			#-- Maximum spherical harmonic degree
+MMAX	None		#-- Maximum spherical harmonic order (None if LMAX)
+START 198				#-- Starting Month in analysis
+END		222		#-- Ending Month in analysis
+MISSING	6,7,18,109,114,125,130,135,140,141,146,151,156,162,166,167,172,177,178,182,187,188,189,190,191,192,193,194,195,196,197,200,201	#-- Missing months (note no spaces)
+SLR_C20	GSFC			#-- Use SLR C2,0 values
+SLR_C30	GSFC			#-- Use SLR C3,0 values
+DEG1	None	#-- Degree 1 (None, Tellus, SLR, SLF)
+MODEL_DEG1 N	#-- Model missing degree 1 values by least-squares fit
+GIA	None	#-- GIA model group (AW13, IJ05-R2, W12a, M09, ICE6G, Wu10, IJ05-Test, AW13-ICE6G, Caron, ICE6G-D)
+GIA_FILE	None	#-- Specific GIA file to read
+UNITS	1			#-- Output units (1: cm Water Eq, 2: mm Geoid, 3: mm Crustal, 4: micGal gravity)
+DATAFORM	2		#-- Input and output data format (1: ascii, 2: netCDF, 3: HDF5)
+DIRECTORY	~/github/tsutterley.github.io/images
+MEAN		Y	#-- Remove Mean gravity field (default mean of imported months)
+MEAN_FILE	~/GRACE/CSR/RL06/GSM/CSR_RL06_GSM_MEAN_CLM_wSLR_C20_L60_013-108.nc	#-- choose a file to remove as static field (if MEAN == Y).  None is Default
+MEANFORM	2	#-- Data format for input MEAN_FILE (1: ascii, 2: netCDF, 3: HDF5)
+DESTRIPE	Y	#-- filter coefficients with a destriping algorithm
+RAD	350		#-- Gaussian Smoothing Radius
+DDEG	0.5		#-- Output degree spacing can be multiple for dlon,dlat i.e. 0.5,0.75
+INTERVAL	1		#-- Degree interval (1: -180:180,-90:90; 2: degree spacing/2)
+POLE_TIDE	N	#-- Pole Tide Correction from Wahr et al. (2015)
+ATM		N	#-- Use GAE/GAF/GAG atmospheric correction coefficients
+PRANGE		-100,100,20
+CRANGE		-200,200,20
+BOUNDARY	None
+CONTOUR		N
+CBUNITS		cm
+CBTITLE		GRACE-FO_CSR_Release-6
+CBEXTEND	both
+CBFORMAT	{0:g}
+SCALE_FACTOR	1.0
+INTERPOLATION  bilinear
+GROUND		N
+CPT_FILE	   None
+COLOR_MAP	cm.PRGn
+ALPHA		1.0
+FIGURE_DPI	180
+FIGURE_FORMAT	jpg

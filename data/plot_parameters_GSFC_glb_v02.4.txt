@@ -1,0 +1,17 @@
+PROC	GSFC			#-- Processing Center
+DREL	v02.4			#-- GSFC Data Version
+DSET	GSM				#-- Data Product
+MEAN	13,108		#-- Start and End Month for mean (or None)
+DIRECTORY	~/github/tsutterley.github.io/images
+PRANGE		-100,100,20
+CRANGE		-200,200,20
+BOUNDARY	None
+CBUNITS		cm
+CBTITLE		GRACE_GSFC_Version_2.4
+CBFORMAT	{0:g}
+SCALE_FACTOR	1.0
+CPT_FILE	   None
+COLOR_MAP	cm.PRGn
+ALPHA		1.0
+FIGURE_DPI	180
+FIGURE_FORMAT	jpg

@@ -1,0 +1,119 @@
+% LaTeX resume file using the resume document class (res.cls)
+% the margin option causes section titles to appear to the left of body text
+% the line option draws a horizontal line over the whole width of resume
+\documentclass[margin,line,11pt]{res}
+\usepackage[english]{babel}
+\usepackage[latin1]{inputenc}
+\usepackage[sfdefault]{cabin}
+\setlength{\textwidth}{5.25in} % set width of text portion
+\usepackage{bibentry}
+\makeatletter\let\saved@bibitem\@bibitem\makeatother
+\usepackage{xcolor}
+\definecolor{urlblue}{rgb}{0.2,0.6,0.8}
+\usepackage[colorlinks=true,linkcolor=urlblue,urlcolor=urlblue]{hyperref}
+\makeatletter\let\@bibitem\saved@bibitem\makeatother
+
+\hyphenpenalty=10000
+\tolerance=500
+\emergencystretch=2.5em
+
+\begin{document}
+\nobibliography{allref}
+\bibliographystyle{abbrvdoi}
+
+\name{\Large TYLER C. SUTTERLEY}
+\address{email: \href{mailto:tsutterl@uw.edu}{tsutterl@uw.edu}}
+\address{website: \href{https://tsutterley.github.io}{tsutterley.github.io}}
+
+\begin{resume}
+
+\section{EDUCATION}
+	{\bf Doctor of Philosophy in Earth System Science} \hfill 2016  \\
+		{\em\href{http://search.proquest.com/docview/1794656381}{Remote Sensing Observations of Modern-Day Regional Ice Sheet Change}} \\
+		PhD Advisor: Isabella Velicogna \\
+		University of California, Irvine
+
+	International Summer School in Glaciology \hfill 2014\\
+	University of Alaska, Fairbanks
+
+	{\bf Master of Science in Earth System Science} \hfill 2012  \\
+		University of California, Irvine
+
+	{\bf Bachelor of Science in Mechanical Engineering} \hfill 2008  \\
+		University of California, San Diego
+
+\section{PROFESSIONAL \\ EXPERIENCE}
+	{\bf Research Associate}, University of Washington, Applied Physics Laboratory \hfill 2019 -- \\
+	{\bf NASA Postdoctoral Program Fellow}, Goddard Space Flight Center \hfill 2017 -- 2019\\
+	{\bf Postdoctoral Scholar}, University of California, Irvine \hfill 2016 -- 2017 \\
+	{\bf Graduate Student Representative}, University of California, Irvine \hfill 2011 -- 2012 \\
+	{\bf Graduate Student Researcher}, University of California, Irvine \hfill 2010 -- 2016 \\
+	{\bf Mechanical Engineer of Research \& Development}, Asymtek \hfill 2008 -- 2009
+
+\section{REFEREED\\ PUBLICATIONS}
+	\begin{enumerate}
+		\setlength{\itemindent}{-3ex}
+		\item \bibentry{Velicogna:2020ek}
+		\item \bibentry{Sutterley:2020js}
+		\item \bibentry{Shepherd:2020jx}
+		\item \bibentry{Sutterley:2019bx}
+		\item \bibentry{Sutterley:2019cl}
+		\item \bibentry{Ciraci:2018bd}
+		\item \bibentry{Sutterley:2018cc}
+		\item \bibentry{Shepherd:2018ca}
+		\item \bibentry{Kishore:2018gp}
+		\item \bibentry{Kishore:2017bt}
+		\item \bibentry{Khazendar:2016is}
+		\item \bibentry{Kishore:2016do}
+		\item \bibentry{Kishore:2016cn}
+		\item \bibentry{Basha:2015je}
+		\item \bibentry{Sutterley:2014gw}
+		\item \bibentry{Velicogna:2014km}
+		\item \bibentry{Sutterley:2014it}
+	\end{enumerate}
+
+\section{INVITED\\ LECTURES}
+	{\bf International Summer School in Glaciology}\hfill {\bf McCarthy, AK}\\
+	{\em \href{http://glaciers.gi.alaska.edu/sites/default/files/Lecture_GRACE_Sutterley2014.pdf}{Time-Variable Gravity for Glacier and Ice Sheet Mass Balance}}\hfill August 2014
+
+\section{CONFERENCE\\ TALKS}
+	\begin{enumerate}
+		\setlength{\itemindent}{-3ex}
+		\item \bibentry{Sutterley:2019wx}
+		\item \bibentry{Sutterley:2018tv}
+		\item \bibentry{Sutterley:2018ww}
+		\item \bibentry{Sutterley:2016tb}
+		\item \bibentry{Sutterley:2016th}
+		\item \bibentry{Sutterley:2015wq}
+		\item \bibentry{Sutterley:2014vh}
+		\item \bibentry{Sutterley:2014tc}
+		\item \bibentry{Sutterley:2013ue}
+		\item \bibentry{Sutterley:2012tx}
+	\end{enumerate}
+
+
+\section{CONFERENCE\\ POSTERS}
+	\begin{enumerate}
+		\setlength{\itemindent}{-3ex}
+		\item \bibentry{Sutterley:2019wg}
+		\item \bibentry{Sutterley:2018fm}
+		\item \bibentry{Sutterley:2018vi}
+		\item \bibentry{Sutterley:2017um}
+		\item \bibentry{Sutterley:2017wo}
+		\item \bibentry{Sutterley:2017vw}
+		\item \bibentry{Sutterley:2016ur}
+		\item \bibentry{Sutterley:2015ur}
+		\item \bibentry{Sutterley:2014vj}
+		\item \bibentry{Sutterley:2014wj}
+		\item \bibentry{Sutterley:2013wj}
+		\item \bibentry{Sutterley:2012ve}
+		\item \bibentry{Sutterley:2011ug}
+	\end{enumerate}
+
+\end{resume}
+\end{document}
+
+%%% Local Variables: ***
+%%% mode: latex ***
+%%% TeX-master: "Sutterley_Tyler.tex" ***
+%%% End: ***

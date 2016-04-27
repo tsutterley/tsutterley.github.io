@@ -1,0 +1,138 @@
+<!doctype html>
+<html>
+  <head>
+        <meta charset="utf-8">
+        <meta http-equiv="X-UA-Compatible" content="chrome=1">
+        <meta name="viewport" content="width=device-width">
+        <title>Greenland Movie</title>
+        <meta name="author" content="Tyler Sutterley"/>
+        <link rel="icon" href="../assets/img/favicon.ico" type="image/x-icon"/>
+        <link rel="stylesheet" href="../assets/css/styles.css">
+        <link rel="stylesheet" href="../assets/css/font-awesome.min.css"/>
+        <link rel="stylesheet" href="../assets/css/academicons.min.css"/>
+        <style>
+            table {
+                counter-reset: rowNumber;
+            }
+            table tr {
+                counter-increment: rowNumber;
+            }
+            .bibtexnumber::before {
+                content: "[" counter(rowNumber) "]";
+            }
+        </style>
+  </head>
+  <body>
+
+        <div id="Sidenav" class="sidenav">
+            <a href="javascript:void(0)" class="closebtn" onclick="closeNav()">&times;</a>
+            <a href="../index.html">Home</a>
+            <a href="../references/publications.html">Publications</a>
+            <a href="../references/presentations.html">Presentations</a>
+            <a href="../references/datasets.html">Datasets</a>
+            <a href="../references/Sutterley_Tyler.pdf">Curriculum Vitae</a>
+            <a href="../news/index.html">News</a>
+            <a href="../resources/index.html">Resources</a>
+            <a href="../animations/antarctica.html">GRACE Antarctic Animation</a>
+            <a href="../data/GRACE-Months.html">GRACE Months</a>
+        </div>
+
+        <span style="font-size:20px;cursor:pointer" onclick="openNav()">&#9776;</span>
+
+        <div class="wrapper">
+        <video width="100%" controls autoplay>
+            <source src="./greenland_movie.mp4" type="video/mp4">
+        </video>
+        <p><em>Movie generated on 2018-09-05 using 163 GRACE spherical harmonic
+            solutions from the University of Texas, Center for Space Research (CSR).
+            Data is corrected for glacial isostatic adjustment (GIA) using coefficients
+            from <a href="#Simpson:2009hg" onmouseover="HighlightRow('Simpson:2009hg')"
+                onmouseout="UnhighlightRow('Simpson:2009hg')">Simpson&nbsp;et&nbsp;al.&nbsp;(2009)</a>,
+            corrected for pole tide drift following <a href="#Wahr:2015dg"
+                onmouseover="HighlightRow('Wahr:2015dg')"
+                onmouseout="UnhighlightRow('Wahr:2015dg')"> Wahr&nbsp;et&nbsp;al.&nbsp;(2015)</a>,
+            smoothed using a 250km radius Gaussian filter
+            <a href="#Wahr:1998hy" onmouseover="HighlightRow('Wahr:1998hy')"
+            onmouseout="UnhighlightRow('Wahr:1998hy')">(Wahr&nbsp;et&nbsp;al.,&nbsp;1998)</a>
+            and filtered for seasonal effects
+            <a href="#Velicogna:2009ft" onmouseover="HighlightRow('Velicogna:2009ft')"
+            onmouseout="UnhighlightRow('Velicogna:2009ft')">(Velicogna,&nbsp;2009)</a>.
+        </em></p>
+
+        <table>
+            <tr valign="top" id="Simpson:2009hg">
+            <td align="right" class="bibtexnumber"></td>
+            <td class="bibtexitem">
+            M.&nbsp;J.&nbsp;R.&nbsp;Simpson, G.&nbsp;A. Milne, P.&nbsp;Huybrechts
+             and A.&nbsp;J.&nbsp;Long.
+             Calibrating a glaciological model of the Greenland ice sheet from
+              the Last Glacial Maximum to present-day using field observations of relative
+              sea level and ice extent.
+             <em>Quaternary Science Reviews</em>, 28(17-18):1631&#8211;1657, Aug. 2009.
+            [&nbsp;<a href="../references/Simpson-2009hg.bib">bib</a>&nbsp;|
+            <a href="https://doi.org/10.1016/j.quascirev.2009.03.004">http</a>&nbsp;]
+            </td>
+            </tr>
+
+            <tr valign="top" id="Wahr:1998hy">
+            <td align="right" class="bibtexnumber"></td>
+            <td class="bibtexitem">
+            J.&nbsp;Wahr, M.&nbsp;Molenaar and F.&nbsp;Bryan.
+             Time variability of the Earth's gravity field: Hydrological and
+              oceanic effects and their possible detection using GRACE.
+             <em>Journal of Geophysical Research: Solid Earth</em>,
+              103(B12):30205&#8211;30229, 1998.
+            [&nbsp;<a href="../references/Wahr-1998hy.bib">bib</a>&nbsp;|
+            <a href="https://doi.org/10.1029/98JB02844">http</a>&nbsp;]
+            </td>
+            </tr>
+
+            <tr valign="top" id="Wahr:2015dg">
+            <td align="right" class="bibtexnumber"></td>
+            <td class="bibtexitem">
+            J.&nbsp;Wahr, R.&nbsp;S.&nbsp;Nerem and S.&nbsp;V.&nbsp;Bettadpur.
+                The pole tide and its effect on GRACE time-variable gravity measurements:
+                Implications for estimates of surface mass variations.
+                <em>Journal of Geophysical Research: Solid Earth</em>,
+                120(6):4597&#8211;4615, 2015.
+            [&nbsp;<a href="../references/Wahr-2015dg.bib">bib</a>&nbsp;|
+            <a href="https://doi.org/10.1002/2015JB011986">http</a>&nbsp;]
+            </td>
+            </tr>
+
+            <tr valign="top" id="Velicogna:2009ft">
+            <td align="right" class="bibtexnumber"></td>
+            <td class="bibtexitem">
+            I.&nbsp;Velicogna.
+             Increasing rates of ice mass loss from the Greenland and Antarctic
+              ice sheets revealed by GRACE.
+             <em>Geophysical Research Letters</em>, 36:1&#8211;4, Oct. 2009.
+            [&nbsp;<a href="../references/Velicogna-2009ft.bib">bib</a>&nbsp;|
+            <a href="https://doi.org/10.1029/2009GL040222">http</a>&nbsp;]
+            </td>
+            </tr>
+
+        </table>
+
+        <p><small>
+            <span xmlns:dct="http://purl.org/dc/terms/" href="http://purl.org/dc/dcmitype/MovingImage"
+                property="dct:title" rel="dct:type">GRACE Greenland Animation</span> at
+            <a xmlns:cc="https://creativecommons.org/ns#" href="https://tsutterley.github.io/greenland"
+                property="cc:attributionName" rel="cc:attributionURL">https://tsutterley.github.io/greenland</a>
+                is licensed under a <a rel="license" href="https://creativecommons.org/licenses/by/4.0/">
+                Creative Commons Attribution 4.0 International License</a>
+                <a rel="license" href="https://creativecommons.org/licenses/by/4.0/">
+                    <i class="fa fa-creative-commons" aria-hidden="true"></i>BY</a>.
+                Based on work at <a xmlns:dct="http://purl.org/dc/terms/"
+                    href="https://doi.org/10.1002/2014GL061052"
+                    rel="dct:source">https://doi.org/10.1002/2014GL061052</a>.<br>
+                <a href="../index.html"><i class="fa fa-home" aria-hidden="true"></i></a>
+                <a href="javascript:history.back()"><i class="fa fa-angle-left" aria-hidden="true"></i></a>
+        </small></p>
+
+        </div>
+        <script type="text/javascript" src="../assets/js/highlight.row.js"></script>
+        <script type="text/javascript" src="../assets/js/sidenav.js"></script>
+        <script type="text/javascript" src="../assets/js/scale.fix.js"></script>
+    </body>
+</html>
