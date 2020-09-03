@@ -20,6 +20,9 @@ PYTHON DEPENDENCIES:
         https://scitools.org.uk/cartopy
 
 UPDATE HISTORY:
+    Updated 09/2020: can set months parameters to None to use defaults
+        use gravity toolkit utilities to set path to load Love numbers
+        copy matplotlib colormap to prevent future deprecation warning
     Updated 05/2020 for public release
     Updated 04/2020: using the harmonics class for spherical harmonic operations
         updated load love numbers read function.  remove depreciated latex part
@@ -37,18 +40,18 @@ from __future__ import print_function
 
 import sys
 import os
+import copy
 import getopt
 import numpy as np
 import matplotlib
-matplotlib.rcParams['axes.linewidth'] = 1.5
-matplotlib.rcParams['font.family'] = 'sans-serif'
-matplotlib.rcParams['font.sans-serif'] = ['Helvetica']
-matplotlib.rcParams['mathtext.default'] = 'regular'
+import matplotlib.font_manager
 import matplotlib.pyplot as plt
 import matplotlib.cm as cm
 import matplotlib.colors as colors
 from matplotlib.offsetbox import AnchoredText
 import cartopy.crs as ccrs
+from gravity_toolkit.utilities import get_data_path
+from gravity_toolkit.grace_find_months import grace_find_months
 from gravity_toolkit.grace_input_months import grace_input_months
 from gravity_toolkit.harmonics import harmonics
 from gravity_toolkit.units import units
@@ -59,14 +62,23 @@ from gravity_toolkit.ocean_stokes import ocean_stokes
 from gravity_toolkit.harmonic_summation import harmonic_summation
 from read_cpt import read_cpt
 
+#-- rebuilt the matplotlib fonts and set parameters
+matplotlib.font_manager._rebuild()
+matplotlib.rcParams['axes.linewidth'] = 1.5
+matplotlib.rcParams['font.family'] = 'sans-serif'
+matplotlib.rcParams['font.sans-serif'] = ['Helvetica']
+matplotlib.rcParams['mathtext.default'] = 'regular'
+
 #-- PURPOSE: import GRACE files for a given months range
 def read_grace_harmonics(base_dir, parameters):
-    #-- Data processing center
+    #-- GRACE/GRACE-FO data processing center
     PROC = parameters['PROC']
-    #-- Data Release
+    #-- GRACE/GRACE-FO data Release
     DREL = parameters['DREL']
-    #-- GRACE dataset
+    #-- GRACE/GRACE-FO dataset
     DSET = parameters['DSET']
+    #-- find GRACE/GRACE-FO months for a dataset
+    grace_months = grace_find_months(base_dir, PROC, DREL, DSET=DSET)
     #-- maximum degree and order
     LMAX = np.int(parameters['LMAX'])
     if (parameters['MMAX'].title() == 'None'):
@@ -78,16 +90,28 @@ def read_grace_harmonics(base_dir, parameters):
     SLR_C30 = parameters['SLR_C30']
     #-- Degree 1 correction
     DEG1 = parameters['DEG1']
+    #-- least squares model geocenter from known coefficients
+    MODEL_DEG1 = parameters['MODEL_DEG1'] in ('Y','y')
     #-- ECMWF jump corrections
     ATM = parameters['ATM'] in ('Y','y')
     #-- Pole Tide corrections from Wahr et al. (2015)
     POLE_TIDE = parameters['POLE_TIDE'] in ('Y','y')
     #-- Date Range and missing months
-    start_mon = np.int(parameters['START'])
-    end_mon = np.int(parameters['END'])
-    missing = np.array(parameters['MISSING'].split(','),dtype=np.int)
-    MODEL_DEG1 = parameters['MODEL_DEG1'] in ('Y','y')
-
+    #-- first month to run
+    if (parameters['START'].title() == 'None'):
+        start_mon = np.copy(grace_months['start'])
+    else:
+        start_mon = np.int(parameters['START'])
+    #-- final month to run
+    if (parameters['END'].title() == 'None'):
+        end_mon = np.copy(grace_months['end'])
+    else:
+        end_mon = np.int(parameters['END'])
+    #-- GRACE/GRACE-FO missing months
+    if (parameters['MISSING'].title() == 'None'):
+        missing = np.copy(grace_months['missing'])
+    else:
+        missing = np.array(parameters['MISSING'].split(','),dtype=np.int)
     #-- reading GRACE months for input range with grace_input_months.py
     #-- replacing SLR and Degree 1 if specified
     #-- correcting for Pole-Tide and Atmospheric Jumps if specified
@@ -96,9 +120,9 @@ def read_grace_harmonics(base_dir, parameters):
         SLR_C30=SLR_C30, MODEL_DEG1=MODEL_DEG1, POLE_TIDE=POLE_TIDE, ATM=ATM)
 
 #-- PURPOSE: read load love numbers for the range of spherical harmonic degrees
-def load_love_numbers(base_dir, LMAX, REFERENCE='CF'):
+def load_love_numbers(LMAX, REFERENCE='CF'):
     #-- load love numbers file
-    love_numbers_file = os.path.join(base_dir,'love_numbers')
+    love_numbers_file = get_data_path(['data','love_numbers'])
     #-- LMAX of load love numbers from Han and Wahr (1995) is 696.
     #-- from Wahr (2007) linearly interpolating kl works
     #-- however, as we are linearly extrapolating out, do not make
@@ -136,7 +160,7 @@ def plot_grid(base_dir, parameters):
         cmap = colors.LinearSegmentedColormap('cpt_import', cpt)
     else:
         #-- colormap
-        cmap = eval(parameters['COLOR_MAP'])
+        cmap = copy.copy(eval(parameters['COLOR_MAP']))
     #-- grey color map for bad values
     cmap.set_bad('w',0.5)
 
@@ -180,15 +204,7 @@ def plot_grid(base_dir, parameters):
     #-- degree spacing (if dlon != dlat: dlon,dlat)
     #-- input degree spacing
     DDEG = np.squeeze(np.array(parameters['DDEG'].split(','),dtype=np.float))
-    if (np.ndim(DDEG) == 0):
-        #-- dlon == dlat
-        dlon = DDEG
-        dlat = DDEG
-    else:
-        #-- dlon ne dlat
-        dlon = DDEG[0]
-        dlat = DDEG[1]
-
+    dlon,dlat = (DDEG,DDEG) if (np.ndim(DDEG) == 0) else (DDEG[0],DDEG[1])
     #-- Input Degree Interval
     INTERVAL = np.int(parameters['INTERVAL'])
     if (INTERVAL == 1):
@@ -209,7 +225,7 @@ def plot_grid(base_dir, parameters):
     PLM,dPLM = plm_holmes(LMAX,np.cos(theta))
 
     #-- read load love numbers
-    hl,kl,ll = load_love_numbers(base_dir, LMAX, REFERENCE='CF')
+    hl,kl,ll = load_love_numbers(LMAX, REFERENCE='CF')
 
     #-- Setting units factor for output
     #-- dfactor computes the degree dependent coefficients
@@ -295,8 +311,8 @@ def plot_grid(base_dir, parameters):
         color='k', size=18, ha='left', va='baseline', usetex=True)
 
     #-- stronger linewidth on frame
-    ax1.outline_patch.set_linewidth(2.0)
-    ax1.outline_patch.set_capstyle('projecting')
+    ax1.spines['geo'].set_linewidth(2.0)
+    ax1.spines['geo'].set_capstyle('projecting')
     #-- adjust subplot within figure
     fig.subplots_adjust(left=0.02,right=0.98,bottom=0.05,top=0.98)
 

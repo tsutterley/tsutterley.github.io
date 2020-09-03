@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 u"""
 plot_GSFC_global_mascons.py
-Written by Tyler Sutterley (04/2020)
+Written by Tyler Sutterley (09/2020)
 Creates a series of GMT-like plots of GSFC GRACE mascon data for the globe in a
     Plate Carree (Equirectangular) projection
 
@@ -20,6 +20,7 @@ PYTHON DEPENDENCIES:
         https://github.com/GeospatialPython/pyshp
 
 UPDATE HISTORY:
+    Updated 09/2020: copy matplotlib colormap to prevent deprecation warning
     Updated 04/2020: remove depreciated latex portions
     Updated 04/2019: set cap style of cartopy geoaxes outline patch
     Updated 03/2019: replacing matplotlib basemap with cartopy
@@ -33,13 +34,11 @@ from __future__ import print_function
 import sys
 import os
 import h5py
+import copy
 import getopt
 import numpy as np
 import matplotlib
-matplotlib.rcParams['axes.linewidth'] = 1.5
-matplotlib.rcParams['font.family'] = 'sans-serif'
-matplotlib.rcParams['font.sans-serif'] = ['Helvetica']
-matplotlib.rcParams['mathtext.default'] = 'regular'
+import matplotlib.font_manager
 import matplotlib.pyplot as plt
 import matplotlib.cm as cm
 import matplotlib.colors as colors
@@ -50,6 +49,13 @@ import cartopy.crs as ccrs
 from gravity_toolkit.convert_julian import convert_julian
 from gravity_toolkit.convert_calendar_decimal import convert_calendar_decimal
 from read_cpt import read_cpt
+
+#-- rebuilt the matplotlib fonts and set parameters
+matplotlib.font_manager._rebuild()
+matplotlib.rcParams['axes.linewidth'] = 1.5
+matplotlib.rcParams['font.family'] = 'sans-serif'
+matplotlib.rcParams['font.sans-serif'] = ['Helvetica']
+matplotlib.rcParams['mathtext.default'] = 'regular'
 
 #-- plot mascon program
 def plot_mascon(base_dir, parameters):
@@ -65,7 +71,7 @@ def plot_mascon(base_dir, parameters):
         parameters['DREL'],parameters['DSET'])
     #-- GRACE HDF5 file
     grace_file = {}
-    grace_file['v02.4'] = 'GSFC.glb.200301_201607_v02.4.h5'
+    grace_file['v02.4'] = 'GSFC.glb.200301_201607_v02.4.hdf'
     #-- read the HDF5 file
     with h5py.File(os.path.join(grace_dir,grace_file[VERSION]),'r') as fileID:
         nmas,nt = fileID['solution']['cmwe'].shape
@@ -100,7 +106,7 @@ def plot_mascon(base_dir, parameters):
         cmap = colors.LinearSegmentedColormap('cpt_import', cpt)
     else:
         #-- colormap
-        cmap = eval(parameters['COLOR_MAP'])
+        cmap = copy.copy(eval(parameters['COLOR_MAP']))
 
     #-- grey color map for bad values
     cmap.set_bad('w',0.5)
@@ -196,8 +202,8 @@ def plot_mascon(base_dir, parameters):
         color='k', size=18, ha='left', va='baseline', usetex=True)
 
     #-- stronger linewidth on frame
-    ax1.outline_patch.set_linewidth(2.0)
-    ax1.outline_patch.set_capstyle('projecting')
+    ax1.spines['geo'].set_linewidth(2.0)
+    ax1.spines['geo'].set_capstyle('projecting')
     #-- adjust subplot within figure
     fig.subplots_adjust(left=0.02,right=0.98,bottom=0.05,top=0.98)
 

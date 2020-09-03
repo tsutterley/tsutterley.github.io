@@ -59,7 +59,7 @@ with future.standard_library.hooks():
 
 #-- PURPOSE: program to acquire (and plot) subsetted NSIDC data
 def nsidc_subset_altimetry(PRODUCT, filepath, BOUNDS=None, LATITUDE=None,
-    LONGITUDE=None, TIME=None, VERBOSE=False, PLOT=False, MODE=0775):
+    LONGITUDE=None, TIME=None, VERBOSE=False, PLOT=False, MODE=0o775):
     #-- create output directory if non-existent
     os.makedirs(filepath) if not os.access(filepath, os.F_OK) else None
     #-- if using latitude and longitude points
