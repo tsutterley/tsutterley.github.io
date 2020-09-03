@@ -20,6 +20,7 @@ PYTHON DEPENDENCIES:
         https://scitools.org.uk/cartopy
 
 UPDATE HISTORY:
+    Updated 09/2020: can set months parameters to None to use defaults
     Updated 05/2020 for public release
     Updated 04/2020: using the harmonics class for spherical harmonic operations
         updated load love numbers read function.  remove depreciated latex part
@@ -49,6 +50,7 @@ import matplotlib.cm as cm
 import matplotlib.colors as colors
 from matplotlib.offsetbox import AnchoredText
 import cartopy.crs as ccrs
+from gravity_toolkit.grace_find_months import grace_find_months
 from gravity_toolkit.grace_input_months import grace_input_months
 from gravity_toolkit.harmonics import harmonics
 from gravity_toolkit.units import units
@@ -61,12 +63,14 @@ from read_cpt import read_cpt
 
 #-- PURPOSE: import GRACE files for a given months range
 def read_grace_harmonics(base_dir, parameters):
-    #-- Data processing center
+    #-- GRACE/GRACE-FO data processing center
     PROC = parameters['PROC']
-    #-- Data Release
+    #-- GRACE/GRACE-FO data Release
     DREL = parameters['DREL']
-    #-- GRACE dataset
+    #-- GRACE/GRACE-FO dataset
     DSET = parameters['DSET']
+    #-- find GRACE/GRACE-FO months for a dataset
+    grace_months = grace_find_months(base_dir, PROC, DREL, DSET=DSET)
     #-- maximum degree and order
     LMAX = np.int(parameters['LMAX'])
     if (parameters['MMAX'].title() == 'None'):
@@ -78,16 +82,28 @@ def read_grace_harmonics(base_dir, parameters):
     SLR_C30 = parameters['SLR_C30']
     #-- Degree 1 correction
     DEG1 = parameters['DEG1']
+    #-- least squares model geocenter from known coefficients
+    MODEL_DEG1 = parameters['MODEL_DEG1'] in ('Y','y')
     #-- ECMWF jump corrections
     ATM = parameters['ATM'] in ('Y','y')
     #-- Pole Tide corrections from Wahr et al. (2015)
     POLE_TIDE = parameters['POLE_TIDE'] in ('Y','y')
     #-- Date Range and missing months
-    start_mon = np.int(parameters['START'])
-    end_mon = np.int(parameters['END'])
-    missing = np.array(parameters['MISSING'].split(','),dtype=np.int)
-    MODEL_DEG1 = parameters['MODEL_DEG1'] in ('Y','y')
-
+    #-- first month to run
+    if (parameters['START'].title() == 'None'):
+        start_mon = np.copy(grace_months['start'])
+    else:
+        start_mon = np.int(parameters['START'])
+    #-- final month to run
+    if (parameters['END'].title() == 'None'):
+        end_mon = np.copy(grace_months['end'])
+    else:
+        end_mon = np.int(parameters['END'])
+    #-- GRACE/GRACE-FO missing months
+    if (parameters['MISSING'].title() == 'None'):
+        missing = np.copy(grace_months['missing'])
+    else:
+        missing = np.array(parameters['MISSING'].split(','),dtype=np.int)
     #-- reading GRACE months for input range with grace_input_months.py
     #-- replacing SLR and Degree 1 if specified
     #-- correcting for Pole-Tide and Atmospheric Jumps if specified

@@ -1,0 +1,86 @@
+# This workflow will install Python dependencies and update the html tables
+
+name: Auto-Update Tables
+
+on:
+  pull_request:
+  schedule:
+    # * is a special character in YAML so you have to quote this string
+    - cron:  '0 0 * * 0'
+
+jobs:
+  build:
+
+    runs-on: ubuntu-20.04
+
+    steps:
+    - uses: actions/checkout@v2
+      with:
+        lfs: true
+    - name: Checkout git dependencies
+      uses: actions/checkout@v2
+      with:
+        repository: tsutterley/read-GRACE-harmonics
+        path: read-GRACE-harmonics
+    - name: Set up Python
+      uses: actions/setup-python@v2
+      with:
+        python-version: 3.8
+    - name: Install dependencies
+      run: |
+        sudo apt-get update
+        sudo apt-get install libproj-dev proj-data proj-bin libgeos-dev
+        sudo apt-get install libhdf5-dev libnetcdf-dev
+        sudo apt-get install libxml2-dev libxslt1-dev
+        pip install --upgrade pip
+        pip install numpy
+    - name: Install Python packages
+      run: |
+        pip install ./read-GRACE-harmonics
+    - name: Download GRACE/GRACE-FO data
+      run: |
+        python data/get_podaac_webdav.py --user=${{ secrets.EARTHDATA_USERNAME }} \
+            --password=${{ secrets.EARTHDATA_PASSWORD }}
+        podaac_grace_sync.py --directory=data/ --netrc=data/.netrc --release=RL06
+        python data/GSFC_grace_date.py --directory=data/
+        run_grace_date.py --directory=data/ --verbose
+    - name: Archive GRACE/GRACE-FO dates
+      uses: actions/upload-artifact@v2
+      with:
+        name: grace-months
+        path: data/GRACE_months.txt
+    - name: Check data for updates
+      id: changes
+      run: |
+        if [ -n "$(git status --porcelain data/GRACE_months.txt)" ] ; then
+            echo "::set-output name=detected::true";
+        else
+            echo "::set-output name=detected::false";
+        fi
+    - name: Update GRACE/GRACE-FO tables
+      if: steps.changes.detected == 'true'
+      run: |
+        grace_mean_harmonics.py --directory=data/ \
+            data/parameters_CSR_RL06_mean_Ylms_013-108.txt \
+            data/parameters_GFZ_RL06_mean_Ylms_013-108.txt \
+            data/parameters_JPL_RL06_mean_Ylms_013-108.txt
+        python data/plot_global_grace_maps.py \
+            data/plot_parameters_CSR_RL06_L60_r350km.txt \
+            data/plot_parameters_GRFO_CSR_RL06_L60_r350km.txt \
+            data/plot_parameters_GFZ_RL06_L60_r350km.txt \
+            data/plot_parameters_GRFO_GFZ_RL06_L60_r350km.txt \
+            data/plot_parameters_JPL_RL06_L60_r350km.txt \
+            data/plot_parameters_GRFO_JPL_RL06_L60_r350km.txt
+        python data/plot_GSFC_grace_mascons.py \
+            data/plot_parameters_GSFC_glb_v02.4.txt
+        python data/grace_months_html.py --directory=data/
+        python data/git_lfs_attributes.py --directory images/ \
+            --regex "^(CSR|GFZ|GSFC|JPL)-(.*?)-(\d+).jpg"
+    - name: Commit changes
+      if: steps.changes.detected == 'true'
+      run: |
+        git config user.name github-actions
+        git config user.email github-actions@github.com
+        git add GRACE-Months.html GRACE_months.txt images/*.jpg
+        git commit -m "Automatic table updates"
+        git push
