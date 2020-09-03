@@ -20,6 +20,8 @@
 *.rar
 *.tar
 *.zip
+*.md5
+*.xml
 *.nc
 *.h5
 *.H5

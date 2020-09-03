@@ -15,9 +15,9 @@ GIA	None	#-- GIA model group (AW13, IJ05-R2, W12a, M09, ICE6G, Wu10, IJ05-Test, 
 GIA_FILE	None	#-- Specific GIA file to read
 UNITS	1			#-- Output units (1: cm Water Eq, 2: mm Geoid, 3: mm Crustal, 4: micGal gravity)
 DATAFORM	2		#-- Input and output data format (1: ascii, 2: netCDF, 3: HDF5)
-DIRECTORY	~/github/tsutterley.github.io/images
+DIRECTORY	images
 MEAN		Y	#-- Remove Mean gravity field (default mean of imported months)
-MEAN_FILE	/Volumes/ice2/tyler/GRACE/CSR/RL06/GSM/CSR_RL06_GSM_MEAN_CLM_wSLR_C20_L60_013-108.nc	#-- choose a file to remove as static field (if MEAN == Y).  None is Default
+MEAN_FILE	data/CSR/RL06/GSM/CSR_RL06_GSM_MEAN_CLM_wSLR_C20_L60_013-108.nc	#-- choose a file to remove as static field (if MEAN == Y).  None is Default
 MEANFORM	2	#-- Data format for input MEAN_FILE (1: ascii, 2: netCDF, 3: HDF5)
 DESTRIPE	Y	#-- filter coefficients with a destriping algorithm
 RAD	350		#-- Gaussian Smoothing Radius
@@ -34,8 +34,6 @@ CBTITLE		GRACE_CSR_Release-6
 CBEXTEND	both
 CBFORMAT	{0:g}
 SCALE_FACTOR	1.0
-INTERPOLATION  bilinear
-GROUND		N
 CPT_FILE	   None
 COLOR_MAP	cm.PRGn
 ALPHA		1.0

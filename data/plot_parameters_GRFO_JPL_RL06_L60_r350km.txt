@@ -5,7 +5,7 @@ LMIN	1			#-- Minimum spherical harmonic degree
 LMAX	60			#-- Maximum spherical harmonic degree
 MMAX	None		#-- Maximum spherical harmonic order (None if LMAX)
 START	198			#-- Starting Month in analysis
-END		222		#-- Ending Month in analysis
+END		None		#-- Ending Month in analysis
 MISSING	6,7,18,109,114,125,130,135,140,141,146,151,156,162,166,167,172,177,178,182,187,188,189,190,191,192,193,194,195,196,197,200,201	#-- Missing months (note no spaces)
 SLR_C20	GSFC			#-- Use SLR C2,0 values
 SLR_C30	GSFC			#-- Use SLR C3,0 values
@@ -15,9 +15,9 @@ GIA	None	#-- GIA model group (AW13, IJ05-R2, W12a, M09, ICE6G, Wu10, IJ05-Test, 
 GIA_FILE	None	#-- Specific GIA file to read
 UNITS	1			#-- Output units (1: cm Water Eq, 2: mm Geoid, 3: mm Crustal, 4: micGal gravity)
 DATAFORM	2		#-- Input and output data format (1: ascii, 2: netCDF, 3: HDF5)
-DIRECTORY	~/github/tsutterley.github.io/images
+DIRECTORY	images
 MEAN		Y	#-- Remove Mean gravity field (default mean of imported months)
-MEAN_FILE	~/GRACE/JPL/RL06/GSM/JPL_RL06_GSM_MEAN_CLM_wSLR_C20_L60_013-108.nc	#-- choose a file to remove as static field (if MEAN == Y).  None is Default
+MEAN_FILE	data/JPL/RL06/GSM/JPL_RL06_GSM_MEAN_CLM_wSLR_C20_L60_013-108.nc	#-- choose a file to remove as static field (if MEAN == Y).  None is Default
 MEANFORM	2	#-- Data format for input MEAN_FILE (1: ascii, 2: netCDF, 3: HDF5)
 DESTRIPE	Y	#-- filter coefficients with a destriping algorithm
 RAD	350		#-- Gaussian Smoothing Radius
@@ -34,8 +34,6 @@ CBTITLE		GRACE-FO_JPL_Release-6
 CBEXTEND	both
 CBFORMAT	{0:g}
 SCALE_FACTOR	1.0
-INTERPOLATION  bilinear
-GROUND		N
 CPT_FILE	   None
 COLOR_MAP	cm.PRGn
 ALPHA		1.0
