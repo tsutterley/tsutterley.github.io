@@ -20,6 +20,10 @@
 *.rar
 *.tar
 *.zip
+*.nc
+*.h5
+*.H5
+*.hdf
 
 # Logs and databases #
 ######################
@@ -31,6 +35,16 @@
 .RData
 .Rhistory
 __pycache__
+build/
+dist/
+develop-eggs/
+run/
+wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+.pytest_cache
+pythonenv*/
 
 # OS generated files #
 ######################
@@ -41,6 +55,7 @@ __pycache__
 .Trashes
 ehthumbs.db
 Thumbs.db
+.netrc
 
 # LaTeX and Vim #
 ######################
@@ -60,6 +75,7 @@ Thumbs.db
 *.lof
 *.log
 *.lot
+*-mpgraph.mp
 *.nav
 *.nlo
 *.out
@@ -68,9 +84,12 @@ Thumbs.db
 *.ps
 *.eps
 *.snm
+*.spl
 *.synctex.gz
-*.synctex.gz(busy)
+*.synctex.gz*(busy)
 *.toc
+*.top
+*.tui
 *.vrb
 *.maf
 *.mtc
@@ -78,6 +97,7 @@ Thumbs.db
 *.sw*
 .!*
 *.hidden
+None*.png
 
 # Jupyter Checkpoints #
 #######################

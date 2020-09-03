@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 u"""
 grace_months_html.py
-Written by Tyler Sutterley (08/2020)
+Written by Tyler Sutterley (09/2020)
 
 Creates a html file with the start and end days for each dataset
 Shows the range of each month for CSR/GFZ/JPL (RL05/RL06) and GSFC (v02.4)
@@ -36,6 +36,7 @@ PYTHON DEPENDENCIES:
     numpy: Scientific Computing Tools For Python (https://numpy.org)
 
 UPDATE HISTORY:
+    Updated 09/2020: add link to plain text table
     Updated 08/2020: using git lfs for image storage
     Updated 06/2020: use full calendar years to not require local dependencies
     Updated 03/2020: local import of required dependencies
@@ -357,7 +358,8 @@ def grace_months(base_dir, DREL=['RL06','v02.4']):
     #-- print footer text
     args = (time.strftime('%Y-%m-%d',time.localtime()), os.path.basename(sys.argv[0]))
     print(('\n\t\t<p><em>Table generated on {0} with <a href="./{1}">\n'
-        '\t\t\t<code>{1}</code></a></em></p>').format(*args), file=fid)
+        '\t\t\t<code>{1}</code></a></em><br>').format(*args), file=fid)
+    print('\t\t<em><a href="./GRACE_months.txt">Table as plain text</a></em></p>', file=fid)
     #-- print navigation symbols
     print(('\t\t<p><small>\n\t\t\t<a href="../index.html">'
         '<i class="fa fa-home" aria-hidden="true"></i></a>\n\t\t\t'
