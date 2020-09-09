@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 u"""
 read_cpt.py
-Written by Tyler Sutterley (01/2019)
+Written by Tyler Sutterley (09/2020)
 Reads a GMT color palette table for use with matplotlib cmap functions
 Can import HSV (hue-saturation-value) or RGB values
 
@@ -23,6 +23,7 @@ NOTES:
     import matplotlib.colors as colors
 
 UPDATE HISTORY:
+    Updated 09/2020: python3 compatible regular expression patterns
     Updated 01/2019: added option REVERSE to flip the colormap
     Updated 04/2015: use regular expressions and updated header text
     Updated 09/2014: updated header text
@@ -39,8 +40,7 @@ def read_cpt(filename, REVERSE=False):
         file_contents = f.read().splitlines()
 
     #-- compile regular expression operator to find numerical instances
-    regex_pattern = '[-+]?(?:(?:\d*\.\d+)|(?:\d+\.?))(?:[Ee][+-]?\d+)?'
-    rx = re.compile(regex_pattern, re.VERBOSE)
+    rx = re.compile(r'[-+]?(?:(?:\d*\.\d+)|(?:\d+\.?))(?:[Ee][+-]?\d+)?')
 
     #-- create list objects for x, r, g, b
     x = []
@@ -49,9 +49,9 @@ def read_cpt(filename, REVERSE=False):
     b = []
     for line in file_contents:
         #-- skip over commented header text
-        if bool(re.search("#",line)):
+        if bool(re.search(r"#",line)):
             #-- find color model
-            if bool(re.search('COLOR_MODEL.*HSV',line)):
+            if bool(re.search(r'COLOR_MODEL.*HSV',line)):
                 #-- HSV color model chosen
                 colorModel = "HSV"
             else:
