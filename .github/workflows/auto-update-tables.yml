@@ -3,10 +3,9 @@
 name: Auto-Update Tables
 
 on:
-  pull_request:
   schedule:
     # * is a special character in YAML so you have to quote this string
-    - cron:  '0 0 * * 0'
+    - cron:  '0 0 * * *'
 
 jobs:
   build:
@@ -32,8 +31,20 @@ jobs:
         sudo apt-get install libproj-dev proj-data proj-bin libgeos-dev
         sudo apt-get install libhdf5-dev libnetcdf-dev
         sudo apt-get install libxml2-dev libxslt1-dev
+        sudo apt-get install texlive texlive-fonts-extra texlive-font-utils
+        sudo apt-get install cm-super dvipng font-manager
         pip install --upgrade pip
-        pip install numpy
+        pip install flake8 pytest pytest-cov numpy matplotlib
+    - name: Lint with flake8
+      run: |
+        # stop the build if there are Python syntax errors or undefined names
+        flake8 data --count --select=E9,F63,F7,F82 --show-source --statistics
+        # exit-zero treats all errors as warnings. The GitHub editor is 127 chars wide
+        flake8 data --count --exit-zero --max-complexity=10 --max-line-length=127 --statistics
+    - name: Test with pytest
+      run: |
+        sudo ln -s assets/fonts/Helvetica /usr/share/fonts/truetype
+        pytest data/test_font_files.py
     - name: Install Python packages
       run: |
         pip install ./read-GRACE-harmonics
@@ -41,46 +52,57 @@ jobs:
       run: |
         python data/get_podaac_webdav.py --user=${{ secrets.EARTHDATA_USERNAME }} \
             --password=${{ secrets.EARTHDATA_PASSWORD }}
-        podaac_grace_sync.py --directory=data/ --netrc=data/.netrc --release=RL06
+        python data/podaac_grace_sync.py --directory=data/ --netrc=data/.netrc \
+            --release=RL06 --log --np=0
+        grace_date.py --directory=data/ --release=RL06 --dataset=GSM --output
         python data/GSFC_grace_date.py --directory=data/
-        run_grace_date.py --directory=data/ --verbose
+        grace_months_index.py --directory=data/ --release=RL06,v02.4
     - name: Archive GRACE/GRACE-FO dates
       uses: actions/upload-artifact@v2
       with:
         name: grace-months
-        path: data/GRACE_months.txt
-    - name: Check data for updates
+        path: |
+            data/PODAAC_sync.log
+            data/GRACE_months.txt
+    - name: Check for updates
       id: changes
       run: |
         if [ -n "$(git status --porcelain data/GRACE_months.txt)" ] ; then
             echo "::set-output name=detected::true";
+            echo "::debug::Changes detected";
         else
             echo "::set-output name=detected::false";
+            echo "::debug::No changes detected";
         fi
     - name: Update GRACE/GRACE-FO tables
-      if: steps.changes.detected == 'true'
+      if: steps.changes.outputs.detected == 'true'
       run: |
         grace_mean_harmonics.py --directory=data/ \
             data/parameters_CSR_RL06_mean_Ylms_013-108.txt \
             data/parameters_GFZ_RL06_mean_Ylms_013-108.txt \
             data/parameters_JPL_RL06_mean_Ylms_013-108.txt
-        python data/plot_global_grace_maps.py \
+        python data/plot_global_grace_maps.py --directory=data/ \
             data/plot_parameters_CSR_RL06_L60_r350km.txt \
             data/plot_parameters_GRFO_CSR_RL06_L60_r350km.txt \
             data/plot_parameters_GFZ_RL06_L60_r350km.txt \
             data/plot_parameters_GRFO_GFZ_RL06_L60_r350km.txt \
             data/plot_parameters_JPL_RL06_L60_r350km.txt \
             data/plot_parameters_GRFO_JPL_RL06_L60_r350km.txt
-        python data/plot_GSFC_grace_mascons.py \
+        python data/plot_GSFC_global_mascons.py --directory=data/ \
             data/plot_parameters_GSFC_glb_v02.4.txt
         python data/grace_months_html.py --directory=data/
         python data/git_lfs_attributes.py --directory images/ \
             --regex "^(CSR|GFZ|GSFC|JPL)-(.*?)-(\d+).jpg"
     - name: Commit changes
-      if: steps.changes.detected == 'true'
+      if: steps.changes.outputs.detected == 'true'
       run: |
-        git config user.name github-actions
-        git config user.email github-actions@github.com
-        git add GRACE-Months.html GRACE_months.txt images/*.jpg
-        git commit -m "Automatic table updates"
-        git push
+        git config user.name ${{ github.actor }}
+        git config user.email '${{ github.actor }}@users.noreply.github.com>'
+        git add .gitattributes data/GRACE-Months.html data/GRACE_months.txt images/*.jpg
+        git commit -am "Automatic table updates"
+    - name: Create pull request
+      if: steps.changes.outputs.detected == 'true'
+      uses: peter-evans/create-pull-request@v3
+      with:
+        author: ${{ github.actor }} <${{ github.actor }}@users.noreply.github.com>
+        title: "Automatic table updates"

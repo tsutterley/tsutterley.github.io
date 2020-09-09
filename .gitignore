@@ -105,3 +105,12 @@ None*.png
 #######################
 .ipynb_checkpoints
 Untitled.ipynb
+
+# Untracked GitHub Actions #
+############################
+read-GRACE-harmonics/
+data/CSR/
+data/GFZ/
+data/GSFC/
+data/JPL/
+data/TN-*
