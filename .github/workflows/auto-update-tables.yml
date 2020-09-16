@@ -43,7 +43,7 @@ jobs:
         flake8 data --count --exit-zero --max-complexity=10 --max-line-length=127 --statistics
     - name: Test with pytest
       run: |
-        sudo ln -s assets/fonts/Helvetica /usr/share/fonts/truetype
+        sudo ln -sv $PWD/assets/fonts/Helvetica /usr/share/fonts/truetype
         pytest data/test_font_files.py
     - name: Install Python packages
       run: |
