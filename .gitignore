@@ -58,6 +58,7 @@ pythonenv*/
 ehthumbs.db
 Thumbs.db
 .netrc
+.uuid
 
 # LaTeX and Vim #
 ######################
