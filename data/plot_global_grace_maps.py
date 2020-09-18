@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 u"""
 plot_global_grace_maps.py
-Written by Tyler Sutterley (05/2020)
+Written by Tyler Sutterley (10/2020)
 Creates a series of GMT-like plots of GRACE data for the globe in a Plate Carree
     (Equirectangular) projection
 
@@ -20,6 +20,7 @@ PYTHON DEPENDENCIES:
         https://scitools.org.uk/cartopy
 
 UPDATE HISTORY:
+    Updated 10/2020: use argparse to set command line parameters
     Updated 09/2020: can set months parameters to None to use defaults
         use gravity toolkit utilities to set path to load Love numbers
         copy matplotlib colormap to prevent future deprecation warning
@@ -41,7 +42,7 @@ from __future__ import print_function
 import sys
 import os
 import copy
-import getopt
+import argparse
 import numpy as np
 import matplotlib
 import matplotlib.font_manager
@@ -180,13 +181,12 @@ def plot_grid(base_dir, parameters):
     if (parameters['MEAN_FILE'].title() == 'None'):
         grace_Ylms.mean(apply=True)
     else:
-        #-- data form for input mean file (1: ascii, 2: netcdf, 3: HDF5)
-        MEANFORM = np.int(parameters['MEANFORM'])
-        if (MEANFORM == 1):
+        #-- data form for input mean file (ascii, netCDF4, HDF5)
+        if (parameters['MEANFORM'] == 'ascii'):
             mean_Ylms=harmonics().from_ascii(parameters['MEAN_FILE'],date=False)
-        if (MEANFORM == 2):
+        if (parameters['MEANFORM'] == 'netCDF4'):
             mean_Ylms=harmonics().from_netCDF4(parameters['MEAN_FILE'],date=False)
-        if (MEANFORM == 3):
+        if (parameters['MEANFORM'] == 'HDF5'):
             mean_Ylms=harmonics().from_HDF5(parameters['MEAN_FILE'],date=False)
         #-- remove the input mean
         grace_Ylms.subtract(mean_Ylms)
@@ -352,20 +352,24 @@ def usage():
 #-- This is the main part of the program that calls the individual modules
 def main():
     #-- Read the system arguments listed after the program
-    optlist,arglist = getopt.getopt(sys.argv[1:],'hD:', ['help','directory='])
-
+    parser = argparse.ArgumentParser(
+        description="""Creates a series of GMT-like plots of GRACE data for the
+            globe in a Plate Carree (Equirectangular) projection
+            """
+    )
     #-- command line parameters
-    #-- standard directory is set from the PYTHONDATA environmental variable
-    base_dir = os.getcwd()
-    for opt, arg in optlist:
-        if opt in ('-h','--help'):
-            usage()
-            sys.exit()
-        elif opt in ("-D","--directory"):
-            base_dir = os.path.expanduser(arg)
+    parser.add_argument('parameters',
+        type=lambda p: os.path.abspath(os.path.expanduser(p)), nargs='+',
+        help='Parameter files containing specific variables for each analysis')
+    #-- working data directory
+    parser.add_argument('--directory','-D',
+        type=lambda p: os.path.abspath(os.path.expanduser(p)),
+        default=os.getcwd(),
+        help='Working data directory')
+    args = parser.parse_args()
 
     #-- for each input parameter file
-    for parameter_file in arglist:
+    for parameter_file in args.parameters:
         #-- keep track of progress
         print(os.path.basename(parameter_file))
         #-- variable with parameter definitions
@@ -381,7 +385,7 @@ def main():
         #-- close the parameter file
         fid.close()
         #-- run plot program with parameters
-        plot_grid(base_dir, parameters)
+        plot_grid(args.directory, parameters)
         #-- clear parameters
         parameters = None
 

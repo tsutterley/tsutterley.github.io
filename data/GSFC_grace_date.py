@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 u"""
 GSFC_grace_date.py
-Written by Tyler Sutterley (03/2020)
+Written by Tyler Sutterley (10/2020)
 
 Reads dates of GSFC GRACE mascon data file and assigns the month number
     reads the start and end date from the filename,
@@ -24,14 +24,15 @@ PROGRAM DEPENDENCIES:
     convert_calendar_decimal.py: converts from calendar dates to decimal years
 
 UPDATE HISTORY:
+    Updated 10/2020: use argparse to set command line parameters
     Updated 03/2020: using getopt to set parameters if run from command line
     Written 07/2018
 """
 import sys
 import os
 import h5py
-import getopt
 import inspect
+import argparse
 import numpy as np
 import gravity_toolkit.utilities
 from gravity_toolkit.convert_julian import convert_julian
@@ -148,36 +149,31 @@ def GSFC_grace_date(base_dir, MODE=0o775):
     fid.close()
     os.chmod(os.path.join(grace_dir, grace_date_file), MODE)
 
-#-- PURPOSE: help module to describe the optional input parameters
-def usage():
-    print('\nHelp: {0}'.format(os.path.basename(sys.argv[0])))
-    print(' -D X, --directory=X\tWorking Data Directory')
-    print(' -M X, --mode=X\t\tPermission mode of files created\n')
-
 #-- This is the main program that calls the individual modules
 def main():
     #-- Read the system arguments listed after the program
-    long_options = ['help','directory=','mode=']
-    optlist,arglist = getopt.getopt(sys.argv[1:],'hD:M:',long_options)
-
+    parser = argparse.ArgumentParser(
+        description="""Reads dates of GSFC GRACE mascon data files and assigns
+            the month number
+            """
+    )
     #-- current file path
     filename = inspect.getframeinfo(inspect.currentframe()).filename
     filepath = os.path.dirname(os.path.abspath(filename))
+    #-- working data directory
+    parser.add_argument('--directory','-D',
+        type=lambda p: os.path.abspath(os.path.expanduser(p)), default=filepath,
+        help='Working data directory')
     #-- permissions mode of the local files (number in octal)
-    MODE = 0o775
-    for opt, arg in optlist:
-        if opt in ('-h','--help'):
-            usage()
-            sys.exit()
-        elif opt in ("-D","--directory"):
-            filepath = os.path.expanduser(arg)
-        elif opt in ("-M","--mode"):
-            MODE = int(arg, 8)
+    parser.add_argument('--mode','-M',
+        type=lambda x: int(x,base=8), default=0o775,
+        help='Permission mode of directories and files synced')
+    args = parser.parse_args()
 
     #-- get GSFC GRACE mascon data
-    get_GSFC_grace_mascons(filepath, MODE=MODE)
+    get_GSFC_grace_mascons(args.directory, MODE=args.mode)
     #-- run GSFC GRACE mascon date program
-    GSFC_grace_date(filepath, MODE=MODE)
+    GSFC_grace_date(args.directory, MODE=args.mode)
 
 #-- run main program
 if __name__ == '__main__':

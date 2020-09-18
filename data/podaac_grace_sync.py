@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 u"""
 podaac_grace_sync.py
-Written by Tyler Sutterley (09/2020)
+Written by Tyler Sutterley (10/2020)
 
 Syncs GRACE/GRACE-FO and auxiliary data from the NASA JPL PO.DAAC Drive Server
 Syncs CSR/GFZ/JPL files for RL06 GSM
@@ -48,9 +48,9 @@ import sys
 import os
 import re
 import netrc
-import getopt
 import shutil
 import getpass
+import argparse
 import traceback
 import posixpath
 import lxml.etree
@@ -323,60 +323,53 @@ def http_pull_file(remote_file, remote_mtime, local_file, MODE=0o775):
     #-- return the output string
     return output
 
-#-- PURPOSE: help module to describe the optional input parameters
-def usage():
-    print('\nHelp: {}'.format(os.path.basename(sys.argv[0])))
-    print(' -N X, --netrc=X\tPath to .netrc file for authentication')
-    print(' -D X, --directory=X\tWorking Data Directory')
-    print(' -C X, --center=X\tGRACE Processing Center (CSR,GFZ,JPL)')
-    print(' -R X, --release=X\tGRACE data releases to sync (RL06)')
-    print(' -P X, --np=X\t\tNumber of processes to use in file downloads')
-    print(' -M X, --mode=X\t\tPermission mode of directories and files synced')
-    print(' -l, --log\t\tOutput log file')
-    print('    Log file format: {}\n'.format('PODAAC_sync.log'))
-
 #-- Main program that calls podaac_grace_sync()
 def main():
     #-- Read the system arguments listed after the program
-    lopt=['help','netrc=','directory=','log','center=','release=','np=','mode=']
-    optlist,arglist = getopt.getopt(sys.argv[1:],'hN:D:lC:R:P:M:',lopt)
-
+    parser = argparse.ArgumentParser(
+        description="""Syncs GRACE/GRACE-FO and auxiliary data from the
+            NASA JPL PO.DAAC Drive Server.
+            Gets the latest technical note (TN) files.
+            """
+    )
     #-- command line parameters
-    NETRC = None
+    #-- NASA Earthdata credentials
+    parser.add_argument('--netrc','-N',
+        type=lambda p: os.path.abspath(os.path.expanduser(p)), default=None,
+        help='Path to .netrc file for authentication')
     #-- working data directory
-    DIRECTORY = os.getcwd()
-    LOG = False
-    #-- GRACE Processing Centers to run
-    PROC = ['CSR', 'GFZ', 'JPL']
-    #-- Data release
-    DREL = ['RL06']
-    #-- sync in series if processes is 0
-    PROCESSES = 0
-    #-- permissions mode of the local directories and files (number in octal)
-    MODE = 0o775
-    for opt, arg in optlist:
-        if opt in ('-h','--help'):
-            usage()
-            sys.exit()
-        elif opt in ("-N","--netrc"):
-            NETRC = os.path.expanduser(arg)
-        elif opt in ("-D","--directory"):
-            DIRECTORY = os.path.expanduser(arg)
-        elif opt in ("-l","--log"):
-            LOG = True
-        elif opt in ("-C","--center"):
-            PROC = arg.upper().split(',')
-        elif opt in ("-R","--release"):
-            DREL = arg.upper().split(',')
-        elif opt in ("-P","--np"):
-            PROCESSES = int(arg)
-        elif opt in ("-M","--mode"):
-            MODE = int(arg, 8)
+    parser.add_argument('--directory','-D',
+        type=lambda p: os.path.abspath(os.path.expanduser(p)),
+        default=os.getcwd(),
+        help='Working data directory')
+    #-- number of processes to run in parallel
+    parser.add_argument('--np','-P',
+        metavar='PROCESSES', type=int, default=0,
+        help='Number of processes to run in parallel')
+    #-- GRACE/GRACE-FO processing center
+    parser.add_argument('--center','-c',
+        metavar='PROC', type=str, nargs='+',
+        default=['CSR','GFZ','JPL'], choices=['CSR','GFZ','JPL'],
+        help='GRACE/GRACE-FO processing center')
+    #-- GRACE/GRACE-FO data release
+    parser.add_argument('--release','-r',
+        metavar='DREL', type=str, nargs='+',
+        default=['RL06'], choices=['RL04','RL05','RL06'],
+        help='GRACE/GRACE-FO data release')
+    #-- Output log file in form PODAAC_sync.log
+    parser.add_argument('--log','-l',
+        default=False, action='store_true',
+        help='Output log file')
+    #-- permissions mode of the directories and files synced (number in octal)
+    parser.add_argument('--mode','-M',
+        type=lambda x: int(x,base=8), default=0o775,
+        help='Permission mode of directories and files synced')
+    args = parser.parse_args()
 
     #-- JPL PO.DAAC drive hostname
     HOST = 'podaac-tools.jpl.nasa.gov'
     #-- get NASA Earthdata and JPL PO.DAAC drive credentials
-    USER,LOGIN,PASSWORD = netrc.netrc(NETRC).authenticators(HOST)
+    USER,LOGIN,PASSWORD = netrc.netrc(args.netrc).authenticators(HOST)
     #-- build a urllib opener for PO.DAAC Drive
     #-- Add the username and password for NASA Earthdata Login system
     gravity_toolkit.utilities.build_opener(USER,PASSWORD)
@@ -384,8 +377,9 @@ def main():
     #-- check internet connection before attempting to run program
     #-- check JPL PO.DAAC Drive credentials before attempting to run program
     if gravity_toolkit.utilities.check_credentials():
-        podaac_grace_sync(DIRECTORY, PROC, DREL=DREL,
-            PROCESSES=PROCESSES, LOG=LOG, MODE=MODE)
+        podaac_grace_sync(args.directory, args.center, DREL=args.release,
+            PROCESSES=args.np, LOG=args.log, MODE=args.mode)
+
 
 #-- run main program
 if __name__ == '__main__':

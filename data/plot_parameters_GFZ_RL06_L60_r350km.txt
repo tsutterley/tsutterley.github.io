@@ -14,11 +14,11 @@ MODEL_DEG1 N	#-- Model missing degree 1 values by least-squares fit
 GIA	None	#-- GIA model group (AW13, IJ05-R2, W12a, M09, ICE6G, Wu10, IJ05-Test, AW13-ICE6G, Caron, ICE6G-D)
 GIA_FILE	None	#-- Specific GIA file to read
 UNITS	1			#-- Output units (1: cm Water Eq, 2: mm Geoid, 3: mm Crustal, 4: micGal gravity)
-DATAFORM	2		#-- Input and output data format (1: ascii, 2: netCDF, 3: HDF5)
+DATAFORM	netCDF4		#-- Input and output data format (ascii, netCDF4, HDF5)
 DIRECTORY	images
 MEAN		Y	#-- Remove Mean gravity field (default mean of imported months)
 MEAN_FILE	data/GFZ/RL06/GSM/GFZ_RL06_GSM_MEAN_CLM_wSLR_C20_L60_013-108.nc	#-- choose a file to remove as static field (if MEAN == Y).  None is Default
-MEANFORM	2	#-- Data format for input MEAN_FILE (1: ascii, 2: netCDF, 3: HDF5)
+MEANFORM	netCDF4	#-- Data format for input MEAN_FILE (ascii, netCDF4, HDF5)
 DESTRIPE	Y	#-- filter coefficients with a destriping algorithm
 RAD	350		#-- Gaussian Smoothing Radius
 DDEG	0.5		#-- Output degree spacing can be multiple for dlon,dlat i.e. 0.5,0.75

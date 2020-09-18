@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 u"""
 grace_months_html.py
-Written by Tyler Sutterley (09/2020)
+Written by Tyler Sutterley (10/2020)
 
 Creates a html file with the start and end days for each dataset
 Shows the range of each month for CSR/GFZ/JPL (RL05/RL06) and GSFC (v02.4)
@@ -36,6 +36,7 @@ PYTHON DEPENDENCIES:
     numpy: Scientific Computing Tools For Python (https://numpy.org)
 
 UPDATE HISTORY:
+    Updated 10/2020: use argparse to set command line parameters
     Updated 09/2020: add link to plain text table
     Updated 08/2020: using git lfs for image storage
     Updated 06/2020: use full calendar years to not require local dependencies
@@ -71,8 +72,8 @@ from __future__ import print_function
 
 import sys
 import os
-import getopt
 import inspect
+import argparse
 import numpy as np
 import calendar,time
 
@@ -205,6 +206,7 @@ def grace_months(base_dir, DREL=['RL06','v02.4']):
     print('\t\t\t<a href="../references/publications.html">Publications</a>', file=fid)
     print('\t\t\t<a href="../references/presentations.html">Presentations</a>', file=fid)
     print('\t\t\t<a href="../references/datasets.html">Datasets</a>', file=fid)
+    print('\t\t\t<a href="../references/documentation.html">Documentation</a>', file=fid)
     print('\t\t\t<a href="../references/Sutterley_Tyler.pdf">Curriculum Vitae</a>', file=fid)
     print('\t\t\t<a href="../news/index.html">News</a>', file=fid)
     print('\t\t\t<a href="../resources/index.html">Resources</a>', file=fid)
@@ -381,31 +383,29 @@ def grace_months(base_dir, DREL=['RL06','v02.4']):
     #-- close output HTML file
     fid.close()
 
-#-- PURPOSE: help module to describe the optional input parameters
-def usage():
-    print('\nHelp: {0}'.format(os.path.basename(sys.argv[0])))
-    print(' -D X, --directory=X\tGRACE data directory')
-    print(' -R X, --release=X\tGRACE data releases to run (RL04,RL05)\n')
-
 #-- PURPOSE: functional call to grace_months() if running as program
 def main():
     #-- Read the system arguments listed after the program
-    long_options = ['help','directory=','release=']
-    optlist,arglist = getopt.getopt(sys.argv[1:],'hD:R:',long_options)
-
+    parser = argparse.ArgumentParser(
+        description="""SCreates a html file with the start and end days for
+            each dataset
+            """
+    )
     #-- command line parameters
-    base_dir = os.getcwd()
-    DREL = ['RL06','v02.4']
-    for opt, arg in optlist:
-        if opt in ('-h','--help'):
-            usage()
-            sys.exit()
-        elif opt in ("-D","--directory"):
-            base_dir = os.path.expanduser(arg)
-        elif opt in ("-R","--release"):
-            DREL = arg.split(',')
-    #-- run grace months program
-    grace_months(base_dir, DREL=DREL)
+    #-- working data directory
+    parser.add_argument('--directory','-D',
+        type=lambda p: os.path.abspath(os.path.expanduser(p)),
+        default=os.getcwd(),
+        help='Working data directory')
+    #-- GRACE/GRACE-FO data release
+    parser.add_argument('--release','-r',
+        metavar='DREL', type=str, nargs='+',
+        default=['RL06','v02.4'], choices=['RL04','RL05','RL06','v02.4'],
+        help='GRACE/GRACE-FO data release')
+    args = parser.parse_args()
+
+    #-- run GRACE/GRACE-FO months program
+    grace_months(args.directory, DREL=args.release)
 
 #-- run main program
 if __name__ == '__main__':

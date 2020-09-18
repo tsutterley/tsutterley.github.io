@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 u"""
 plot_GSFC_global_mascons.py
-Written by Tyler Sutterley (09/2020)
+Written by Tyler Sutterley (10/2020)
 Creates a series of GMT-like plots of GSFC GRACE mascon data for the globe in a
     Plate Carree (Equirectangular) projection
 
@@ -20,6 +20,7 @@ PYTHON DEPENDENCIES:
         https://github.com/GeospatialPython/pyshp
 
 UPDATE HISTORY:
+    Updated 10/2020: use argparse to set command line parameters
     Updated 09/2020: copy matplotlib colormap to prevent deprecation warning
     Updated 04/2020: remove depreciated latex portions
     Updated 04/2019: set cap style of cartopy geoaxes outline patch
@@ -35,7 +36,7 @@ import sys
 import os
 import h5py
 import copy
-import getopt
+import argparse
 import numpy as np
 import matplotlib
 import matplotlib.font_manager
@@ -245,19 +246,24 @@ def usage():
 #-- This is the main part of the program that calls the individual modules
 def main():
     #-- Read the system arguments listed after the program
-    optlist,arglist = getopt.getopt(sys.argv[1:],'hD:', ['help','directory='])
-
+    parser = argparse.ArgumentParser(
+        description="""Creates a series of GMT-like plots of  GSFC GRACE mascon
+            data for the globe in a Plate Carree (Equirectangular) projection
+            """
+    )
     #-- command line parameters
-    base_dir = os.getcwd()
-    for opt, arg in optlist:
-        if opt in ('-h','--help'):
-            usage()
-            sys.exit()
-        elif opt in ("-D","--directory"):
-            base_dir = os.path.expanduser(arg)
+    parser.add_argument('parameters',
+        type=lambda p: os.path.abspath(os.path.expanduser(p)), nargs='+',
+        help='Parameter files containing specific variables for each analysis')
+    #-- working data directory
+    parser.add_argument('--directory','-D',
+        type=lambda p: os.path.abspath(os.path.expanduser(p)),
+        default=os.getcwd(),
+        help='Working data directory')
+    args = parser.parse_args()
 
     #-- for each input parameter file
-    for parameter_file in arglist:
+    for parameter_file in args.parameters:
         #-- keep track of progress
         print(os.path.basename(parameter_file))
         #-- variable with parameter definitions
@@ -273,7 +279,7 @@ def main():
         #-- close the parameter file
         fid.close()
         #-- run plot program with parameters
-        plot_mascon(base_dir, parameters)
+        plot_mascon(args.directory, parameters)
         #-- clear parameters
         parameters = None
 

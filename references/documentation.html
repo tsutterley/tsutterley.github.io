@@ -1,0 +1,131 @@
+<!doctype html>
+<html>
+    <head>
+    <title>Program Documentation</title>
+    <meta name="author" content="Tyler Sutterley"/>
+    <meta name="viewport" content="width=device-width">
+    <link rel="icon" href="../assets/img/favicon.ico" type="image/x-icon"/>
+    <link rel="stylesheet" href="../assets/css/styles.css">
+    <link rel="stylesheet" href="../assets/css/font-awesome.min.css"/>
+    <link rel="stylesheet" href="../assets/css/academicons.min.css"/>
+    <style>
+        table {
+            counter-reset: rowNumber;
+        }
+        table tr {
+            counter-increment: rowNumber;
+        }
+        .bibtexnumber::before {
+            content: "[" counter(rowNumber) "]";
+        }
+        tr:hover {
+            background-color: #fffbcc;
+        }
+    </style>
+    </head>
+    <body>
+
+    <div id="Sidenav" class="sidenav">
+        <a href="javascript:void(0)" class="closebtn" onclick="closeNav()">&times;</a>
+        <a href="../index.html">Home</a>
+        <a href="../references/publications.html">Publications</a>
+        <a href="../references/presentations.html">Presentations</a>
+        <a href="../references/datasets.html">Datasets</a>
+        <a href="../references/Sutterley_Tyler.pdf">Curriculum Vitae</a>
+        <a href="../news/index.html">News</a>
+        <a href="../resources/index.html">Resources</a>
+        <a href="../animations/greenland.html">GRACE Greenland Animation</a>
+        <a href="../animations/antarctica.html">GRACE Antarctic Animation</a>
+        <a href="../data/GRACE-Months.html">GRACE Months</a>
+    </div>
+
+    <span style="font-size:20px;cursor:pointer" onclick="openNav()">&#9776;</span>
+
+    <div class="wrapper">
+
+        <table>
+        <h2>Program Documentation</h2>
+
+        <tr valign="top">
+        <td align="right" class="bibtexnumber">
+        <a name="nsidc-earthdata" href="https://nsidc-earthdata.readthedocs.io"></a>
+        </td>
+        <td class="bibtexitem">
+         <a href="https://github.com/tsutterley/nsidc-earthdata">nsidc-earthdata</a>:
+            ftp-like program for searching NSIDC databases and retrieving NASA
+            Operation IceBridge data
+         [&nbsp;<a href="https://nsidc-earthdata.readthedocs.io">http</a>&nbsp;]
+        </td>
+        </tr>
+
+        <tr valign="top">
+        <td align="right" class="bibtexnumber">
+        <a name="pyTMD" href="https://pytmd.readthedocs.io"></a>
+        </td>
+        <td class="bibtexitem">
+         <a href="https://github.com/tsutterley/pyTMD">pyTMD</a>:
+            Python-based tidal prediction software that reads OTIS, GOT and
+            FES formatted tidal solutions for predicting ocean and load tides
+            and IERS conventions for calculating radial pole tide displacements
+         [&nbsp;<a href="https://pytmd.readthedocs.io">http</a>&nbsp;]
+        </td>
+        </tr>
+
+        <tr valign="top">
+        <td align="right" class="bibtexnumber">
+        <a name="read-cryosat-2" href="https://read-cryosat-2.readthedocs.io"></a>
+        </td>
+        <td class="bibtexitem">
+         <a href="https://github.com/tsutterley/read-cryosat-2">read-cryosat-2</a>:
+             Python tools to read waveform and geolocated elevation data from
+             the ESA CryoSat-2 mission
+         [&nbsp;<a href="https://read-cryosat-2.readthedocs.io">http</a>&nbsp;]
+        </td>
+        </tr>
+
+        <tr valign="top">
+        <td align="right" class="bibtexnumber">
+        <a name="read-GRACE-harmonics" href="https://read-grace-harmonics.readthedocs.io"></a>
+        </td>
+        <td class="bibtexitem">
+         <a href="https://github.com/tsutterley/read-GRACE-harmonics">read-GRACE-harmonics</a>:
+            Python tools for working with spherical harmonic coefficients from
+            the GRACE and GRACE Follow-On missions
+         [&nbsp;<a href="https://read-grace-harmonics.readthedocs.io">http</a>&nbsp;]
+        </td>
+        </tr>
+
+        <tr valign="top">
+        <td align="right" class="bibtexnumber">
+        <a name="read-ICESat-2" href="https://read-icesat-2.readthedocs.io"></a>
+        </td>
+        <td class="bibtexitem">
+         <a href="https://github.com/tsutterley/read-ICESat-2">read-ICESat-2</a>:
+            Python tools to read elevation data from the NASA ICESat-2 mission
+         [&nbsp;<a href="https://read-icesat-2.readthedocs.io">http</a>&nbsp;]
+        </td>
+        </tr>
+
+        <tr valign="top">
+        <td align="right" class="bibtexnumber">
+        <a name="SMBcorr" href="https://smbcorr.readthedocs.io"></a>
+        </td>
+        <td class="bibtexitem">
+         <a href="https://github.com/tsutterley/SMBcorr">SMBcorr</a>:
+            Python-based tools for correcting altimetry data for surface mass
+            balance and firn processes
+         [&nbsp;<a href="https://smbcorr.readthedocs.io">http</a>&nbsp;]
+        </td>
+        </tr>
+
+        </table>
+
+        <p><small>
+            <a href="../index.html"><i class="fa fa-home" aria-hidden="true"></i></a>
+            <a href="javascript:history.back()"><i class="fa fa-angle-left" aria-hidden="true"></i></a>
+        </small></p>
+    </div>
+    <script type="text/javascript" src="../assets/js/sidenav.js"></script>
+    <script type="text/javascript" src="../assets/js/scale.fix.js"></script>
+</body>
+</html>
