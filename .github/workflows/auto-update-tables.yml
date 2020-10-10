@@ -96,13 +96,14 @@ jobs:
     - name: Commit changes
       if: steps.changes.outputs.detected == 'true'
       run: |
-        git config user.name ${{ github.actor }}
-        git config user.email '${{ github.actor }}@users.noreply.github.com>'
+        git config user.name 'Github Actions'
+        git config user.email 'actions@github.com'
         git add .gitattributes data/GRACE-Months.html data/GRACE_months.txt images/*.jpg
         git commit -am "Automatic table updates"
     - name: Create pull request
       if: steps.changes.outputs.detected == 'true'
       uses: peter-evans/create-pull-request@v3
       with:
+        assignees: ${{ github.actor }}
         author: ${{ github.actor }} <${{ github.actor }}@users.noreply.github.com>
         title: "Automatic table updates"
