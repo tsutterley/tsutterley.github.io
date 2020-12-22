@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 u"""
 GSFC_grace_date.py
-Written by Tyler Sutterley (10/2020)
+Written by Tyler Sutterley (12/2020)
 
 Reads dates of GSFC GRACE mascon data file and assigns the month number
     reads the start and end date from the filename,
@@ -19,11 +19,11 @@ PYTHON DEPENDENCIES:
         (http://python-future.org/)
 
 PROGRAM DEPENDENCIES:
+    time.py: utilities for calculating time operations
     utilities: download and management utilities for syncing files
-    convert_julian.py: converts a julian date into a calendar date
-    convert_calendar_decimal.py: converts from calendar dates to decimal years
 
 UPDATE HISTORY:
+    Updated 12/2020: using utilities from time module.  add version option
     Updated 10/2020: use argparse to set command line parameters
     Updated 03/2020: using getopt to set parameters if run from command line
     Written 07/2018
@@ -34,40 +34,53 @@ import h5py
 import inspect
 import argparse
 import numpy as np
+import gravity_toolkit.time
 import gravity_toolkit.utilities
-from gravity_toolkit.convert_julian import convert_julian
-from gravity_toolkit.convert_calendar_decimal import convert_calendar_decimal
 
 #-- PURPOSE: get GSFC GRACE mascon data
-def get_GSFC_grace_mascons(base_dir, MODE=0o775):
-    #-- remote path
-    HOST = ['https://earth.gsfc.nasa.gov','sites','default','files','neptune',
-        'grace','mascons_2.4','GSFC.glb.200301_201607_v02.4.hdf']
+def get_GSFC_grace_mascons(base_dir, VERSION='v02.4', MODE=0o775):
+    #-- remote path for mascon versions
+    HOST = {}
+    HOST['v02.4'] = ['https://earth.gsfc.nasa.gov','sites','default','files',
+        'neptune','grace','mascons_2.4','GSFC.glb.200301_201607_v02.4.hdf']
     #-- local file
-    local = os.path.join(base_dir,'GSFC','v02.4','GSM',HOST[-1])
+    local = os.path.join(base_dir,'GSFC',VERSION,'GSM',HOST[VERSION][-1])
     if not os.access(os.path.dirname(local),os.F_OK):
         os.makedirs(os.path.dirname(local),MODE)
     #-- get GSFC GRACE mascon file
-    gravity_toolkit.utilities.from_http(HOST,local=local,verbose=True,mode=MODE)
+    gravity_toolkit.utilities.from_http(HOST[VERSION], local=local,
+        verbose=True, mode=MODE)
 
-def GSFC_grace_date(base_dir, MODE=0o775):
+def GSFC_grace_date(base_dir, VERSION='v02.4', MODE=0o775):
     #-- set the GRACE directory
-    grace_dir = os.path.join(base_dir,'GSFC','v02.4','GSM')
-    grace_file = 'GSFC.glb.200301_201607_v02.4.hdf'
+    grace_dir = os.path.join(base_dir,'GSFC',VERSION,'GSM')
+    #-- dictionary of GSFC GRACE mascon files
+    grace_file = {}
+    grace_file['v02.4'] = 'GSFC.glb.200301_201607_v02.4.hdf'
+    #-- valid date string (HDF5 attribute: 'days since 2002-01-00T00:00:00')
+    date_string = 'days since 2002-01-01T00:00:00'
+    epoch,to_secs = gravity_toolkit.time.parse_date_string(date_string)
+    #-- dictionary of start, end and mid-dates as Modified Julian Days
+    MJD = {}
     #-- read the HDF5 file
-    with h5py.File(os.path.join(grace_dir,grace_file),'r') as fileID:
+    with h5py.File(os.path.join(grace_dir,grace_file[VERSION]),'r') as fileID:
         nmas,nt = fileID['solution']['cmwe'].shape
-        #-- convert from reference days to Julian Days
-        JD1 = 2452275.5 + fileID['time']['ref_days_first'][:].flatten()
-        JD2 = 2452275.5 + fileID['time']['ref_days_last'][:].flatten()
-        JD = 2452275.5 + fileID['time']['ref_days_middle'][:].flatten()
+        #-- convert from reference days to Modified Julian Days
+        for key in ['ref_days_first','ref_days_last','ref_days_middle']:
+            MJD[key] = gravity_toolkit.time.convert_delta_time(
+                to_secs*fileID['time'][key][:].flatten(),
+                epoch1=epoch, epoch2=(1858,11,17,0,0,0), scale=1.0/86400.0)
 
-    #-- convert Julian days to calendar days
-    start_yr,M1,D1,h1,m1,s1 = convert_julian(JD1, FORMAT='tuple')
-    end_yr,M2,D2,h2,m2,s2 = convert_julian(JD2, FORMAT='tuple')
-    YY,MM,DD,hh,mm,ss = convert_julian(JD, FORMAT='tuple')
+    #-- convert from Modified Julian Days to calendar days
+    start_yr,M1,D1,h1,m1,s1 = gravity_toolkit.time.convert_julian(2400000.5 +
+        MJD['ref_days_first'], FORMAT='tuple')
+    end_yr,M2,D2,h2,m2,s2 = gravity_toolkit.time.convert_julian(2400000.5 +
+        MJD['ref_days_last'], FORMAT='tuple')
+    YY,MM,DD,hh,mm,ss = gravity_toolkit.time.convert_julian(2400000.5 +
+        MJD['ref_days_middle'], FORMAT='tuple')
     #-- convert mid-date calendar dates to year-decimal
-    tdec = convert_calendar_decimal(YY,MM,DAY=DD,HOUR=hh,MINUTE=mm,SECOND=ss)
+    tdec = gravity_toolkit.time.convert_calendar_decimal(YY,MM,day=DD,
+        hour=hh,minute=mm,second=ss)
 
     #-- create day of year variables
     start_day = np.zeros((nt))
@@ -99,7 +112,7 @@ def GSFC_grace_date(base_dir, MODE=0o775):
     mon = np.zeros((nt),dtype=np.int)#-- GRACE month number
 
     #-- Output GRACE date ascii file
-    grace_date_file = '{0}_{1}_DATES.txt'.format('GSFC', 'v02.4')
+    grace_date_file = '{0}_{1}_DATES.txt'.format('GSFC', VERSION)
     fid = open(os.path.join(grace_dir,grace_date_file), 'w')
     #-- date file header information
     args = ('Mid-date','Month','Start_Day','End_Day','Total_Days')
@@ -107,13 +120,10 @@ def GSFC_grace_date(base_dir, MODE=0o775):
 
     #-- for each date
     for t in range(nt):
-        dpy = 366.0 if ((start_yr[t] % 4) == 0) else 365.0
+        #-- number of days in the year
+        dpy = gravity_toolkit.time.calendar_days(start_yr[t]).sum()
         #-- For data that crosses years
-        if (start_yr[t] != end_yr[t]):
-            #-- end_yr - start_yr should be 1
-            end_plus = (end_yr[t] - start_yr[t])*dpy + end_day[t]
-        else:
-            end_plus = np.copy(end_day[t])
+        end_cyclic = (end_yr[t] - start_yr[t])*dpy + end_day[t]
         #-- Calculation of total days since start of campaign
         count = 0
         n_yrs = np.int(start_yr[t]-2002)
@@ -122,12 +132,11 @@ def GSFC_grace_date(base_dir, MODE=0o775):
             #-- year i
             year = 2002 + iyr
             #-- number of days in year i (if leap year or standard year)
-            dpm = dpm_leap.copy() if ((year % 4) == 0) else dpm_stnd.copy()
             #-- add all days from prior years to count
-            count += np.sum(dpm)
+            count += gravity_toolkit.time.calendar_days(year).sum()
 
         #-- calculating the total number of days since 2002
-        tot_days[t] = np.mean([count+start_day[t], count+end_plus])
+        tot_days[t] = np.mean([count+start_day[t], count+end_cyclic])
 
         #-- calculate the GRACE month (Apr02 == 004)
         #-- https://grace.jpl.nasa.gov/data/grace-months/
@@ -164,6 +173,10 @@ def main():
     parser.add_argument('--directory','-D',
         type=lambda p: os.path.abspath(os.path.expanduser(p)), default=filepath,
         help='Working data directory')
+    #-- GSFC GRACE mascon version
+    parser.add_argument('--version','-v',
+        type=str, default='v02.4',
+        help='GSFC GRACE mascon version')
     #-- permissions mode of the local files (number in octal)
     parser.add_argument('--mode','-M',
         type=lambda x: int(x,base=8), default=0o775,
@@ -171,9 +184,9 @@ def main():
     args = parser.parse_args()
 
     #-- get GSFC GRACE mascon data
-    get_GSFC_grace_mascons(args.directory, MODE=args.mode)
+    get_GSFC_grace_mascons(args.directory, VERSION=args.version, MODE=args.mode)
     #-- run GSFC GRACE mascon date program
-    GSFC_grace_date(args.directory, MODE=args.mode)
+    GSFC_grace_date(args.directory, VERSION=args.version, MODE=args.mode)
 
 #-- run main program
 if __name__ == '__main__':

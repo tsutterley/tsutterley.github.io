@@ -113,7 +113,7 @@ def geocenter_processing_centers(grace_dir,START_MON,END_MON,MISSING):
         ax[j].xaxis.set_ticks(major_ticks)
         minor_ticks = sorted(set(np.arange(2002, 2021, 1)) - set(major_ticks))
         ax[j].xaxis.set_ticks(minor_ticks, minor=True)
-        ax[j].set_xlim(2002, 2020.75)
+        ax[j].set_xlim(2002, 2021)
         ax[j].set_ylim(-9.5,8.5)
         #-- axes tick adjustments
         ax[j].get_xaxis().set_tick_params(which='both', direction='in')

@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 u"""
 plot_GSFC_global_mascons.py
-Written by Tyler Sutterley (10/2020)
+Written by Tyler Sutterley (12/2020)
 Creates a series of GMT-like plots of GSFC GRACE mascon data for the globe in a
     Plate Carree (Equirectangular) projection
 
@@ -20,6 +20,7 @@ PYTHON DEPENDENCIES:
         https://github.com/GeospatialPython/pyshp
 
 UPDATE HISTORY:
+    Updated 12/2020: using utilities from time module
     Updated 10/2020: use argparse to set command line parameters
     Updated 09/2020: copy matplotlib colormap to prevent deprecation warning
     Updated 04/2020: remove depreciated latex portions
@@ -47,8 +48,7 @@ import matplotlib.patches as patches
 from matplotlib.collections import PatchCollection
 from matplotlib.offsetbox import AnchoredText
 import cartopy.crs as ccrs
-from gravity_toolkit.convert_julian import convert_julian
-from gravity_toolkit.convert_calendar_decimal import convert_calendar_decimal
+import gravity_toolkit.time
 from read_cpt import read_cpt
 
 #-- rebuilt the matplotlib fonts and set parameters
@@ -73,6 +73,9 @@ def plot_mascon(base_dir, parameters):
     #-- GRACE HDF5 file
     grace_file = {}
     grace_file['v02.4'] = 'GSFC.glb.200301_201607_v02.4.hdf'
+    #-- valid date string (HDF5 attribute: 'days since 2002-01-00T00:00:00')
+    date_string = 'days since 2002-01-01T00:00:00'
+    epoch,to_secs = gravity_toolkit.time.parse_date_string(date_string)
     #-- read the HDF5 file
     with h5py.File(os.path.join(grace_dir,grace_file[VERSION]),'r') as fileID:
         nmas,nt = fileID['solution']['cmwe'].shape
@@ -82,6 +85,9 @@ def plot_mascon(base_dir, parameters):
         lat_span = fileID['mascon']['lat_span'][:].flatten()
         lon_span = fileID['mascon']['lon_span'][:].flatten()
         julian = 2452275.5 + fileID['time']['ref_days_middle'][:].flatten()
+        MJD = gravity_toolkit.time.convert_delta_time(
+            to_secs*fileID['time']['ref_days_middle'][:].flatten(),
+            epoch1=epoch, epoch2=(1858,11,17,0,0,0), scale=1.0/86400.0)
     #-- sign to convert from center to patch
     lon_sign=np.array([-0.5,-0.3,-0.1,0.1,0.3,0.5,0.5,0.3,0.1,-0.1,-0.3,-0.5,-0.5])
     lat_sign=np.array([-0.5,-0.5,-0.5,-0.5,-0.5,-0.5,0.5,0.5,0.5,0.5,0.5,0.5,-0.5])
@@ -89,12 +95,13 @@ def plot_mascon(base_dir, parameters):
     gt180, = np.nonzero(lon_center > 180)
     lon_center[gt180] -= 360.0
 
-    #-- use a mean file for the static field to remove
+    #-- use a mean range for the static field to remove
     MEAN = np.zeros((nmas))
     if (parameters['MEAN'].title() != 'None'):
         START,END = np.array(parameters['MEAN'].split(','),dtype=np.int)
         #-- convert Julian days to calendar days
-        YY,MM,DD,hh,mm,ss = convert_julian(julian, FORMAT='tuple')
+        YY,MM,DD,hh,mm,ss = gravity_toolkit.time.convert_julian(2400000.5+MJD,
+            FORMAT='tuple')
         GM = np.array((YY - 2002.0)*12.0 + MM, dtype=np.int)
         ind, = np.nonzero((GM >= START) & (GM <= END))
         for i in range(nmas):
@@ -213,12 +220,15 @@ def plot_mascon(base_dir, parameters):
     format = parameters['FIGURE_FORMAT']
     #-- for each input file
     grace_month = np.zeros((nt),dtype=np.int)
-    for t,JD in enumerate(julian):
+    for t,JD in enumerate(2400000.5+MJD):
         #-- data for time with mean removed
         data = cmwe[:,t] - MEAN
         #-- convert Julian days to calendar days
-        YY,MM,DD,hh,mm,ss = convert_julian(JD, FORMAT='tuple')
-        tdec = convert_calendar_decimal(YY,MM,DAY=DD,HOUR=hh,MINUTE=mm,SECOND=ss)
+        YY,MM,DD,hh,mm,ss=gravity_toolkit.time.convert_julian(JD,FORMAT='tuple')
+        #-- convert calendar days to year-decimal
+        tdec = gravity_toolkit.time.convert_calendar_decimal(YY,MM,day=DD,
+            hour=hh,minute=mm,second=ss)
+        #-- GRACE/GRACE-FO month
         grace_month[t] = np.int((YY - 2002.0)*12.0 + MM)
         #-- calculating the month number of 'Special Months' with accelerometer
         #-- shutoffs is more complicated as days from other months are used
@@ -247,8 +257,8 @@ def usage():
 def main():
     #-- Read the system arguments listed after the program
     parser = argparse.ArgumentParser(
-        description="""Creates a series of GMT-like plots of  GSFC GRACE mascon
-            data for the globe in a Plate Carree (Equirectangular) projection
+        description="""Creates a series of GMT-like plots of GSFC GRACE mascon
+            data on a global Plate Carr\u00E9e (Equirectangular) projection
             """
     )
     #-- command line parameters

@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 u"""
 podaac_grace_sync.py
-Written by Tyler Sutterley (10/2020)
+Written by Tyler Sutterley (12/2020)
 
 Syncs GRACE/GRACE-FO and auxiliary data from the NASA JPL PO.DAAC Drive Server
 Syncs CSR/GFZ/JPL files for RL06 GSM
@@ -137,8 +137,8 @@ def podaac_grace_sync(DIRECTORY,PROC,DREL=[],PROCESSES=0,LOG=False,MODE=None):
     #-- compile regular expression operator for remote files
     R1 = re.compile(r'TN-(05|07|11)_C20_SLR.txt', re.VERBOSE)
     #-- open connection with PO.DAAC drive server at remote directory
-    files,mtimes = gravity_toolkit.utilities.podaac_list(PATH,
-        timeout=120,build=False,parser=parser,pattern=R1,sort=True)
+    files,mtimes = gravity_toolkit.utilities.drive_list(PATH,
+        timeout=360,build=False,parser=parser,pattern=R1,sort=True)
     #-- for each file on the remote server
     for colname,remote_mtime in zip(files,mtimes):
         #-- remote and local versions of the file
@@ -153,8 +153,8 @@ def podaac_grace_sync(DIRECTORY,PROC,DREL=[],PROCESSES=0,LOG=False,MODE=None):
     #-- compile regular expression operator for remote files
     R1 = re.compile(r'TN-(14)_C30_C20_GSFC_SLR.txt', re.VERBOSE)
     #-- open connection with PO.DAAC drive server at remote directory
-    files,mtimes = gravity_toolkit.utilities.podaac_list(PATH,
-        timeout=120,build=False,parser=parser,pattern=R1,sort=True)
+    files,mtimes = gravity_toolkit.utilities.drive_list(PATH,
+        timeout=360,build=False,parser=parser,pattern=R1,sort=True)
     #-- for each file on the remote server
     for colname,remote_mtime in zip(files,mtimes):
         #-- remote and local versions of the file
@@ -179,8 +179,8 @@ def podaac_grace_sync(DIRECTORY,PROC,DREL=[],PROCESSES=0,LOG=False,MODE=None):
             PATH.extend(['L2',pr,drel_str])
             remote_dir = posixpath.join(*PATH)
             #-- open connection with PO.DAAC drive server at remote directory
-            colnames,mtimes = gravity_toolkit.utilities.podaac_list(PATH,
-                timeout=120,build=False,parser=parser,sort=True)
+            colnames,mtimes = gravity_toolkit.utilities.drive_list(PATH,
+                timeout=360,build=False,parser=parser,sort=True)
             #-- local directory for exact data product
             local_dir = os.path.join(DIRECTORY, pr, rl, DSET)
             #-- check if directory exists and recursively create if not
@@ -208,15 +208,15 @@ def podaac_grace_sync(DIRECTORY,PROC,DREL=[],PROCESSES=0,LOG=False,MODE=None):
             PATH.extend(['L2',pr,rl])
             #-- open connection with PO.DAAC drive server at remote directory
             R2 = re.compile(r'\d{4}',re.VERBOSE)
-            years,mtimes = gravity_toolkit.utilities.podaac_list(PATH,
-                timeout=120,build=False,parser=parser,pattern=R2,sort=True)
+            years,mtimes = gravity_toolkit.utilities.drive_list(PATH,
+                timeout=360,build=False,parser=parser,pattern=R2,sort=True)
             for yr in years:
                 #-- add the year directory to the path
                 PATH.append(yr)
                 remote_dir = posixpath.join(*PATH)
                 #-- open connection with PO.DAAC drive server at remote directory
-                colnames,mtimes=gravity_toolkit.utilities.podaac_list(PATH,
-                    timeout=120,build=False,parser=parser,sort=True)
+                colnames,mtimes=gravity_toolkit.utilities.drive_list(PATH,
+                    timeout=360,build=False,parser=parser,sort=True)
                 #-- local directory for exact data product
                 local_dir = os.path.join(DIRECTORY, pr, rl, DSET)
                 #-- check if directory exists and recursively create if not
@@ -312,7 +312,7 @@ def http_pull_file(remote_file, remote_mtime, local_file, MODE=0o775):
     #-- There are a wide range of exceptions that can be thrown here
     #-- including HTTPError and URLError.
     request = gravity_toolkit.utilities.urllib2.Request(remote_file)
-    response = gravity_toolkit.utilities.urllib2.urlopen(request, timeout=120)
+    response = gravity_toolkit.utilities.urllib2.urlopen(request, timeout=360)
     #-- copy contents to local file using chunked transfer encoding
     #-- transfer should work properly with ascii and binary formats
     with open(local_file, 'wb') as f:

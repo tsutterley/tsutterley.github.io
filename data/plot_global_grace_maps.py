@@ -353,8 +353,8 @@ def usage():
 def main():
     #-- Read the system arguments listed after the program
     parser = argparse.ArgumentParser(
-        description="""Creates a series of GMT-like plots of GRACE data for the
-            globe in a Plate Carree (Equirectangular) projection
+        description="""Creates a series of GMT-like plots of GRACE data on a
+            global Plate Carr\u00E9e (Equirectangular) projection
             """
     )
     #-- command line parameters

@@ -55,7 +55,7 @@ jobs:
         python data/podaac_grace_sync.py --directory data/ --netrc data/.netrc \
             --release RL06 --log --np=0
         grace_date.py --directory data/ --release RL06 --product GSM --output
-        python data/GSFC_grace_date.py --directory data/
+        python data/GSFC_grace_date.py --version v02.4 --directory data/
         grace_months_index.py --directory data/ --release RL06 v02.4
     - name: Archive GRACE/GRACE-FO dates
       uses: actions/upload-artifact@v2
