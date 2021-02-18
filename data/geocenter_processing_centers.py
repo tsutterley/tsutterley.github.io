@@ -1,18 +1,20 @@
 #!/usr/bin/env python
 u"""
 geocenter_processing_centers.py
-Written by Tyler Sutterley (04/2020)
+Written by Tyler Sutterley (02/2021)
 
 CALLING SEQUENCE:
-    python geocenter_processing_centers.py --start=4 --end=216
+    python geocenter_processing_centers.py --start 4 --end 216
 
 COMMAND LINE OPTIONS:
-    -D X, --directory=X: working data directory with geocenter files
-    -S X, --start=X: starting GRACE month for time series
-    -E X, --end=X: ending GRACE month for time series
-    -M X, --missing=X: Missing GRACE months in time series
+    -D X, --directory X: working data directory with geocenter files
+    -R X, --release X: GRACE/GRACE-FO data release
+    -S X, --start X: starting GRACE month for time series
+    -E X, --end X: ending GRACE month for time series
+    -M X, --missing X: Missing GRACE months in time series
 
 UPDATE HISTORY:
+    Updated 02/2021: using argparse to set parameters
     Updated 04/2020: use units class for setting earth parameters
     Updated 02/2020: add minor ticks and adjust x axes
     Updated 11/2019: adjust axes and set directory to full path
@@ -20,10 +22,9 @@ UPDATE HISTORY:
 """
 from __future__ import print_function
 
-import sys
 import os
 import inspect
-import getopt
+import argparse
 import numpy as np
 import matplotlib.pyplot as plt
 import matplotlib
@@ -40,7 +41,7 @@ filename = inspect.getframeinfo(inspect.currentframe()).filename
 filepath = os.path.dirname(os.path.dirname(os.path.abspath(filename)))
 
 #-- PURPOSE: plots the GRACE/GRACE-FO geocenter time series
-def geocenter_processing_centers(grace_dir,START_MON,END_MON,MISSING):
+def geocenter_processing_centers(grace_dir,DREL,START_MON,END_MON,MISSING):
     #-- GRACE months
     GAP = [187,188,189,190,191,192,193,194,195,196,197]
     months = sorted(set(np.arange(START_MON,END_MON+1)) - set(MISSING))
@@ -49,8 +50,7 @@ def geocenter_processing_centers(grace_dir,START_MON,END_MON,MISSING):
     input_labels = ['Static','Iterated','Iterated SLF']
     #-- labels for Release-6
     PROC = ['CSR','GFZ','JPL']
-    DREL = ['RL06','RL06','RL06']
-    MODEL = ['MPIOM','MPIOM','MPIOM']
+    model_str = 'OMCT' if DREL in ('RL04','RL05') else 'MPIOM'
     #-- degree one coefficient labels
     fig_labels = ['C11','S11','C10']
     axes_labels = dict(C10='c)',C11='a)',S11='b)')
@@ -74,9 +74,9 @@ def geocenter_processing_centers(grace_dir,START_MON,END_MON,MISSING):
     ax = {}
     fig,(ax[0],ax[1],ax[2])=plt.subplots(num=1,ncols=3,sharey=True,figsize=(9,4))
     #-- plot geocenter estimates for each processing center
-    for pr,drl,mdl in zip(PROC,DREL,MODEL):
+    for k,pr in enumerate(PROC):
         #-- read geocenter file for processing center and model
-        grace_file = '{0}_{1}_{2}_{3}.txt'.format(pr,drl,mdl,input_flags[2])
+        grace_file = '{0}_{1}_{2}_{3}.txt'.format(pr,DREL,model_str,input_flags[2])
         DEG1 = read_GRACE_geocenter(os.path.join(grace_dir,grace_file))
         #-- indices for mean months
         kk, = np.nonzero((DEG1['month'] >= START_MON) & (DEG1['month'] <= 176))
@@ -99,8 +99,8 @@ def geocenter_processing_centers(grace_dir,START_MON,END_MON,MISSING):
     #-- add axis labels and adjust font sizes for axis ticks
     for j,key in enumerate(fig_labels):
         #-- vertical lines for end of the GRACE mission and start of GRACE-FO
-        jj, = np.nonzero(DEG1['month'] == 186)
-        kk, = np.nonzero(DEG1['month'] == 198)
+        jj, = np.flatnonzero(DEG1['month'] == 186)
+        kk, = np.flatnonzero(DEG1['month'] == 198)
         ax[j].axvspan(DEG1['time'][jj],DEG1['time'][kk],
             color='0.5',ls='dashed',alpha=0.15)
         #-- axis label
@@ -139,43 +139,42 @@ def geocenter_processing_centers(grace_dir,START_MON,END_MON,MISSING):
         format='png', dpi=300)
     plt.clf()
 
-#-- PURPOSE: help module to describe the optional input parameters
-def usage():
-    print('\nHelp: {0}'.format(os.path.basename(sys.argv[0])))
-    print(' -D X, --directory=X\tWorking data directory with geocenter files')
-    print(' -S X, --start=X\tStarting GRACE month for time series')
-    print(' -E X, --end=X\t\tEnding GRACE month for time series')
-    print(' -M X, --missing=X\tMissing GRACE months in time series\n')
-
 #-- This is the main part of the program that calls the individual modules
 #-- If no parameter file is listed as an argument: will exit with an error
 def main():
-    #-- Read the system arguments listed after the program and run the analyses
-    #--    with the specific parameters.
-    long_options = ['help','directory=','start=','end=','missing=']
-    optlist,arglist = getopt.getopt(sys.argv[1:],'hD:S:E:M:',long_options)
-
-    #-- command line parameters
-    grace_dir = os.getcwd()
-    START_MON = 4
-    END_MON = 216
+    #-- Read the system arguments listed after the program
+    parser = argparse.ArgumentParser(
+        description="""Plots the GRACE/GRACE-FO geocenter time series for
+            different GRACE/GRACE-FO processing centers
+            """
+    )
+    #-- working data directory
+    parser.add_argument('--directory','-D',
+        type=lambda p: os.path.abspath(os.path.expanduser(p)),
+        default=os.getcwd(),
+        help='Working data directory')
+    #-- GRACE/GRACE-FO data release
+    parser.add_argument('--release','-r',
+        metavar='DREL', type=str, nargs='+',
+        default='RL06', choices=['RL04','RL05','RL06'],
+        help='GRACE/GRACE-FO data release')
+    #-- start and end GRACE/GRACE-FO months
+    parser.add_argument('--start','-S',
+        type=int, default=4,
+        help='Starting GRACE/GRACE-FO month for time series')
+    parser.add_argument('--end','-E',
+        type=int, default=227,
+        help='Ending GRACE/GRACE-FO month for time series')
     MISSING = [6,7,18,109,114,125,130,135,140,141,146,151,156,162,166,167,172,
         177,178,182,200,201]
-    for opt, arg in optlist:
-        if opt in ('-h','--help'):
-            usage()
-            sys.exit()
-        elif opt in ("-D","--directory"):
-            grace_dir = os.path.expanduser(arg)
-        elif opt in ("-S","--start"):
-            START_MON = np.int(arg)
-        elif opt in ("-E","--end"):
-            END_MON = np.int(arg)
-        elif opt in ("-M","--missing"):
-            MISSING = np.array(arg.split(','), dtype=np.int)
+    parser.add_argument('--missing','-M',
+        metavar='MISSING', type=int, nargs='+', default=MISSING,
+        help='Missing GRACE/GRACE-FO months in time series')
+    args = parser.parse_args()
 
     #-- run program with parameters
-    geocenter_processing_centers(grace_dir,START_MON,END_MON,MISSING)
+    geocenter_processing_centers(args.directory, args.release,
+        args.start, args.end, args.missing)
 
 #-- run main program
 if __name__ == '__main__':
