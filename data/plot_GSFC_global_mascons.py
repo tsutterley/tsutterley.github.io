@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 u"""
 plot_GSFC_global_mascons.py
-Written by Tyler Sutterley (12/2020)
+Written by Tyler Sutterley (02/2021)
 Creates a series of GMT-like plots of GSFC GRACE mascon data for the globe in a
     Plate Carree (Equirectangular) projection
 
@@ -20,6 +20,7 @@ PYTHON DEPENDENCIES:
         https://github.com/GeospatialPython/pyshp
 
 UPDATE HISTORY:
+    Updated 02/2021: use adjust_months function to fix special months cases
     Updated 12/2020: using utilities from time module
     Updated 10/2020: use argparse to set command line parameters
     Updated 09/2020: copy matplotlib colormap to prevent deprecation warning
@@ -95,15 +96,21 @@ def plot_mascon(base_dir, parameters):
     gt180, = np.nonzero(lon_center > 180)
     lon_center[gt180] -= 360.0
 
+    #-- convert Julian days to calendar days
+    cal_date = gravity_toolkit.time.convert_julian(MJD + 2400000.5)
+    #-- calculate the GRACE month (Apr02 == 004)
+    #-- https://grace.jpl.nasa.gov/data/grace-months/
+    #-- Notes on special months (e.g. 119, 120) below
+    grace_month = 12*(cal_date['year'] - 2002) + cal_date['month']
+    #-- calculating the month number of 'Special Months' with accelerometer
+    #-- shutoffs is more complicated as days from other months are used
+    grace_month = gravity_toolkit.time.adjust_months(grace_month)
+
     #-- use a mean range for the static field to remove
     MEAN = np.zeros((nmas))
     if (parameters['MEAN'].title() != 'None'):
         START,END = np.array(parameters['MEAN'].split(','),dtype=np.int)
-        #-- convert Julian days to calendar days
-        YY,MM,DD,hh,mm,ss = gravity_toolkit.time.convert_julian(2400000.5+MJD,
-            FORMAT='tuple')
-        GM = np.array((YY - 2002.0)*12.0 + MM, dtype=np.int)
-        ind, = np.nonzero((GM >= START) & (GM <= END))
+        ind, = np.nonzero((grace_month >= START) & (grace_month <= END))
         for i in range(nmas):
             MEAN[i] = np.mean(cmwe[i,ind])
 
@@ -218,29 +225,18 @@ def plot_mascon(base_dir, parameters):
     #-- replace data and contours to create figure frames
     dpi = np.int(parameters['FIGURE_DPI'])
     format = parameters['FIGURE_FORMAT']
-    #-- for each input file
-    grace_month = np.zeros((nt),dtype=np.int)
-    for t,JD in enumerate(2400000.5+MJD):
+    #-- for each date
+    for t,mon in enumerate(grace_month):
         #-- data for time with mean removed
         data = cmwe[:,t] - MEAN
-        #-- convert Julian days to calendar days
-        YY,MM,DD,hh,mm,ss=gravity_toolkit.time.convert_julian(JD,FORMAT='tuple')
-        #-- convert calendar days to year-decimal
-        tdec = gravity_toolkit.time.convert_calendar_decimal(YY,MM,day=DD,
-            hour=hh,minute=mm,second=ss)
-        #-- GRACE/GRACE-FO month
-        grace_month[t] = np.int((YY - 2002.0)*12.0 + MM)
-        #-- calculating the month number of 'Special Months' with accelerometer
-        #-- shutoffs is more complicated as days from other months are used
-        if (grace_month[t] == grace_month[t-1]) and (grace_month[t-1] == 160):
-            grace_month[t] = grace_month[t-1] + 1
         #-- set colors for patch
         p.set_array(data)
         p.set_edgecolor(cmap(norm(data)))
         #-- add date label (year-calendar month e.g. 2002-01)
-        time_text.set_text(r'\textbf{{{0:4.0f}--{1:02.0f}}}'.format(YY,MM))
+        args = (cal_date['year'][t], cal_date['month'][t])
+        time_text.set_text(r'\textbf{{{0:4.0f}--{1:02.0f}}}'.format(*args))
         #-- output to file
-        args = (parameters['PROC'],VERSION,grace_month[t],format)
+        args = (parameters['PROC'],VERSION,mon,format)
         FIGURE_FILE = '{0}-{1}-{2:003d}.{3}'.format(*args)
         plt.savefig(os.path.join(DIRECTORY,FIGURE_FILE), dpi=dpi, format=format)
     #-- clear all figure axes

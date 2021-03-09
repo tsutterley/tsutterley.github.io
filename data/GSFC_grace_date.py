@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 u"""
 GSFC_grace_date.py
-Written by Tyler Sutterley (12/2020)
+Written by Tyler Sutterley (02/2021)
 
 Reads dates of GSFC GRACE mascon data file and assigns the month number
     reads the start and end date from the filename,
@@ -23,6 +23,7 @@ PROGRAM DEPENDENCIES:
     utilities: download and management utilities for syncing files
 
 UPDATE HISTORY:
+    Updated 02/2021: use adjust_months function to fix special months cases
     Updated 12/2020: using utilities from time module.  add version option
     Updated 10/2020: use argparse to set command line parameters
     Updated 03/2020: using getopt to set parameters if run from command line
@@ -107,9 +108,13 @@ def GSFC_grace_date(base_dir, VERSION='v02.4', MODE=0o775):
     end_day[sd2] = (D2[sd2]-1) + np.dot(mon_mat[m2_m1[sd2],:],dpm_stnd)
     end_day[lp2] = (D2[lp2]-1) + np.dot(mon_mat[m2_m1[lp2],:],dpm_leap)
 
-    #-- define date variables
-    tot_days = np.zeros((nt))#-- number of days since Jan 2002
-    mon = np.zeros((nt),dtype=np.int)#-- GRACE month number
+    #-- calculate the GRACE month (Apr02 == 004)
+    #-- https://grace.jpl.nasa.gov/data/grace-months/
+    #-- Notes on special months (e.g. 119, 120) below
+    grace_month = np.array(12*(YY - 2002) + MM, dtype=np.int)
+    #-- calculating the month number of 'Special Months' with accelerometer
+    #-- shutoffs is more complicated as days from other months are used
+    grace_month = gravity_toolkit.time.adjust_months(grace_month)
 
     #-- Output GRACE date ascii file
     grace_date_file = '{0}_{1}_DATES.txt'.format('GSFC', VERSION)
@@ -118,8 +123,11 @@ def GSFC_grace_date(base_dir, VERSION='v02.4', MODE=0o775):
     args = ('Mid-date','Month','Start_Day','End_Day','Total_Days')
     print('{0} {1:>10} {2:>11} {3:>10} {4:>13}'.format(*args),file=fid)
 
+    #-- calculate total number of days since Jan 2002
+    tot_days = np.zeros((nt))
+
     #-- for each date
-    for t in range(nt):
+    for t,mon in enumerate(grace_month):
         #-- number of days in the year
         dpy = gravity_toolkit.time.calendar_days(start_yr[t]).sum()
         #-- For data that crosses years
@@ -138,19 +146,9 @@ def GSFC_grace_date(base_dir, VERSION='v02.4', MODE=0o775):
         #-- calculating the total number of days since 2002
         tot_days[t] = np.mean([count+start_day[t], count+end_cyclic])
 
-        #-- calculate the GRACE month (Apr02 == 004)
-        #-- https://grace.jpl.nasa.gov/data/grace-months/
-        #-- Notes on special months (e.g. 119, 120) below
-        mon[t] = 12*(YY[t] - 2002) + MM[t]
-
-        #-- calculating the month number of 'Special Months' with accelerometer
-        #-- shutoffs is more complicated as days from other months are used
-        if (mon[t] == mon[t-1]) and (mon[t-1] == 160):
-            mon[t] = mon[t-1] + 1
-
         #-- print to GRACE DATES ascii file (NOTE: tot_days will be rounded up)
         print(('{0:13.8f} {1:03d} {2:8.0f} {3:03.0f} {4:8.0f} {5:03.0f} '
-            '{6:8.0f}').format(tdec[t],mon[t],start_yr[t],start_day[t],
+            '{6:8.0f}').format(tdec[t],mon,start_yr[t],start_day[t],
             end_yr[t],end_day[t],tot_days[t]), file=fid)
 
     #-- close date file
