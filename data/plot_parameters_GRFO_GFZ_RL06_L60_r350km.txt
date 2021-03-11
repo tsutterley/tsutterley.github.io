@@ -11,8 +11,8 @@ SLR_C20	GSFC			#-- Use SLR C2,0 values
 SLR_C30	GSFC			#-- Use SLR C3,0 values
 DEG1	None	#-- Degree 1 (None, Tellus, SLR, SLF)
 MODEL_DEG1 N	#-- Model missing degree 1 values by least-squares fit
-GIA	None	#-- GIA model group (AW13, IJ05-R2, W12a, M09, ICE6G, Wu10, IJ05-Test, AW13-ICE6G, Caron, ICE6G-D)
-GIA_FILE	None	#-- Specific GIA file to read
+GIA	ICE6G-D	#-- GIA model group (AW13, IJ05-R2, W12a, M09, ICE6G, Wu10, IJ05-Test, AW13-ICE6G, Caron, ICE6G-D)
+GIA_FILE	data/ICE-6G_High_Res_Stokes_trend.txt	#-- Specific GIA file to read
 UNITS	1			#-- Output units (1: cm Water Eq, 2: mm Geoid, 3: mm Crustal, 4: micGal gravity)
 DATAFORM	netCDF4		#-- Input and output data format (ascii, netCDF4, HDF5)
 DIRECTORY	images

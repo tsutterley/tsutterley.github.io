@@ -1,11 +1,12 @@
+# This is a basic workflow that is manually triggered
 # This workflow will install Python dependencies and update the html tables
 
-name: Auto-Update Tables
+name: Manual workflow
 
-on:
-  schedule:
-    # * is a special character in YAML so you have to quote this string
-    - cron:  '0 0 * * *'
+# Controls when the action will run. Workflow runs when manually triggered using the UI
+# or API.
+
+on: [workflow_dispatch]
 
 jobs:
   build:

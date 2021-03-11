@@ -4,7 +4,7 @@ grace_months_html.py
 Written by Tyler Sutterley (10/2020)
 
 Creates a html file with the start and end days for each dataset
-Shows the range of each month for CSR/GFZ/JPL (RL05/RL06) and GSFC (v02.4)
+Shows the range of each month for CSR/GFZ/JPL (RL06) and GSFC (rl06v1.0)
 Shows which months are missing for each dataset as **missing**
 
 Similar to ftp://podaac.jpl.nasa.gov/allData/tellus/L3/Doc/GraceMonths.html
@@ -14,28 +14,27 @@ INPUTS:
     base_dir: Working data directory for GRACE/GRACE-FO data
 
 OPTIONS:
-    DREL: GRACE/GRACE-FO data release (RL06,v02.4)
+    DREL: GRACE/GRACE-FO data release (RL06,rl06v1.0)
 
 OUTPUTS:
     GRACE_months.txt
-    Column 1: Month Number e.g. 004
-    Column 2: Month Name e.g. Apr
-    Column 3: CSR RL05 Dates
-    Column 4: CSR RL06 Dates
-    Column 5: GFZ RL05 Dates
-    Column 6: GSFC v02.4 Dates
-    Column 7: JPL RL05 Dates
-    Column 8: JPL RL06 Dates
+    Column 1: GRACE Month Number
+    Column 2: Calendar Date
+    Column 3: CSR RL06 Date Range
+    Column 4: GFZ RL06 Date Range
+    Column 5: GSFC rl06v1.0 Date Range
+    Column 6: JPL RL06 Date Range
 
 COMMAND LINE OPTIONS:
     --help: list the command line options
     -D X, --directory=X: Working GRACE/GRACE-FO data directory
-    -R X, --release=X: GRACE/GRACE-FO data releases to run (RL06,v02.4)
+    -R X, --release=X: GRACE/GRACE-FO data releases to run (RL06,rl06v1.0)
 
 PYTHON DEPENDENCIES:
     numpy: Scientific Computing Tools For Python (https://numpy.org)
 
 UPDATE HISTORY:
+    Updated 03/2021: added options for GSFC Release-6 Version 1.0
     Updated 10/2020: use argparse to set command line parameters
     Updated 09/2020: add link to plain text table
     Updated 08/2020: using git lfs for image storage
@@ -78,7 +77,7 @@ import numpy as np
 import calendar,time
 
 #-- PURPOSE: create HTML file of GRACE "nominal" months
-def grace_months(base_dir, DREL=['RL06','v02.4']):
+def grace_months(base_dir, DREL=['RL06','rl06v1.0']):
 
     #-- Opening output GRACE months HTML file
     filename = inspect.getframeinfo(inspect.currentframe()).filename
@@ -298,10 +297,15 @@ def grace_months(base_dir, DREL=['RL06','v02.4']):
         print(('''\t\t<a href="#Wahr:2015dg" onmouseover="HighlightRow('Wahr:2015dg')"\n'''
             '''\t\t\tonmouseout="UnhighlightRow('Wahr:2015dg')">'''
             'Wahr&nbsp;et&nbsp;al.&nbsp;(2015)</a>.'), file=fid)
-    print(('\t\tGSFC GRACE mascon data products are calculated as described in '), file=fid)
-    print(('''\t\t<a href="#Luthcke:2013ep" onmouseover="HighlightRow('Luthcke:2013ep')"\n'''
-        '''\t\t\tonmouseout="UnhighlightRow('Luthcke:2013ep')">'''
-        'Luthcke&nbsp;et&nbsp;al.&nbsp;(2013)</a>.'), file=fid)
+    print(('\t\tGSFC GRACE/GRACE-FO mascon data products are calculated as described in '), file=fid)
+    print(('''\t\t<a href="#Loomis:2019ef" onmouseover="HighlightRow('Loomis:2019ef')"\n'''
+        '''\t\t\tonmouseout="UnhighlightRow('Loomis:2019ef')">'''
+        'Loomis&nbsp;et&nbsp;al.&nbsp;(2019)</a>.'), file=fid)
+    print('\t\tGRACE/GRACE-FO fields have been corrected for Glacial Isostatic '
+        'Adjustment (GIA) using coefficients from ICE6G Version-D', file=fid)
+    print(('''\t\t<a href="#Peltier:2018dp" onmouseover="HighlightRow('Peltier:2018dp')"\n'''
+        '''\t\t\tonmouseout="UnhighlightRow('Peltier:2018dp')">'''
+        '(Peltier&nbsp;et&nbsp;al.&nbsp;,&nbsp;2018)</a>.'), file=fid)
 
     print('\t\t<table class="ref">', file=fid)
     print('\t\t\t<tr class="ref" valign="top" id="Swenson:2006hu">', file=fid)
@@ -343,17 +347,26 @@ def grace_months(base_dir, DREL=['RL06','v02.4']):
         print('\t\t\t\t</td>', file=fid)
         print('\t\t\t</tr>', file=fid)
 
-    print('\t\t\t<tr class="ref" valign="top" id="Luthcke:2013ep">', file=fid)
+    print('\t\t\t<tr class="ref" valign="top" id="Loomis:2019ef">', file=fid)
     print('\t\t\t\t<td class="ref" align="right"></td>', file=fid)
     print('\t\t\t\t<td class="ref">', file=fid)
-    print('\t\t\t\tS.&nbsp;B.&nbsp;Luthcke, T.&nbsp;J.&nbsp;Sabaka, B.&nbsp;D.&nbsp;Loomis, ', file=fid)
-    print('\t\t\t\tA.&nbsp;A.&nbsp;Arendt, J.&nbsp;J.&nbsp;McCarthy, J.&nbsp;Camp.', file=fid)
-    print('\t\t\t\tAntarctica, Greenland and Gulf of Alaska land-ice evolution ', file=fid)
-    print('\t\t\t\tfrom an iterated GRACE global mascon solution.', file=fid)
-    print('\t\t\t\t<em>Journal of Glaciology</em>,', file=fid)
-    print('\t\t\t\t59(216):613&#8211;631, 2013.', file=fid)
-    print('\t\t\t\t[&nbsp;<a href="../references/Luthcke-2013ep.bib">bib</a>&nbsp;|', file=fid)
-    print('\t\t\t\t<a href="https://doi.org/10.3189/2013JoG12J147">http</a>&nbsp;]', file=fid)
+    print('\t\t\t\tB.&nbsp;D.&nbsp;Loomis, S.&nbsp;B.&nbsp;Luthcke, T.&nbsp;J.&nbsp;Sabaka.', file=fid)
+    print('\t\t\t\tRegularization and error characterization of GRACE mascons.', file=fid)
+    print('\t\t\t\t<em>Journal of Geodesy</em>,', file=fid)
+    print('\t\t\t\t93(9):1381&#8211;1398, 2019.', file=fid)
+    print('\t\t\t\t[&nbsp;<a href="../references/Loomis-2019ef.bib">bib</a>&nbsp;|', file=fid)
+    print('\t\t\t\t<a href="https://doi.org/10.1007/s00190-019-01252-y">http</a>&nbsp;]', file=fid)
+
+    print('\t\t\t<tr class="ref" valign="top" id="Peltier:2018dp">', file=fid)
+    print('\t\t\t\t<td class="ref" align="right"></td>', file=fid)
+    print('\t\t\t\t<td class="ref">', file=fid)
+    print('\t\t\t\tW.&nbsp;R.&nbsp;Peltier, D.&nbsp;F.&nbsp;Argus, R.&nbsp;Drummond.', file=fid)
+    print('\t\t\t\tComment on "An Assessment of the ICE-6G_C (VM5a) Glacial ', file=fid)
+    print('\t\t\t\tIsostatic Adjustment Model" by Purcell et al.', file=fid)
+    print('\t\t\t\t<em>Journal of Geophysical Research: Solid Earth</em>,', file=fid)
+    print('\t\t\t\t123(2):2019&#8211;2028, 2018.', file=fid)
+    print('\t\t\t\t[&nbsp;<a href="../references/Peltier-2018dp.bib">bib</a>&nbsp;|', file=fid)
+    print('\t\t\t\t<a href="https://doi.org/10.1002/2016JB013844">http</a>&nbsp;]', file=fid)
     print('\t\t\t\t</td>', file=fid)
     print('\t\t\t</tr>\n\t\t</table>\n\t\t</p>\n\t\t</div>', file=fid)
 
@@ -400,7 +413,7 @@ def main():
     #-- GRACE/GRACE-FO data release
     parser.add_argument('--release','-r',
         metavar='DREL', type=str, nargs='+',
-        default=['RL06','v02.4'], choices=['RL04','RL05','RL06','v02.4'],
+        default=['RL06','rl06v1.0'],
         help='GRACE/GRACE-FO data release')
     args = parser.parse_args()
 

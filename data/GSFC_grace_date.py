@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 u"""
 GSFC_grace_date.py
-Written by Tyler Sutterley (02/2021)
+Written by Tyler Sutterley (03/2021)
 
 Reads dates of GSFC GRACE mascon data file and assigns the month number
     reads the start and end date from the filename,
@@ -23,6 +23,8 @@ PROGRAM DEPENDENCIES:
     utilities: download and management utilities for syncing files
 
 UPDATE HISTORY:
+    Updated 03/2021: use python requests to download GSFC mascon file
+        added parameters for GSFC mascons Release-6 Version 1.0
     Updated 02/2021: use adjust_months function to fix special months cases
     Updated 12/2020: using utilities from time module.  add version option
     Updated 10/2020: use argparse to set command line parameters
@@ -33,7 +35,9 @@ import sys
 import os
 import h5py
 import inspect
+import requests
 import argparse
+import posixpath
 import numpy as np
 import gravity_toolkit.time
 import gravity_toolkit.utilities
@@ -44,13 +48,48 @@ def get_GSFC_grace_mascons(base_dir, VERSION='v02.4', MODE=0o775):
     HOST = {}
     HOST['v02.4'] = ['https://earth.gsfc.nasa.gov','sites','default','files',
         'neptune','grace','mascons_2.4','GSFC.glb.200301_201607_v02.4.hdf']
+    HOST['rl06v1.0'] = ['https://earth.gsfc.nasa.gov','sites','default','files',
+        '2021-03','gsfc.glb_.200204_202009_rl06v1.0_sla-ice6gd.h5']
     #-- local file
     local = os.path.join(base_dir,'GSFC',VERSION,'GSM',HOST[VERSION][-1])
-    if not os.access(os.path.dirname(local),os.F_OK):
-        os.makedirs(os.path.dirname(local),MODE)
     #-- get GSFC GRACE mascon file
-    gravity_toolkit.utilities.from_http(HOST[VERSION], local=local,
-        verbose=True, mode=MODE)
+    from_http(HOST[VERSION], local=local, verbose=True, mode=MODE)
+
+#-- PURPOSE: download a file from a http host
+def from_http(HOST,timeout=None,local=None,verbose=False,mode=0o775):
+    """
+    Download a file from a http host
+
+    Arguments
+    ---------
+    HOST: remote http host path split as list
+
+    Keyword arguments
+    -----------------
+    timeout: timeout in seconds for blocking operations
+    local: path to local file
+    verbose: print file transfer information
+    mode: permissions mode of output local file
+    """
+    #-- get GSFC GRACE mascon file
+    req = requests.get(posixpath.join(*HOST), timeout=timeout,
+        allow_redirects=True)
+    #-- get last modified time of GRACE mascon file
+    last_modified = req.headers['last-modified']
+    mtime = gravity_toolkit.utilities.get_unix_time(last_modified,
+        format='%a, %d %b %Y %H:%M:%S %Z')
+    #-- recursively create local directory if non-existent
+    if not os.access(os.path.dirname(local),os.F_OK):
+        os.makedirs(os.path.dirname(local),mode)
+    #-- print file information
+    args = (posixpath.join(*HOST),local)
+    print('{0} -->\n\t{1}'.format(*args)) if verbose else None
+    with open(local, 'wb') as f:
+        f.write(req.content)
+    #-- keep remote modification time of file and local access time
+    os.utime(local, (os.stat(local).st_atime, mtime))
+    #-- change the permissions mode
+    os.chmod(local, mode)
 
 def GSFC_grace_date(base_dir, VERSION='v02.4', MODE=0o775):
     #-- set the GRACE directory
@@ -58,6 +97,7 @@ def GSFC_grace_date(base_dir, VERSION='v02.4', MODE=0o775):
     #-- dictionary of GSFC GRACE mascon files
     grace_file = {}
     grace_file['v02.4'] = 'GSFC.glb.200301_201607_v02.4.hdf'
+    grace_file['rl06v1.0'] = 'gsfc.glb_.200204_202009_rl06v1.0_sla-ice6gd.h5'
     #-- valid date string (HDF5 attribute: 'days since 2002-01-00T00:00:00')
     date_string = 'days since 2002-01-01T00:00:00'
     epoch,to_secs = gravity_toolkit.time.parse_date_string(date_string)

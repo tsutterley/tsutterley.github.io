@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 u"""
 plot_GSFC_global_mascons.py
-Written by Tyler Sutterley (02/2021)
+Written by Tyler Sutterley (03/2021)
 Creates a series of GMT-like plots of GSFC GRACE mascon data for the globe in a
     Plate Carree (Equirectangular) projection
 
@@ -20,6 +20,7 @@ PYTHON DEPENDENCIES:
         https://github.com/GeospatialPython/pyshp
 
 UPDATE HISTORY:
+    Updated 03/2021: added parameters for GSFC mascons Release-6 Version 1.0
     Updated 02/2021: use adjust_months function to fix special months cases
     Updated 12/2020: using utilities from time module
     Updated 10/2020: use argparse to set command line parameters
@@ -52,7 +53,7 @@ import cartopy.crs as ccrs
 import gravity_toolkit.time
 from read_cpt import read_cpt
 
-#-- rebuilt the matplotlib fonts and set parameters
+#-- rebuild the matplotlib fonts and set parameters
 matplotlib.font_manager._rebuild()
 matplotlib.rcParams['axes.linewidth'] = 1.5
 matplotlib.rcParams['font.family'] = 'sans-serif'
@@ -74,6 +75,7 @@ def plot_mascon(base_dir, parameters):
     #-- GRACE HDF5 file
     grace_file = {}
     grace_file['v02.4'] = 'GSFC.glb.200301_201607_v02.4.hdf'
+    grace_file['rl06v1.0'] = 'gsfc.glb_.200204_202009_rl06v1.0_sla-ice6gd.h5'
     #-- valid date string (HDF5 attribute: 'days since 2002-01-00T00:00:00')
     date_string = 'days since 2002-01-01T00:00:00'
     epoch,to_secs = gravity_toolkit.time.parse_date_string(date_string)
@@ -101,7 +103,7 @@ def plot_mascon(base_dir, parameters):
     #-- calculate the GRACE month (Apr02 == 004)
     #-- https://grace.jpl.nasa.gov/data/grace-months/
     #-- Notes on special months (e.g. 119, 120) below
-    grace_month = 12*(cal_date['year'] - 2002) + cal_date['month']
+    grace_month = np.array(12*(cal_date['year']-2002)+cal_date['month'],dtype='i')
     #-- calculating the month number of 'Special Months' with accelerometer
     #-- shutoffs is more complicated as days from other months are used
     grace_month = gravity_toolkit.time.adjust_months(grace_month)

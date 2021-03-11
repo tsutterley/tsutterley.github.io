@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 u"""
 plot_global_grace_maps.py
-Written by Tyler Sutterley (02/2021)
+Written by Tyler Sutterley (03/2021)
 Creates a series of GMT-like plots of GRACE data for the globe in a Plate Carree
     (Equirectangular) projection
 
@@ -20,6 +20,7 @@ PYTHON DEPENDENCIES:
         https://scitools.org.uk/cartopy
 
 UPDATE HISTORY:
+    Updated 03/2021: added correction for glacial isostatic adjustment (GIA)
     Updated 12/2020: added more love number options
     Updated 10/2020: use argparse to set command line parameters
     Updated 09/2020: can set months parameters to None to use defaults
@@ -50,11 +51,11 @@ import matplotlib.font_manager
 import matplotlib.pyplot as plt
 import matplotlib.cm as cm
 import matplotlib.colors as colors
-from matplotlib.offsetbox import AnchoredText
 import cartopy.crs as ccrs
 from gravity_toolkit.utilities import get_data_path
 from gravity_toolkit.grace_find_months import grace_find_months
 from gravity_toolkit.grace_input_months import grace_input_months
+from gravity_toolkit.read_GIA_model import read_GIA_model
 from gravity_toolkit.harmonics import harmonics
 from gravity_toolkit.units import units
 from gravity_toolkit.read_love_numbers import read_love_numbers
@@ -224,6 +225,20 @@ def plot_grid(base_dir, parameters):
     if parameters['DESTRIPE'] in ('Y','y'):
         grace_Ylms = grace_Ylms.destripe()
 
+    #-- Glacial Isostatic Adjustment file to read
+    GIA = parameters['GIA'] if (parameters['GIA'].title() != 'None') else None
+    GIA_FILE = os.path.expanduser(parameters['GIA_FILE'])
+    #-- input GIA spherical harmonic datafiles
+    GIA_Ylms_rate = read_GIA_model(GIA_FILE,GIA=GIA,LMAX=LMAX,MMAX=MMAX)
+    #-- GIA monthly coefficients
+    GIA_Ylms = grace_Ylms.zeros_like()
+    GIA_Ylms.time[:] = np.copy(grace_Ylms.time)
+    GIA_Ylms.month[:] = np.copy(grace_Ylms.month)
+    #-- finding change in GIA each month
+    for t,tdec in enumerate(GIA_Ylms.time):
+        GIA_Ylms.clm[:,:,t] = GIA_Ylms_rate['clm']*(tdec-2003.3)
+        GIA_Ylms.slm[:,:,t] = GIA_Ylms_rate['slm']*(tdec-2003.3)
+
     #-- Gaussian smoothing
     if (RAD != 0):
         wt = 2.0*np.pi*gauss_weights(RAD,LMAX)
@@ -352,6 +367,7 @@ def plot_grid(base_dir, parameters):
     for t,grace_month in enumerate(grace_Ylms.month):
         #-- convert harmonics to truncated, smoothed coefficients of output unit
         Ylms = grace_Ylms.index(t)
+        Ylms.subtract(GIA_Ylms.index(t))
         Ylms.convolve(dfactor*wt)
         #-- convert spherical harmonics to output spatial grid
         data = harmonic_summation(Ylms.clm,Ylms.slm,glon,glat,
