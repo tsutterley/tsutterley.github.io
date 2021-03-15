@@ -190,6 +190,7 @@ images/CSR-RL06-225.jpg filter=lfs diff=lfs merge=lfs -text
 images/CSR-RL06-226.jpg filter=lfs diff=lfs merge=lfs -text
 images/CSR-RL06-227.jpg filter=lfs diff=lfs merge=lfs -text
 images/CSR-RL06-228.jpg filter=lfs diff=lfs merge=lfs -text
+images/CSR-RL06-229.jpg filter=lfs diff=lfs merge=lfs -text
 images/GFZ-RL06-004.jpg filter=lfs diff=lfs merge=lfs -text
 images/GFZ-RL06-005.jpg filter=lfs diff=lfs merge=lfs -text
 images/GFZ-RL06-008.jpg filter=lfs diff=lfs merge=lfs -text
