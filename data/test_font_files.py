@@ -18,8 +18,8 @@ def test_font_files(verbose=True):
     print(os.listdir(os.path.join(basedir,'Helvetica'))) if verbose else None
     for fpath in fonts:
         assert os.path.exists(os.path.join(basedir,'Helvetica',fpath))
-    #-- rebuilt the matplotlib fonts and set parameters
-    matplotlib.font_manager._rebuild()
+    #-- reload the matplotlib fonts and set parameters
+    matplotlib.font_manager._load_fontmanager()
     matplotlib.rcParams['axes.linewidth'] = 1.5
     matplotlib.rcParams['font.family'] = 'sans-serif'
     matplotlib.rcParams['font.sans-serif'] = ['Helvetica']

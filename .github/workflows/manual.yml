@@ -12,6 +12,10 @@ jobs:
   build:
 
     runs-on: ubuntu-20.04
+    env:
+      EARTHDATA_USERNAME: ${{ secrets.EARTHDATA_USERNAME }}
+      EARTHDATA_PASSWORD: ${{ secrets.EARTHDATA_PASSWORD }}
+      PODAAC_PASSWORD: ${{ secrets.PODAAC_PASSWORD }}
 
     steps:
     - uses: actions/checkout@v2
@@ -48,11 +52,12 @@ jobs:
         pytest data/test_font_files.py
     - name: Install Python packages
       run: |
+        pip install git+https://github.com/tsutterley/geoid-toolkit.git
+        pip install git+https://github.com/tsutterley/read-GRACE-geocenter.git
         pip install ./read-GRACE-harmonics
     - name: Download GRACE/GRACE-FO data
       run: |
-        python data/get_podaac_webdav.py --user ${{ secrets.EARTHDATA_USERNAME }} \
-            --password ${{ secrets.EARTHDATA_PASSWORD }}
+        python data/get_podaac_webdav.py
         python data/podaac_grace_sync.py --directory data/ --netrc data/.netrc \
             --release RL06 --log --np=0
         grace_date.py --directory data/ --release RL06 --product GSM --output

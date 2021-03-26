@@ -1,10 +1,10 @@
 #!/usr/bin/env python
 u"""
 podaac_grace_sync.py
-Written by Tyler Sutterley (12/2020)
+Written by Tyler Sutterley (04/2021)
 
 Syncs GRACE/GRACE-FO and auxiliary data from the NASA JPL PO.DAAC Drive Server
-Syncs CSR/GFZ/JPL files for RL06 GSM
+Syncs CSR/GFZ/JPL GSM files for Release-06
 Gets the latest technical note (TN) files
 
 https://wiki.earthdata.nasa.gov/display/EL/How+To+Access+Data+With+Python
@@ -25,12 +25,12 @@ OUTPUTS:
 
 COMMAND LINE OPTIONS:
     --help: list the command line options
-    -N X, --netrc=X: path to .netrc file for authentication
-    -D X, --directory=X: working data directory
-    -C X, --center=X: GRACE Processing Center
-    -R X, --release=X: GRACE data releases to sync (RL06)
+    -N X, --netrc X: path to .netrc file for authentication
+    -D X, --directory X: working data directory
+    -C X, --center X: GRACE Processing Center
+    -R X, --release X: GRACE data releases to sync (RL06)
     -l, --log: output log of files downloaded
-    -M X, --mode=X: Local permissions mode of the directories and files synced
+    -M X, --mode X: Local permissions mode of the directories and files synced
 
 PYTHON DEPENDENCIES:
     lxml: Pythonic XML and HTML processing library using libxml2/libxslt
@@ -49,7 +49,6 @@ import os
 import re
 import netrc
 import shutil
-import getpass
 import argparse
 import traceback
 import posixpath
@@ -335,7 +334,8 @@ def main():
     #-- command line parameters
     #-- NASA Earthdata credentials
     parser.add_argument('--netrc','-N',
-        type=lambda p: os.path.abspath(os.path.expanduser(p)), default=None,
+        type=lambda p: os.path.abspath(os.path.expanduser(p)),
+        default=os.path.join(os.path.expanduser('~'),'.netrc'),
         help='Path to .netrc file for authentication')
     #-- working data directory
     parser.add_argument('--directory','-D',
@@ -369,7 +369,7 @@ def main():
     #-- JPL PO.DAAC drive hostname
     HOST = 'podaac-tools.jpl.nasa.gov'
     #-- get NASA Earthdata and JPL PO.DAAC drive credentials
-    USER,LOGIN,PASSWORD = netrc.netrc(args.netrc).authenticators(HOST)
+    USER,_,PASSWORD = netrc.netrc(args.netrc).authenticators(HOST)
     #-- build a urllib opener for PO.DAAC Drive
     #-- Add the username and password for NASA Earthdata Login system
     gravity_toolkit.utilities.build_opener(USER,PASSWORD)

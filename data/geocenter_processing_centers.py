@@ -155,7 +155,7 @@ def main():
         help='Working data directory')
     #-- GRACE/GRACE-FO data release
     parser.add_argument('--release','-r',
-        metavar='DREL', type=str, nargs='+',
+        metavar='DREL', type=str,
         default='RL06', choices=['RL04','RL05','RL06'],
         help='GRACE/GRACE-FO data release')
     #-- start and end GRACE/GRACE-FO months

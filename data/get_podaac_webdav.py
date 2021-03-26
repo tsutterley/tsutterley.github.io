@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 u"""
 get_podaac_webdav.py
-Written by Tyler Sutterley (10/2020)
+Written by Tyler Sutterley (03/2021)
 
 Retrieves and prints a user's PO.DAAC WebDAV credentials to a netrc file
 
@@ -27,6 +27,7 @@ COMMAND LINE OPTIONS:
     --help: list the command line options
     -U X, --user X: username for NASA Earthdata Login
     -P X, --password X: password for NASA Earthdata Login
+    -W X, --webdav X: WebDAV password for JPL PO.DAAC Drive Login
 
 PYTHON DEPENDENCIES:
     lxml: Pythonic XML and HTML processing library using libxml2/libxslt
@@ -39,6 +40,7 @@ PROGRAM DEPENDENCIES:
     utilities: download and management utilities for syncing files
 
 UPDATE HISTORY:
+    Updated 03/2021: default credentials from environmental variables
     Updated 10/2020: use argparse to set command line parameters
     Written 05/2020 for public release
 """
@@ -56,7 +58,7 @@ import lxml.etree
 import gravity_toolkit.utilities
 
 #-- PURPOSE: retrieve PO.DAAC Drive WebDAV credentials
-def podaac_webdav(USER, PASSWORD, parser):
+def podaac_webdav(USER, PASSWORD, parser=lxml.etree.HTMLParser()):
     #-- build opener for retrieving PO.DAAC Drive WebDAV credentials
     #-- Add the username and password for NASA Earthdata Login system
     URS = 'https://urs.earthdata.nasa.gov'
@@ -94,11 +96,14 @@ def main():
     #-- command line parameters
     #-- NASA Earthdata credentials
     parser.add_argument('--user','-U',
-        type=str, default='', required=True,
+        type=str, default=os.environ.get('EARTHDATA_USERNAME'),
         help='Username for NASA Earthdata Login')
     parser.add_argument('--password','-P',
-        type=str, default='', required=True,
+        type=str, default=os.environ.get('EARTHDATA_PASSWORD'),
         help='Password for NASA Earthdata Login')
+    parser.add_argument('--webdav','-W',
+        type=str, default=os.environ.get('PODAAC_PASSWORD'),
+        help='WebDAV Password for JPL PO.DAAC Drive Login')
     args = parser.parse_args()
 
     #-- append credentials to netrc file
@@ -108,18 +113,18 @@ def main():
 
     #-- check internet connection before attempting to run program
     DRIVE = posixpath.join('https://podaac-tools.jpl.nasa.gov','drive')
-    if gravity_toolkit.utilities.check_connection(DRIVE):
+    if gravity_toolkit.utilities.check_connection(DRIVE) and not args.webdav:
         #-- compile HTML parser for lxml
-        WEBDAV = podaac_webdav(args.user,args.password,lxml.etree.HTMLParser())
-        #-- append to netrc file and set permissions level
-        with open(NETRC,'a+') as f:
-            #-- NASA Earthdata credentials
-            f.write('machine {0} login {1} password {2}\n'.format(
-                'urs.earthdata.nasa.gov',args.user,args.password))
-            #-- JPL PO.DAAC drive credentials
-            f.write('machine {0} login {1} password {2}\n'.format(
-                'podaac-tools.jpl.nasa.gov',args.user,WEBDAV))
-            os.chmod(NETRC, 0o600)
+        args.webdav = podaac_webdav(args.user,args.password)
+    #-- append to netrc file and set permissions level
+    with open(NETRC,'a+') as f:
+        #-- NASA Earthdata credentials
+        f.write('machine {0} login {1} password {2}\n'.format(
+            'urs.earthdata.nasa.gov',args.user,args.password))
+        #-- JPL PO.DAAC drive credentials
+        f.write('machine {0} login {1} password {2}\n'.format(
+            'podaac-tools.jpl.nasa.gov',args.user,args.webdav))
+        os.chmod(NETRC, 0o600)
 
 #-- run main program
 if __name__ == '__main__':

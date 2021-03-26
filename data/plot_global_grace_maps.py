@@ -65,7 +65,7 @@ from gravity_toolkit.harmonic_summation import harmonic_summation
 from read_cpt import read_cpt
 
 #-- rebuilt the matplotlib fonts and set parameters
-matplotlib.font_manager._rebuild()
+matplotlib.font_manager._load_fontmanager()
 matplotlib.rcParams['axes.linewidth'] = 1.5
 matplotlib.rcParams['font.family'] = 'sans-serif'
 matplotlib.rcParams['font.sans-serif'] = ['Helvetica']
@@ -236,8 +236,8 @@ def plot_grid(base_dir, parameters):
     GIA_Ylms.month[:] = np.copy(grace_Ylms.month)
     #-- finding change in GIA each month
     for t,tdec in enumerate(GIA_Ylms.time):
-        GIA_Ylms.clm[:,:,t] = GIA_Ylms_rate['clm']*(tdec-2003.3)
-        GIA_Ylms.slm[:,:,t] = GIA_Ylms_rate['slm']*(tdec-2003.3)
+        GIA_Ylms.clm[:,:,t] = GIA_Ylms_rate['clm']*(tdec-2007.0)
+        GIA_Ylms.slm[:,:,t] = GIA_Ylms_rate['slm']*(tdec-2007.0)
 
     #-- Gaussian smoothing
     if (RAD != 0):

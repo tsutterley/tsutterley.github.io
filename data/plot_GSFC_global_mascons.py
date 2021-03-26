@@ -54,7 +54,7 @@ import gravity_toolkit.time
 from read_cpt import read_cpt
 
 #-- rebuild the matplotlib fonts and set parameters
-matplotlib.font_manager._rebuild()
+matplotlib.font_manager._load_fontmanager()
 matplotlib.rcParams['axes.linewidth'] = 1.5
 matplotlib.rcParams['font.family'] = 'sans-serif'
 matplotlib.rcParams['font.sans-serif'] = ['Helvetica']
