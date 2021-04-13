@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 u"""
 geocenter_processing_centers.py
-Written by Tyler Sutterley (02/2021)
+Written by Tyler Sutterley (04/2021)
 
 CALLING SEQUENCE:
     python geocenter_processing_centers.py --start 4 --end 216
@@ -14,6 +14,8 @@ COMMAND LINE OPTIONS:
     -M X, --missing X: Missing GRACE months in time series
 
 UPDATE HISTORY:
+    Updated 04/2021: reload the matplotlib font manager
+        use GRACE/GRACE-FO months to update the ticks
     Updated 02/2021: using argparse to set parameters
     Updated 04/2020: use units class for setting earth parameters
     Updated 02/2020: add minor ticks and adjust x axes
@@ -26,16 +28,20 @@ import os
 import inspect
 import argparse
 import numpy as np
-import matplotlib.pyplot as plt
 import matplotlib
-matplotlib.rcParams['font.family'] = 'sans-serif'
-matplotlib.rcParams['font.sans-serif'] = ['Helvetica']
-matplotlib.rcParams['mathtext.default'] = 'regular'
+import matplotlib.font_manager
+import matplotlib.pyplot as plt
 from matplotlib.ticker import MultipleLocator, FormatStrFormatter
 from matplotlib.offsetbox import AnchoredText,AnchoredOffsetbox,TextArea,VPacker
 from read_GRACE_geocenter.read_GRACE_geocenter import read_GRACE_geocenter
+from gravity_toolkit.time import convert_calendar_decimal
 from gravity_toolkit.units import units
 
+#-- rebuilt the matplotlib fonts and set parameters
+matplotlib.font_manager._load_fontmanager()
+matplotlib.rcParams['font.family'] = 'sans-serif'
+matplotlib.rcParams['font.sans-serif'] = ['Helvetica']
+matplotlib.rcParams['mathtext.default'] = 'regular'
 #-- current file path
 filename = inspect.getframeinfo(inspect.currentframe()).filename
 filepath = os.path.dirname(os.path.dirname(os.path.abspath(filename)))
@@ -98,22 +104,27 @@ def geocenter_processing_centers(grace_dir,DREL,START_MON,END_MON,MISSING):
 
     #-- add axis labels and adjust font sizes for axis ticks
     for j,key in enumerate(fig_labels):
+        #-- vertical line denoting the accelerometer shutoff
+        acc = convert_calendar_decimal(2016,9,day=3,hour=12,minute=12)
+        ax[j].axvline(acc,color='0.5',ls='dashed',lw=0.5,dashes=(8,4))
         #-- vertical lines for end of the GRACE mission and start of GRACE-FO
         jj, = np.flatnonzero(DEG1['month'] == 186)
         kk, = np.flatnonzero(DEG1['month'] == 198)
-        ax[j].axvspan(DEG1['time'][jj],DEG1['time'][kk],
+        vs = ax[j].axvspan(DEG1['time'][jj],DEG1['time'][kk],
             color='0.5',ls='dashed',alpha=0.15)
+        vs._dashes = (4,2)
         #-- axis label
         ax[j].set_title(ylabels[key], style='italic', fontsize=14)
         ax[j].add_artist(AnchoredText(axes_labels[key], pad=0.,
             prop=dict(size=16,weight='bold'), frameon=False, loc=2))
         ax[j].set_xlabel('Time [Yr]', fontsize=14)
         #-- set ticks
-        major_ticks = np.arange(2005, 2025, 5)
+        xmax = 2002 + (END_MON + 1.0)/12.0
+        major_ticks = np.arange(2005, xmax, 5)
         ax[j].xaxis.set_ticks(major_ticks)
-        minor_ticks = sorted(set(np.arange(2002, 2021, 1)) - set(major_ticks))
+        minor_ticks = sorted(set(np.arange(2002, xmax, 1)) - set(major_ticks))
         ax[j].xaxis.set_ticks(minor_ticks, minor=True)
-        ax[j].set_xlim(2002, 2021.25)
+        ax[j].set_xlim(2002, xmax)
         ax[j].set_ylim(-9.5,8.5)
         #-- axes tick adjustments
         ax[j].get_xaxis().set_tick_params(which='both', direction='in')
@@ -163,7 +174,7 @@ def main():
         type=int, default=4,
         help='Starting GRACE/GRACE-FO month for time series')
     parser.add_argument('--end','-E',
-        type=int, default=227,
+        type=int, default=230,
         help='Ending GRACE/GRACE-FO month for time series')
     MISSING = [6,7,18,109,114,125,130,135,140,141,146,151,156,162,166,167,172,
         177,178,182,200,201]

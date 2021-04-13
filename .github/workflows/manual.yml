@@ -49,7 +49,7 @@ jobs:
     - name: Test with pytest
       run: |
         sudo ln -sv $PWD/assets/fonts/Helvetica /usr/share/fonts/truetype
-        pytest data/test_font_files.py
+        pytest --verbose --capture=no data/test_font_files.py
     - name: Install Python packages
       run: |
         pip install git+https://github.com/tsutterley/geoid-toolkit.git
