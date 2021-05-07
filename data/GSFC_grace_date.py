@@ -20,7 +20,7 @@ PYTHON DEPENDENCIES:
 
 PROGRAM DEPENDENCIES:
     time.py: utilities for calculating time operations
-    utilities: download and management utilities for syncing files
+    utilities.py: download and management utilities for syncing files
 
 UPDATE HISTORY:
     Updated 03/2021: use python requests to download GSFC mascon file

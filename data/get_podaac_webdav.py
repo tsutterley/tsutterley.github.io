@@ -37,7 +37,7 @@ PYTHON DEPENDENCIES:
         https://python-future.org/
 
 PROGRAM DEPENDENCIES:
-    utilities: download and management utilities for syncing files
+    utilities.py: download and management utilities for syncing files
 
 UPDATE HISTORY:
     Updated 03/2021: default credentials from environmental variables

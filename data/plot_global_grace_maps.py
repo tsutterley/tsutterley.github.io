@@ -87,9 +87,12 @@ def read_grace_harmonics(base_dir, parameters):
         MMAX = np.copy(LMAX)
     else:
         MMAX = np.int(parameters['MMAX'])
-    #-- SLR C2,0
+    #-- replace low degree harmonics with coefficients from SLR
     SLR_C20 = parameters['SLR_C20']
+    SLR_21 = parameters['SLR_21']
+    SLR_22 = parameters['SLR_22']
     SLR_C30 = parameters['SLR_C30']
+    SLR_C50 = parameters['SLR_C50']
     #-- Degree 1 correction
     DEG1 = parameters['DEG1']
     #-- least squares model geocenter from known coefficients
@@ -115,11 +118,13 @@ def read_grace_harmonics(base_dir, parameters):
     else:
         missing = np.array(parameters['MISSING'].split(','),dtype=np.int)
     #-- reading GRACE months for input range with grace_input_months.py
-    #-- replacing SLR and Degree 1 if specified
+    #-- replacing low-degree harmonics with SLR values if specified
+    #-- include degree 1 (geocenter) harmonics if specified
     #-- correcting for Pole-Tide and Atmospheric Jumps if specified
     return grace_input_months(base_dir, PROC, DREL, DSET, LMAX,
         start_mon, end_mon, missing, SLR_C20, DEG1, MMAX=MMAX,
-        SLR_C30=SLR_C30, MODEL_DEG1=MODEL_DEG1, POLE_TIDE=POLE_TIDE, ATM=ATM)
+        SLR_21=SLR_21, SLR_22=SLR_22, SLR_C30=SLR_C30, SLR_C50=SLR_C50,
+        MODEL_DEG1=MODEL_DEG1, POLE_TIDE=POLE_TIDE, ATM=ATM)
 
 #-- PURPOSE: read load love numbers for the range of spherical harmonic degrees
 def load_love_numbers(LMAX, LOVE_NUMBERS=0, REFERENCE='CF'):
