@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 u"""
 geocenter_processing_centers.py
-Written by Tyler Sutterley (04/2021)
+Written by Tyler Sutterley (05/2021)
 
 CALLING SEQUENCE:
     python geocenter_processing_centers.py --start 4 --end 216
@@ -14,6 +14,7 @@ COMMAND LINE OPTIONS:
     -M X, --missing X: Missing GRACE months in time series
 
 UPDATE HISTORY:
+    Updated 05/2021: additionally plot GFZ with pole tide replaced with SLR
     Updated 04/2021: reload the matplotlib font manager
         use GRACE/GRACE-FO months to update the ticks
     Updated 02/2021: using argparse to set parameters
@@ -52,10 +53,10 @@ def geocenter_processing_centers(grace_dir,DREL,START_MON,END_MON,MISSING):
     GAP = [187,188,189,190,191,192,193,194,195,196,197]
     months = sorted(set(np.arange(START_MON,END_MON+1)) - set(MISSING))
     #-- labels for each scenario
-    input_flags = ['','iter','SLF_iter']
+    input_flags = ['','iter','SLF_iter','SLF_iter_wSLR21']
     input_labels = ['Static','Iterated','Iterated SLF']
     #-- labels for Release-6
-    PROC = ['CSR','GFZ','JPL']
+    PROC = ['CSR','GFZ','GFZwPT','JPL']
     model_str = 'OMCT' if DREL in ('RL04','RL05') else 'MPIOM'
     #-- degree one coefficient labels
     fig_labels = ['C11','S11','C10']
@@ -63,7 +64,8 @@ def geocenter_processing_centers(grace_dir,DREL,START_MON,END_MON,MISSING):
     ylabels = dict(C10='z',C11='x',S11='y')
 
     #-- plot colors for each dataset
-    plot_colors = dict(CSR='darkorange',GFZ='darkorchid',JPL='mediumseagreen')
+    plot_colors = dict(CSR='darkorange',GFZ='darkorchid',
+        GFZwPT='dodgerblue',JPL='mediumseagreen')
 
     #-- setting Load Love Number (kl) to 0.021 to match Swenson et al. (2008)
     kl = np.array([0.0,0.021])
@@ -81,8 +83,13 @@ def geocenter_processing_centers(grace_dir,DREL,START_MON,END_MON,MISSING):
     fig,(ax[0],ax[1],ax[2])=plt.subplots(num=1,ncols=3,sharey=True,figsize=(9,4))
     #-- plot geocenter estimates for each processing center
     for k,pr in enumerate(PROC):
+        #-- additionally plot GFZ with SLR replaced pole tide
+        if (pr == 'GFZwPT'):
+            fargs = ('GFZ',DREL,model_str,input_flags[3])
+        else:
+            fargs = (pr,DREL,model_str,input_flags[2])
         #-- read geocenter file for processing center and model
-        grace_file = '{0}_{1}_{2}_{3}.txt'.format(pr,DREL,model_str,input_flags[2])
+        grace_file = '{0}_{1}_{2}_{3}.txt'.format(*fargs)
         DEG1 = read_GRACE_geocenter(os.path.join(grace_dir,grace_file))
         #-- indices for mean months
         kk, = np.nonzero((DEG1['month'] >= START_MON) & (DEG1['month'] <= 176))

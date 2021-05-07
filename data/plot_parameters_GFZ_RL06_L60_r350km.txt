@@ -7,11 +7,11 @@ MMAX	None		#-- Maximum spherical harmonic order (None if LMAX)
 START	4			#-- Starting Month in analysis
 END		186		#-- Ending Month in analysis
 MISSING	6,7,18,109,114,125,130,135,140,141,146,151,156,162,166,167,172,177,178,182,187,188,189,190,191,192,193,194,195,196,197,200,201	#-- Missing months (note no spaces)
-SLR_C20	GSFC		# Use SLR C2,0 values (CSR/GSFC)
-SLR_21	None		# Use SLR C2,1/S2,1 values (CSR)
+SLR_C20	GFZ		# Use SLR C2,0 values (CSR/GFZ/GSFC)
+SLR_21	GFZ		# Use SLR C2,1/S2,1 values (CSR/GFZ)
 SLR_22	None		# Use SLR C2,2/S2,2 values (CSR)
-SLR_C30	GSFC		# Use SLR C3,0 values (CSR/GSFC)
-SLR_C50	None		# Use SLR C3,0 values (CSR/GSFC)
+SLR_C30	GFZ		# Use SLR C3,0 values (CSR/GFZ/GSFC)
+SLR_C50	None		# Use SLR C5,0 values (CSR/GSFC)
 DEG1	None	#-- Degree 1 (None, Tellus, SLR, SLF)
 MODEL_DEG1 N	#-- Model missing degree 1 values by least-squares fit
 GIA	ICE6G-D	#-- GIA model group (AW13, IJ05-R2, W12a, M09, ICE6G, Wu10, IJ05-Test, AW13-ICE6G, Caron, ICE6G-D)
@@ -20,7 +20,7 @@ UNITS	1			#-- Output units (1: cm Water Eq, 2: mm Geoid, 3: mm Crustal, 4: micGa
 DATAFORM	netCDF4		#-- Input and output data format (ascii, netCDF4, HDF5)
 DIRECTORY	images
 MEAN		Y	#-- Remove Mean gravity field (default mean of imported months)
-MEAN_FILE	data/GFZ/RL06/GSM/GFZ_RL06_GSM_MEAN_CLM_wSLR_C20_L60_013-108.nc	#-- choose a file to remove as static field (if MEAN == Y).  None is Default
+MEAN_FILE	data/GFZ/RL06/GSM/GFZ_RL06_GSM_MEAN_CLM_wGFZ_C20_L60_013-108.nc	#-- choose a file to remove as static field (if MEAN == Y).  None is Default
 MEANFORM	netCDF4	#-- Data format for input MEAN_FILE (ascii, netCDF4, HDF5)
 DESTRIPE	Y	#-- filter coefficients with a destriping algorithm
 RAD	350		#-- Gaussian Smoothing Radius
