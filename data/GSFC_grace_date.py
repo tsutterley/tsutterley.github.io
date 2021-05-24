@@ -1,15 +1,19 @@
 #!/usr/bin/env python
 u"""
 GSFC_grace_date.py
-Written by Tyler Sutterley (03/2021)
+Written by Tyler Sutterley (05/2021)
 
 Reads dates of GSFC GRACE mascon data file and assigns the month number
     reads the start and end date from the filename,
     calculates the mean date in decimal format (correcting for leap years)
 
-OPTIONS:
-    VERSION: GSFC data version
-    MODE: Permissions mode of output file
+COMMAND LINE OPTIONS:
+    --help: list the command line options
+    -D X, --directory X: working data directory
+    -v X, --version X: GSFC GRACE mascon version
+    -t X, --timeout X: Timeout in seconds for blocking operations
+    -r X, --retry X: Connection retry attempts
+    -M X, --mode=X: Local permissions mode of the directories and files synced
 
 PYTHON DEPENDENCIES:
     numpy: Scientific Computing Tools For Python (https://numpy.org)
@@ -23,6 +27,7 @@ PROGRAM DEPENDENCIES:
     utilities.py: download and management utilities for syncing files
 
 UPDATE HISTORY:
+    Updated 05/2021: added options for connection timeout and retry attempts
     Updated 03/2021: use python requests to download GSFC mascon file
         added parameters for GSFC mascons Release-6 Version 1.0
     Updated 02/2021: use adjust_months function to fix special months cases
@@ -43,7 +48,8 @@ import gravity_toolkit.time
 import gravity_toolkit.utilities
 
 #-- PURPOSE: get GSFC GRACE mascon data
-def get_GSFC_grace_mascons(base_dir, VERSION='v02.4', MODE=0o775):
+def get_GSFC_grace_mascons(base_dir, TIMEOUT=None, RETRY=5,
+    VERSION='v02.4', MODE=0o775):
     #-- remote path for mascon versions
     HOST = {}
     HOST['v02.4'] = ['https://earth.gsfc.nasa.gov','sites','default','files',
@@ -52,8 +58,22 @@ def get_GSFC_grace_mascons(base_dir, VERSION='v02.4', MODE=0o775):
         '2021-03','gsfc.glb_.200204_202009_rl06v1.0_sla-ice6gd.h5']
     #-- local file
     local = os.path.join(base_dir,'GSFC',VERSION,'GSM',HOST[VERSION][-1])
-    #-- get GSFC GRACE mascon file
-    from_http(HOST[VERSION], local=local, verbose=True, mode=MODE)
+    #-- attempt to download up to the number of retries
+    retry_counter = 0
+    while (retry_counter < RETRY):
+        try:
+            #-- get GSFC GRACE mascon file
+            from_http(HOST[VERSION], timeout=TIMEOUT, local=local,
+                verbose=True, mode=MODE)
+        except:
+            pass
+        else:
+            return
+        #-- add to retry counter
+        retry_counter += 1
+    #-- check if maximum number of retries were reached
+    if (retry_counter == RETRY):
+        raise TimeoutError('Maximum number of retries reached')
 
 #-- PURPOSE: download a file from a http host
 def from_http(HOST,timeout=None,local=None,verbose=False,mode=0o775):
@@ -215,6 +235,13 @@ def main():
     parser.add_argument('--version','-v',
         type=str, default='v02.4',
         help='GSFC GRACE mascon version')
+    #-- connection timeout and number of retry attempts
+    parser.add_argument('--timeout','-t',
+        type=int, default=360,
+        help='Timeout in seconds for blocking operations')
+    parser.add_argument('--retry','-r',
+        type=int, default=5,
+        help='Connection retry attempts')
     #-- permissions mode of the local files (number in octal)
     parser.add_argument('--mode','-M',
         type=lambda x: int(x,base=8), default=0o775,
@@ -222,7 +249,8 @@ def main():
     args = parser.parse_args()
 
     #-- get GSFC GRACE mascon data
-    get_GSFC_grace_mascons(args.directory, VERSION=args.version, MODE=args.mode)
+    get_GSFC_grace_mascons(args.directory, TIMEOUT=args.timeout,
+        RETRY=args.retry, VERSION=args.version, MODE=args.mode)
     #-- run GSFC GRACE mascon date program
     GSFC_grace_date(args.directory, VERSION=args.version, MODE=args.mode)
 

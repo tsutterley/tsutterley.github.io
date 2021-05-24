@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 u"""
 podaac_grace_sync.py
-Written by Tyler Sutterley (04/2021)
+Written by Tyler Sutterley (05/2021)
 
 Syncs GRACE/GRACE-FO and auxiliary data from the NASA JPL PO.DAAC Drive Server
 Syncs CSR/GFZ/JPL GSM files for Release-06
@@ -100,7 +100,8 @@ def compile_regex_pattern(PROC, DREL, DSET):
     return re.compile(regex_pattern, re.VERBOSE)
 
 #-- PURPOSE: sync local GRACE/GRACE-FO files with JPL PO.DAAC drive server
-def podaac_grace_sync(DIRECTORY,PROC,DREL=[],PROCESSES=0,LOG=False,MODE=None):
+def podaac_grace_sync(DIRECTORY,PROC,DREL=[],PROCESSES=0,TIMEOUT=360,RETRY=5,
+    LOG=False,MODE=None):
 
     #-- check if directory exists and recursively create if not
     os.makedirs(DIRECTORY,MODE) if not os.path.exists(DIRECTORY) else None
@@ -137,7 +138,7 @@ def podaac_grace_sync(DIRECTORY,PROC,DREL=[],PROCESSES=0,LOG=False,MODE=None):
     R1 = re.compile(r'TN-(05|07|11)_C20_SLR.txt', re.VERBOSE)
     #-- open connection with PO.DAAC drive server at remote directory
     files,mtimes = gravity_toolkit.utilities.drive_list(PATH,
-        timeout=360,build=False,parser=parser,pattern=R1,sort=True)
+        timeout=TIMEOUT,build=False,parser=parser,pattern=R1,sort=True)
     #-- for each file on the remote server
     for colname,remote_mtime in zip(files,mtimes):
         #-- remote and local versions of the file
@@ -153,7 +154,7 @@ def podaac_grace_sync(DIRECTORY,PROC,DREL=[],PROCESSES=0,LOG=False,MODE=None):
     R1 = re.compile(r'TN-(14)_C30_C20_GSFC_SLR.txt', re.VERBOSE)
     #-- open connection with PO.DAAC drive server at remote directory
     files,mtimes = gravity_toolkit.utilities.drive_list(PATH,
-        timeout=360,build=False,parser=parser,pattern=R1,sort=True)
+        timeout=TIMEOUT,build=False,parser=parser,pattern=R1,sort=True)
     #-- for each file on the remote server
     for colname,remote_mtime in zip(files,mtimes):
         #-- remote and local versions of the file
@@ -179,7 +180,7 @@ def podaac_grace_sync(DIRECTORY,PROC,DREL=[],PROCESSES=0,LOG=False,MODE=None):
             remote_dir = posixpath.join(*PATH)
             #-- open connection with PO.DAAC drive server at remote directory
             colnames,mtimes = gravity_toolkit.utilities.drive_list(PATH,
-                timeout=360,build=False,parser=parser,sort=True)
+                timeout=TIMEOUT,build=False,parser=parser,sort=True)
             #-- local directory for exact data product
             local_dir = os.path.join(DIRECTORY, pr, rl, DSET)
             #-- check if directory exists and recursively create if not
@@ -208,14 +209,14 @@ def podaac_grace_sync(DIRECTORY,PROC,DREL=[],PROCESSES=0,LOG=False,MODE=None):
             #-- open connection with PO.DAAC drive server at remote directory
             R2 = re.compile(r'\d{4}',re.VERBOSE)
             years,mtimes = gravity_toolkit.utilities.drive_list(PATH,
-                timeout=360,build=False,parser=parser,pattern=R2,sort=True)
+                timeout=TIMEOUT,build=False,parser=parser,pattern=R2,sort=True)
             for yr in years:
                 #-- add the year directory to the path
                 PATH.append(yr)
                 remote_dir = posixpath.join(*PATH)
                 #-- open connection with PO.DAAC drive server at remote directory
                 colnames,mtimes=gravity_toolkit.utilities.drive_list(PATH,
-                    timeout=360,build=False,parser=parser,sort=True)
+                    timeout=TIMEOUT,build=False,parser=parser,sort=True)
                 #-- local directory for exact data product
                 local_dir = os.path.join(DIRECTORY, pr, rl, DSET)
                 #-- check if directory exists and recursively create if not
@@ -239,7 +240,7 @@ def podaac_grace_sync(DIRECTORY,PROC,DREL=[],PROCESSES=0,LOG=False,MODE=None):
         for i,remote_file in enumerate(remote_files):
             #-- sync GRACE/GRACE-FO files with PO.DAAC Drive server
             output = http_pull_file(remote_file, remote_mtimes[i],
-                local_files[i], MODE=MODE)
+                local_files[i], TIMEOUT=TIMEOUT, RETRY=RETRY, MODE=MODE)
             #-- print the output string
             print(output, file=fid1)
     else:
@@ -250,7 +251,7 @@ def podaac_grace_sync(DIRECTORY,PROC,DREL=[],PROCESSES=0,LOG=False,MODE=None):
         for i,remote_file in enumerate(remote_files):
             #-- sync GRACE/GRACE-FO files with PO.DAAC Drive server
             args = (remote_file,remote_mtimes[i],local_files[i])
-            kwds = dict(MODE=MODE)
+            kwds = dict(TIMEOUT=TIMEOUT, RETRY=RETRY, MODE=MODE)
             out.append(pool.apply_async(multiprocess_sync,args=args,kwds=kwds))
         #-- start multiprocessing jobs
         #-- close the pool
@@ -288,9 +289,11 @@ def podaac_grace_sync(DIRECTORY,PROC,DREL=[],PROCESSES=0,LOG=False,MODE=None):
         os.chmod(os.path.join(DIRECTORY,LOGFILE), MODE)
 
 #-- PURPOSE: wrapper for running the sync program in multiprocessing mode
-def multiprocess_sync(remote_file, remote_mtime, local_file, MODE=0o775):
+def multiprocess_sync(remote_file, remote_mtime, local_file,
+    TIMEOUT=0, RETRY=5, MODE=0o775):
     try:
-        output = http_pull_file(remote_file,remote_mtime,local_file,MODE=MODE)
+        output = http_pull_file(remote_file,remote_mtime,local_file,
+            TIMEOUT=TIMEOUT,RETRY=RETRY,MODE=MODE)
     except:
         #-- if there has been an error exception
         #-- print the type, value, and stack trace of the
@@ -302,20 +305,36 @@ def multiprocess_sync(remote_file, remote_mtime, local_file, MODE=0o775):
 
 #-- PURPOSE: pull file from a remote host checking if file exists locally
 #-- and if the remote file is newer than the local file
-def http_pull_file(remote_file, remote_mtime, local_file, MODE=0o775):
+def http_pull_file(remote_file, remote_mtime, local_file,
+    TIMEOUT=0, RETRY=5, MODE=0o775):
     #-- output string for printing files transferred
     output = '{0} --> \n\t{1}\n'.format(remote_file,local_file)
     #-- chunked transfer encoding size
     CHUNK = 16 * 1024
-    #-- Create and submit request.
-    #-- There are a wide range of exceptions that can be thrown here
-    #-- including HTTPError and URLError.
-    request = gravity_toolkit.utilities.urllib2.Request(remote_file)
-    response = gravity_toolkit.utilities.urllib2.urlopen(request, timeout=360)
-    #-- copy contents to local file using chunked transfer encoding
-    #-- transfer should work properly with ascii and binary formats
-    with open(local_file, 'wb') as f:
-        shutil.copyfileobj(response, f, CHUNK)
+    #-- attempt to download up to the number of retries
+    retry_counter = 0
+    while (retry_counter < RETRY):
+        #-- attempt to retrieve file from https server
+        try:
+            #-- Create and submit request.
+            #-- There are a wide range of exceptions that can be thrown here
+            #-- including HTTPError and URLError.
+            request = gravity_toolkit.utilities.urllib2.Request(remote_file)
+            response = gravity_toolkit.utilities.urllib2.urlopen(request,
+                timeout=TIMEOUT)
+            #-- copy contents to local file using chunked transfer encoding
+            #-- transfer should work properly with ascii and binary formats
+            with open(local_file, 'wb') as f:
+                shutil.copyfileobj(response, f, CHUNK)
+        except:
+            pass
+        else:
+            break
+        #-- add to retry counter
+        retry_counter += 1
+    #-- check if maximum number of retries were reached
+    if (retry_counter == RETRY):
+        raise TimeoutError('Maximum number of retries reached')
     #-- keep remote modification time of file and local access time
     os.utime(local_file, (os.stat(local_file).st_atime, remote_mtime))
     os.chmod(local_file, MODE)
@@ -356,6 +375,10 @@ def main():
         metavar='DREL', type=str, nargs='+',
         default=['RL06'], choices=['RL04','RL05','RL06'],
         help='GRACE/GRACE-FO data release')
+    #-- connection timeout
+    parser.add_argument('--timeout','-t',
+        type=int, default=360,
+        help='Timeout in seconds for blocking operations')
     #-- Output log file in form PODAAC_sync.log
     parser.add_argument('--log','-l',
         default=False, action='store_true',
@@ -378,7 +401,8 @@ def main():
     #-- check JPL PO.DAAC Drive credentials before attempting to run program
     if gravity_toolkit.utilities.check_credentials():
         podaac_grace_sync(args.directory, args.center, DREL=args.release,
-            PROCESSES=args.np, LOG=args.log, MODE=args.mode)
+            PROCESSES=args.np, TIMEOUT=args.timeout, LOG=args.log,
+            MODE=args.mode)
 
 
 #-- run main program

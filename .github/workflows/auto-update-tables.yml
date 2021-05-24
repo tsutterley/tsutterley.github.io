@@ -58,7 +58,7 @@ jobs:
       run: |
         python data/get_podaac_webdav.py
         python data/podaac_grace_sync.py --directory data/ --netrc data/.netrc \
-            --release RL06 --log --np=0
+            --release RL06 --timeout=360 --log --np=0
         grace_date.py --directory data/ --release RL06 --product GSM --output
         python data/GSFC_grace_date.py --version rl06v1.0 --directory data/
         grace_months_index.py --directory data/ --release RL06 rl06v1.0
