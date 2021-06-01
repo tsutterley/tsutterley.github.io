@@ -114,5 +114,7 @@ data/CSR/
 data/GFZ/
 data/GSFC/
 data/JPL/
+data/geocenter/
 data/TN-*
 data/ICE-6G_High_Res_Stokes_trend.*
+data/*.dat
