@@ -1,19 +1,18 @@
-PROC	CSR		#-- Processing Center
-DREL	RL06		#-- Data Release
-DSET	GSM		#-- Data Product
-LMAX	60		#-- Maximum spherical harmonic degree
-MMAX	None		#-- Maximum spherical harmonic order (None if LMAX)
-START	13		#-- Starting Month in analysis
-END	108		#-- Ending Month in analysis
-MISSING 6,7,18,109,114,125,130,135,140,141,146	#-- Missing months (note no spaces)
-SLR_C20	GSFC		# Use SLR C2,0 values (CSR/GFZ/GSFC)
-SLR_21	None		# Use SLR C2,1/S2,1 values (CSR/GFZ/GSFC)
-SLR_22	None		# Use SLR C2,2/S2,2 values (CSR)
-SLR_C30	GSFC		# Use SLR C3,0 values (CSR/GFZ/GSFC)
-SLR_C50	None		# Use SLR C5,0 values (CSR/GSFC)
-DEG1	None	#-- Degree 1 (None, Tellus, SLR, SLF)
-DATAFORM	netCDF4	#-- Output data format (ascii, netCDF4, HDF5)
-DIRECTORY	None
-FILENAME	CSR_RL06_GSM_MEAN_CLM_wSLR_C20_L60_013-108.nc
-POLE_TIDE	N	#-- Pole Tide Correction from Wahr et al. (2015)
-ATM		N	#-- Use GAE/GAF/GAG atmospheric correction coefficients
+--center	CSR		#-- Processing Center
+--release	RL06		#-- Data Release
+--product	GSM		#-- Data Product
+--lmax	60		#-- Maximum spherical harmonic degree
+#--mmax	None		#-- Maximum spherical harmonic order (None if LMAX)
+--start	13		#-- Starting Month in analysis
+--end	108		#-- Ending Month in analysis
+--missing 6 7 18 109 114 125 130 135 140 141 146	#-- Missing months
+--slr-c20	GSFC		# Use SLR C2,0 values (CSR/GFZ/GSFC)
+#--slr-21	None		# Use SLR C2,1/S2,1 values (CSR/GFZ/GSFC)
+#--slr-22	None		# Use SLR C2,2/S2,2 values (CSR)
+--slr-c30	GSFC		# Use SLR C3,0 values (CSR/GFZ/GSFC)
+#--slr-c50	None		# Use SLR C5,0 values (CSR/GSFC)
+#--geocenter	None	#-- Degree 1 (None, Tellus, SLR, SLF)
+--mean-file	data/CSR/RL06/GSM/CSR_RL06_GSM_MEAN_CLM_wSLR_C20_L60_013-108.nc
+--mean-format netCDF4   # Output data format (ascii, netCDF, HDF5)
+#--pole-tide	#-- Pole Tide Correction from Wahr et al. (2015)
+#--atm-correction	#-- Use GAE/GAF/GAG atmospheric correction coefficients
