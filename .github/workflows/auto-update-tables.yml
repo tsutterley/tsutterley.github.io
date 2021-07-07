@@ -86,10 +86,9 @@ jobs:
         curl https://www.atmosp.physics.utoronto.ca/~peltier/datasets/Ice6G_C_VM5a/ICE-6G_High_Res_Stokes_trend.txt.gz \
           -o data/ICE-6G_High_Res_Stokes_trend.txt.gz
         gunzip data/ICE-6G_High_Res_Stokes_trend.txt.gz
-        grace_mean_harmonics.py --directory data/ \
-            data/parameters_CSR_RL06_mean_Ylms_013-108.txt \
-            data/parameters_GFZ_RL06_mean_Ylms_013-108.txt \
-            data/parameters_JPL_RL06_mean_Ylms_013-108.txt
+        grace_mean_harmonics.py --directory data/ @data/parameters_CSR_RL06_mean_Ylms_013-108.txt
+        grace_mean_harmonics.py --directory data/ @data/parameters_CSR_RL06_mean_Ylms_013-108.txt
+        grace_mean_harmonics.py --directory data/ @data/parameters_CSR_RL06_mean_Ylms_013-108.txt
         python data/plot_global_grace_maps.py --directory data/ \
             data/plot_parameters_CSR_RL06_L60_r350km.txt \
             data/plot_parameters_GRFO_CSR_RL06_L60_r350km.txt \
