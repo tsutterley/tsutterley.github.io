@@ -33,28 +33,58 @@ jobs:
     - name: Install dependencies
       run: |
         sudo apt-get update
-        sudo apt-get install libproj-dev proj-data proj-bin libgeos-dev
-        sudo apt-get install libhdf5-dev libnetcdf-dev
-        sudo apt-get install libxml2-dev libxslt1-dev
+        sudo apt-get install libgeos-dev libhdf5-dev libnetcdf-dev
+        sudo apt-get install libstdc++6 libxml2-dev libxslt1-dev libsqlite3-dev
         sudo apt-get install texlive texlive-fonts-extra texlive-font-utils
-        sudo apt-get install cm-super dvipng font-manager curl gzip
+        sudo apt-get install cm-super dvipng font-manager cmake curl gzip wget
         pip install --upgrade pip
         pip install flake8 pytest pytest-cov numpy requests matplotlib
+        sudo ln -sv $PWD/assets/fonts/Helvetica /usr/share/fonts/truetype
+    - name: Install PROJ
+      env:
+        JOBS: 2
+        PROJ_VERSION: 8.0.1
+        PROJ_DATUMGRID_VERSION: 1.8
+        PROJ_NETWORK: ON
+        SQLITE3_CFLAGS: "-I/usr/local/include"
+        SQLITE3_LIBS: "-L/usr/local/lib -lsqlite3"
+      run: |
+        cd ${RUNNER_TEMP}
+        wget -q https://download.osgeo.org/proj/proj-${PROJ_VERSION}.tar.gz
+        wget -q http://download.osgeo.org/proj/proj-datumgrid-${PROJ_DATUMGRID_VERSION}.zip
+        tar -xzf proj-${PROJ_VERSION}.tar.gz
+        unzip proj-datumgrid-${PROJ_DATUMGRID_VERSION}.zip -d proj-${PROJ_VERSION}/data/
+        cd proj-${PROJ_VERSION}
+        mkdir build
+        cd build
+        sudo cmake \
+            -DPYTHON_EXECUTABLE=/usr/local/bin/python3 \
+            -DCMAKE_BUILD_TYPE=Release \
+            -DBUILD_SHARED_LIBS=true \
+            -DCMAKE_INSTALL_PREFIX=/usr/local/ ..
+        sudo cmake --build .
+        sudo make --quiet --jobs=${JOBS}
+        sudo make --quiet install
+        make clean
+        cd ${GITHUB_WORKSPACE}
+        sudo ldconfig --verbose
+        sudo projsync --system-directory --all
     - name: Lint with flake8
       run: |
         # stop the build if there are Python syntax errors or undefined names
         flake8 data --count --select=E9,F63,F7,F82 --show-source --statistics
         # exit-zero treats all errors as warnings. The GitHub editor is 127 chars wide
         flake8 data --count --exit-zero --max-complexity=10 --max-line-length=127 --statistics
-    - name: Test with pytest
-      run: |
-        sudo ln -sv $PWD/assets/fonts/Helvetica /usr/share/fonts/truetype
-        pytest --verbose --capture=no data/test_font_files.py
     - name: Install Python packages
       run: |
+        pip install git+https://github.com/SciTools/cartopy.git
         pip install git+https://github.com/tsutterley/geoid-toolkit.git
         pip install git+https://github.com/tsutterley/read-GRACE-geocenter.git
         pip install ./read-GRACE-harmonics
+    - name: Test with pytest
+      run: |
+        pytest --verbose --capture=no data/test_font_files.py
+        pytest --verbose --capture=no data/test_cartopy.py
     - name: Download GRACE/GRACE-FO data
       run: |
         python data/get_podaac_webdav.py
