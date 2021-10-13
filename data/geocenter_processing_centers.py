@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 u"""
 geocenter_processing_centers.py
-Written by Tyler Sutterley (05/2021)
+Written by Tyler Sutterley (10/2021)
 
 CALLING SEQUENCE:
     python geocenter_processing_centers.py --start 4 --end 216
@@ -14,6 +14,7 @@ COMMAND LINE OPTIONS:
     -M X, --missing X: Missing GRACE months in time series
 
 UPDATE HISTORY:
+    Updated 10/2021: numpy int and float to prevent deprecation warnings
     Updated 05/2021: additionally plot GFZ with pole tide replaced with SLR
     Updated 04/2021: reload the matplotlib font manager
         use GRACE/GRACE-FO months to update the ticks
@@ -98,8 +99,8 @@ def geocenter_processing_centers(grace_dir,DREL,START_MON,END_MON,MISSING):
             #-- plot model outputs
             DEG1[key] -= DEG1[key][kk].mean()
             #-- create a time series with nans for missing months
-            tdec = np.full_like(months,np.nan,dtype=np.float)
-            geocenter = np.full_like(months,np.nan,dtype=np.float)
+            tdec = np.full_like(months,np.nan,dtype=np.float64)
+            geocenter = np.full_like(months,np.nan,dtype=np.float64)
             for i,m in enumerate(months):
                 valid = np.count_nonzero(DEG1['month'] == m)
                 if valid:
@@ -181,7 +182,7 @@ def main():
         type=int, default=4,
         help='Starting GRACE/GRACE-FO month for time series')
     parser.add_argument('--end','-E',
-        type=int, default=230,
+        type=int, default=236,
         help='Ending GRACE/GRACE-FO month for time series')
     MISSING = [6,7,18,109,114,125,130,135,140,141,146,151,156,162,166,167,172,
         177,178,182,200,201]

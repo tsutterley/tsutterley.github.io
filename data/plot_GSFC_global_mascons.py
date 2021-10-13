@@ -20,6 +20,8 @@ PYTHON DEPENDENCIES:
         https://github.com/GeospatialPython/pyshp
 
 UPDATE HISTORY:
+    Updated 10/2021: numpy int and float to prevent deprecation warnings
+        using time conversion routines for converting to and from months
     Updated 03/2021: added parameters for GSFC mascons Release-6 Version 1.0
     Updated 02/2021: use adjust_months function to fix special months cases
     Updated 12/2020: using utilities from time module
@@ -103,7 +105,8 @@ def plot_mascon(base_dir, parameters):
     #-- calculate the GRACE month (Apr02 == 004)
     #-- https://grace.jpl.nasa.gov/data/grace-months/
     #-- Notes on special months (e.g. 119, 120) below
-    grace_month = np.array(12*(cal_date['year']-2002)+cal_date['month'],dtype='i')
+    grace_month = gravity_toolkit.time.calendar_to_grace(cal_date['year'],
+        month=cal_date['month'])
     #-- calculating the month number of 'Special Months' with accelerometer
     #-- shutoffs is more complicated as days from other months are used
     grace_month = gravity_toolkit.time.adjust_months(grace_month)
@@ -111,7 +114,7 @@ def plot_mascon(base_dir, parameters):
     #-- use a mean range for the static field to remove
     MEAN = np.zeros((nmas))
     if (parameters['MEAN'].title() != 'None'):
-        START,END = np.array(parameters['MEAN'].split(','),dtype=np.int)
+        START,END = np.array(parameters['MEAN'].split(','),dtype=np.int64)
         ind, = np.nonzero((grace_month >= START) & (grace_month <= END))
         for i in range(nmas):
             MEAN[i] = np.mean(cmwe[i,ind])
@@ -138,15 +141,15 @@ def plot_mascon(base_dir, parameters):
     rad_e = a_axis*(1.0 -flat)**(1.0/3.0)
 
     #-- set transparency ALPHA
-    ALPHA = np.float(parameters['ALPHA'])
+    ALPHA = np.float64(parameters['ALPHA'])
     if (parameters['BOUNDARY'].title() == 'None'):
         #-- contours
-        PRANGE = np.array(parameters['PRANGE'].split(','),dtype=np.float)
+        PRANGE = np.array(parameters['PRANGE'].split(','),dtype=np.float64)
         levels = np.arange(PRANGE[0],PRANGE[1]+PRANGE[2],PRANGE[2])
         norm = colors.Normalize(vmin=PRANGE[0],vmax=PRANGE[1])
     else:
         #-- boundary between contours
-        levels = np.array(parameters['BOUNDARY'].split(','),dtype=np.float)
+        levels = np.array(parameters['BOUNDARY'].split(','),dtype=np.float64)
         norm = colors.BoundaryNorm(levels,ncolors=256)
 
     #-- polygon and colors
@@ -225,7 +228,7 @@ def plot_mascon(base_dir, parameters):
     fig.subplots_adjust(left=0.02,right=0.98,bottom=0.05,top=0.98)
 
     #-- replace data and contours to create figure frames
-    dpi = np.int(parameters['FIGURE_DPI'])
+    dpi = np.int64(parameters['FIGURE_DPI'])
     format = parameters['FIGURE_FORMAT']
     #-- for each date
     for t,mon in enumerate(grace_month):

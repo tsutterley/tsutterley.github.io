@@ -20,6 +20,8 @@ PYTHON DEPENDENCIES:
         https://scitools.org.uk/cartopy
 
 UPDATE HISTORY:
+    Updated 10/2021: numpy int and float to prevent deprecation warnings
+        using time conversion routines for converting to and from months
     Updated 03/2021: added correction for glacial isostatic adjustment (GIA)
     Updated 12/2020: added more love number options
     Updated 10/2020: use argparse to set command line parameters
@@ -52,6 +54,7 @@ import matplotlib.pyplot as plt
 import matplotlib.cm as cm
 import matplotlib.colors as colors
 import cartopy.crs as ccrs
+import gravity_toolkit.time
 from gravity_toolkit.utilities import get_data_path
 from gravity_toolkit.grace_find_months import grace_find_months
 from gravity_toolkit.grace_input_months import grace_input_months
@@ -82,11 +85,11 @@ def read_grace_harmonics(base_dir, parameters):
     #-- find GRACE/GRACE-FO months for a dataset
     grace_months = grace_find_months(base_dir, PROC, DREL, DSET=DSET)
     #-- maximum degree and order
-    LMAX = np.int(parameters['LMAX'])
+    LMAX = np.int64(parameters['LMAX'])
     if (parameters['MMAX'].title() == 'None'):
         MMAX = np.copy(LMAX)
     else:
-        MMAX = np.int(parameters['MMAX'])
+        MMAX = np.int64(parameters['MMAX'])
     #-- replace low degree harmonics with coefficients from SLR
     SLR_C20 = parameters['SLR_C20']
     SLR_21 = parameters['SLR_21']
@@ -106,17 +109,17 @@ def read_grace_harmonics(base_dir, parameters):
     if (parameters['START'].title() == 'None'):
         start_mon = np.copy(grace_months['start'])
     else:
-        start_mon = np.int(parameters['START'])
+        start_mon = np.int64(parameters['START'])
     #-- final month to run
     if (parameters['END'].title() == 'None'):
         end_mon = np.copy(grace_months['end'])
     else:
-        end_mon = np.int(parameters['END'])
+        end_mon = np.int64(parameters['END'])
     #-- GRACE/GRACE-FO missing months
     if (parameters['MISSING'].title() == 'None'):
         missing = np.copy(grace_months['missing'])
     else:
-        missing = np.array(parameters['MISSING'].split(','),dtype=np.int)
+        missing = np.array(parameters['MISSING'].split(','),dtype=np.int64)
     #-- reading GRACE months for input range with grace_input_months.py
     #-- replacing low-degree harmonics with SLR values if specified
     #-- include degree 1 (geocenter) harmonics if specified
@@ -201,14 +204,14 @@ def plot_grid(base_dir, parameters):
     cmap.set_bad('w',0.5)
 
     #-- dataset parameters
-    LMIN = np.int(parameters['LMIN'])
-    LMAX = np.int(parameters['LMAX'])
+    LMIN = np.int64(parameters['LMIN'])
+    LMAX = np.int64(parameters['LMAX'])
     if (parameters['MMAX'].title() == 'None'):
         MMAX = np.copy(LMAX)
     else:
-        MMAX = np.int(parameters['MMAX'])
-    RAD = np.float(parameters['RAD'])
-    UNITS = np.int(parameters['UNITS'])
+        MMAX = np.int64(parameters['MMAX'])
+    RAD = np.float64(parameters['RAD'])
+    UNITS = np.int64(parameters['UNITS'])
 
     #-- read the GRACE/GRACE-FO data for the date range
     grace_Ylms=harmonics().from_dict(read_grace_harmonics(base_dir,parameters))
@@ -252,14 +255,14 @@ def plot_grid(base_dir, parameters):
 
     #-- degree spacing (if dlon != dlat: dlon,dlat)
     #-- input degree spacing
-    DDEG = np.squeeze(np.array(parameters['DDEG'].split(','),dtype=np.float))
+    DDEG = np.squeeze(np.array(parameters['DDEG'].split(','),dtype=np.float64))
     dlon,dlat = (DDEG,DDEG) if (np.ndim(DDEG) == 0) else (DDEG[0],DDEG[1])
     #-- Input Degree Interval
-    INTERVAL = np.int(parameters['INTERVAL'])
+    INTERVAL = np.int64(parameters['INTERVAL'])
     if (INTERVAL == 1):
         #-- (-180:180,+90:-90)
-        nlon = np.int((360.0/dlon)+1.0)
-        nlat = np.int((180.0/dlat)+1.0)
+        nlon = np.int64((360.0/dlon)+1.0)
+        nlat = np.int64((180.0/dlat)+1.0)
         glon = -180.0 + dlon*np.arange(0,nlon)
         glat = -90.0 + dlat*np.arange(0,nlat)
     elif (INTERVAL == 2):
@@ -306,15 +309,15 @@ def plot_grid(base_dir, parameters):
     rad_e = a_axis*(1.0 -flat)**(1.0/3.0)
 
     #-- set transparency ALPHA
-    ALPHA = np.float(parameters['ALPHA'])
+    ALPHA = np.float64(parameters['ALPHA'])
     if (parameters['BOUNDARY'].title() == 'None'):
         #-- contours
-        PRANGE = np.array(parameters['PRANGE'].split(','),dtype=np.float)
+        PRANGE = np.array(parameters['PRANGE'].split(','),dtype=np.float64)
         levels = np.arange(PRANGE[0],PRANGE[1]+PRANGE[2],PRANGE[2])
         norm = colors.Normalize(vmin=PRANGE[0],vmax=PRANGE[1])
     else:
         #-- boundary between contours
-        levels = np.array(parameters['BOUNDARY'].split(','),dtype=np.float)
+        levels = np.array(parameters['BOUNDARY'].split(','),dtype=np.float64)
         norm = colors.BoundaryNorm(levels,ncolors=256)
 
     #-- add place holder for figure image
@@ -366,7 +369,7 @@ def plot_grid(base_dir, parameters):
     fig.subplots_adjust(left=0.02,right=0.98,bottom=0.05,top=0.98)
 
     #-- replace data and contours to create figure frames
-    figure_dpi = np.int(parameters['FIGURE_DPI'])
+    figure_dpi = np.int64(parameters['FIGURE_DPI'])
     figure_format = parameters['FIGURE_FORMAT']
     #-- for each input file
     for t,grace_month in enumerate(grace_Ylms.month):
@@ -380,9 +383,8 @@ def plot_grid(base_dir, parameters):
         #-- set image
         im.set_data(data)
         #-- add date label (year-calendar month e.g. 2002-01)
-        year = np.floor(Ylms.time).astype(np.int)
-        calendar_month = np.int(((grace_month-1) % 12) + 1)
-        date_label = r'\textbf{{{0:4d}--{1:02d}}}'.format(year,calendar_month)
+        year,month = gravity_toolkit.time.grace_to_calendar(grace_month)
+        date_label = r'\textbf{{{0:4d}--{1:02d}}}'.format(year,month)
         time_text.set_text(date_label)
         #-- output to file
         args = (parameters['PROC'],parameters['DREL'],grace_month,figure_format)

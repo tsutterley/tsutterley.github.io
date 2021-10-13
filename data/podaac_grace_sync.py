@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 u"""
 podaac_grace_sync.py
-Written by Tyler Sutterley (05/2021)
+Written by Tyler Sutterley (10/2021)
 
 Syncs GRACE/GRACE-FO and auxiliary data from the NASA JPL PO.DAAC Drive Server
 Syncs CSR/GFZ/JPL GSM files for Release-06
@@ -49,6 +49,7 @@ import os
 import re
 import netrc
 import shutil
+import logging
 import argparse
 import traceback
 import posixpath
@@ -117,13 +118,14 @@ def podaac_grace_sync(DIRECTORY,PROC,DREL=[],PROCESSES=0,TIMEOUT=360,RETRY=5,
     if LOG:
         #-- format: PODAAC_sync.log
         LOGFILE = 'PODAAC_sync.log'
-        fid1 = open(os.path.join(DIRECTORY,LOGFILE),'w')
-        print('PO.DAAC Sync Log', file=fid1)
-        print('CENTERS={0}'.format(','.join(PROC)), file=fid1)
-        print('RELEASES={0}'.format(','.join(DREL)), file=fid1)
+        logging.basicConfig(file=os.path.join(DIRECTORY,LOGFILE),
+            level=logging.INFO)
+        logging.info('PO.DAAC Sync Log')
+        logging.info('CENTERS={0}'.format(','.join(PROC)))
+        logging.info('RELEASES={0}'.format(','.join(DREL)))
     else:
         #-- standard output (terminal output)
-        fid1 = sys.stdout
+        logging.basicConfig(level=logging.INFO)
 
     #-- list of GRACE data files and modification times
     remote_files = []
@@ -242,7 +244,7 @@ def podaac_grace_sync(DIRECTORY,PROC,DREL=[],PROCESSES=0,TIMEOUT=360,RETRY=5,
             output = http_pull_file(remote_file, remote_mtimes[i],
                 local_files[i], TIMEOUT=TIMEOUT, RETRY=RETRY, MODE=MODE)
             #-- print the output string
-            print(output, file=fid1)
+            logging.info(output)
     else:
         #-- sync in parallel with multiprocessing Pool
         pool = mp.Pool(processes=PROCESSES)
@@ -261,7 +263,7 @@ def podaac_grace_sync(DIRECTORY,PROC,DREL=[],PROCESSES=0,TIMEOUT=360,RETRY=5,
         pool.join()
         #-- print the output string
         for output in out:
-            print(output.get(), file=fid1)
+            logging.info(output.get())
 
     #-- create index file for GRACE/GRACE-FO L2 Spherical Harmonic Data
     #-- PROCESSING CENTERS (CSR, GFZ, JPL)
@@ -285,7 +287,6 @@ def podaac_grace_sync(DIRECTORY,PROC,DREL=[],PROCESSES=0,TIMEOUT=360,RETRY=5,
 
     #-- close log file and set permissions level to MODE
     if LOG:
-        fid1.close()
         os.chmod(os.path.join(DIRECTORY,LOGFILE), MODE)
 
 #-- PURPOSE: wrapper for running the sync program in multiprocessing mode
@@ -298,7 +299,7 @@ def multiprocess_sync(remote_file, remote_mtime, local_file,
         #-- if there has been an error exception
         #-- print the type, value, and stack trace of the
         #-- current exception being handled
-        print('process id {0:d} failed'.format(os.getpid()))
+        logging.critical('process id {0:d} failed'.format(os.getpid()))
         traceback.print_exc()
     else:
         return output
