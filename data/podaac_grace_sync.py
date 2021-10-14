@@ -118,7 +118,7 @@ def podaac_grace_sync(DIRECTORY,PROC,DREL=[],PROCESSES=0,TIMEOUT=360,RETRY=5,
     if LOG:
         #-- format: PODAAC_sync.log
         LOGFILE = 'PODAAC_sync.log'
-        logging.basicConfig(file=os.path.join(DIRECTORY,LOGFILE),
+        logging.basicConfig(filename=os.path.join(DIRECTORY,LOGFILE),
             level=logging.INFO)
         logging.info('PO.DAAC Sync Log')
         logging.info('CENTERS={0}'.format(','.join(PROC)))
