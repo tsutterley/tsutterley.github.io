@@ -295,12 +295,12 @@ def multiprocess_sync(remote_file, remote_mtime, local_file,
     try:
         output = http_pull_file(remote_file,remote_mtime,local_file,
             TIMEOUT=TIMEOUT,RETRY=RETRY,MODE=MODE)
-    except:
+    except Exception as e:
         #-- if there has been an error exception
         #-- print the type, value, and stack trace of the
         #-- current exception being handled
         logging.critical('process id {0:d} failed'.format(os.getpid()))
-        traceback.print_exc()
+        logging.error(traceback.format_exc())
     else:
         return output
 
