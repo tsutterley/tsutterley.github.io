@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 u"""
 geocenter_processing_centers.py
-Written by Tyler Sutterley (10/2021)
+Written by Tyler Sutterley (11/2021)
 
 CALLING SEQUENCE:
     python geocenter_processing_centers.py --start 4 --end 216
@@ -14,6 +14,7 @@ COMMAND LINE OPTIONS:
     -M X, --missing X: Missing GRACE months in time series
 
 UPDATE HISTORY:
+    Updated 11/2021: use new geocenter class for reading and converting units
     Updated 10/2021: numpy int and float to prevent deprecation warnings
     Updated 05/2021: additionally plot GFZ with pole tide replaced with SLR
     Updated 04/2021: reload the matplotlib font manager
@@ -33,11 +34,9 @@ import numpy as np
 import matplotlib
 import matplotlib.font_manager
 import matplotlib.pyplot as plt
-from matplotlib.ticker import MultipleLocator, FormatStrFormatter
-from matplotlib.offsetbox import AnchoredText,AnchoredOffsetbox,TextArea,VPacker
-from read_GRACE_geocenter.read_GRACE_geocenter import read_GRACE_geocenter
-from gravity_toolkit.time import convert_calendar_decimal
-from gravity_toolkit.units import units
+from matplotlib.offsetbox import AnchoredText
+import gravity_toolkit.time
+import gravity_toolkit.geocenter
 
 #-- rebuilt the matplotlib fonts and set parameters
 matplotlib.font_manager._load_fontmanager()
@@ -68,17 +67,6 @@ def geocenter_processing_centers(grace_dir,DREL,START_MON,END_MON,MISSING):
     plot_colors = dict(CSR='darkorange',GFZ='darkorchid',
         GFZwPT='dodgerblue',JPL='mediumseagreen')
 
-    #-- setting Load Love Number (kl) to 0.021 to match Swenson et al. (2008)
-    kl = np.array([0.0,0.021])
-
-    #-- Earth Parameters
-    factors = units(lmax=1)
-    rho_e = factors.rho_e#-- Average Density of the Earth [g/cm^3]
-    rad_e = factors.rad_e#-- Average Radius of the Earth [cm]
-    l = np.arange(0,2)
-    #-- Factor for converting to geocenter
-    geofactor = rad_e*np.sqrt(2.0*l + 1.0)/(1.0 + kl[l])
-
     #-- 3 row plot (C10, C11 and S11)
     ax = {}
     fig,(ax[0],ax[1],ax[2])=plt.subplots(num=1,ncols=3,sharey=True,figsize=(9,4))
@@ -90,35 +78,39 @@ def geocenter_processing_centers(grace_dir,DREL,START_MON,END_MON,MISSING):
         else:
             fargs = (pr,DREL,model_str,input_flags[2])
         #-- read geocenter file for processing center and model
-        grace_file = '{0}_{1}_{2}_{3}.txt'.format(*fargs)
-        DEG1 = read_GRACE_geocenter(os.path.join(grace_dir,grace_file))
+        grace_file = os.path.join(grace_dir,'{0}_{1}_{2}_{3}.txt'.format(*fargs))
+        DEG1 = gravity_toolkit.geocenter().from_UCI(grace_file)
         #-- indices for mean months
-        kk, = np.nonzero((DEG1['month'] >= START_MON) & (DEG1['month'] <= 176))
+        kk, = np.nonzero((DEG1.month >= START_MON) & (DEG1.month <= 176))
+        DEG1.mean(apply=True, indices=kk)
+        #-- setting Load Love Number (kl) to 0.021 to match Swenson et al. (2008)
+        DEG1.to_cartesian(kl=0.021)
         #-- plot each coefficient
         for j,key in enumerate(fig_labels):
             #-- plot model outputs
-            DEG1[key] -= DEG1[key][kk].mean()
             #-- create a time series with nans for missing months
             tdec = np.full_like(months,np.nan,dtype=np.float64)
-            geocenter = np.full_like(months,np.nan,dtype=np.float64)
+            data = np.full_like(months,np.nan,dtype=np.float64)
+            val = getattr(DEG1, ylabels[key].upper())
             for i,m in enumerate(months):
-                valid = np.count_nonzero(DEG1['month'] == m)
+                valid = np.count_nonzero(DEG1.month == m)
                 if valid:
-                    mm, = np.nonzero(DEG1['month'] == m)
-                    tdec[i] = DEG1['time'][mm]
-                    geocenter[i] = 10.0*geofactor[1]*DEG1[key][mm]
+                    mm, = np.nonzero(DEG1.month == m)
+                    tdec[i] = DEG1.time[mm]
+                    data[i] = val[mm]
             #-- plot all dates
-            ax[j].plot(tdec, geocenter, color=plot_colors[pr], label=pr)
+            ax[j].plot(tdec, data, color=plot_colors[pr], label=pr)
 
     #-- add axis labels and adjust font sizes for axis ticks
     for j,key in enumerate(fig_labels):
         #-- vertical line denoting the accelerometer shutoff
-        acc = convert_calendar_decimal(2016,9,day=3,hour=12,minute=12)
+        acc = gravity_toolkit.time.convert_calendar_decimal(2016,9,
+            day=3,hour=12,minute=12)
         ax[j].axvline(acc,color='0.5',ls='dashed',lw=0.5,dashes=(8,4))
         #-- vertical lines for end of the GRACE mission and start of GRACE-FO
-        jj, = np.flatnonzero(DEG1['month'] == 186)
-        kk, = np.flatnonzero(DEG1['month'] == 198)
-        vs = ax[j].axvspan(DEG1['time'][jj],DEG1['time'][kk],
+        jj, = np.flatnonzero(DEG1.month == 186)
+        kk, = np.flatnonzero(DEG1.month == 198)
+        vs = ax[j].axvspan(DEG1.time[jj],DEG1.time[kk],
             color='0.5',ls='dashed',alpha=0.15)
         vs._dashes = (4,2)
         #-- axis label
