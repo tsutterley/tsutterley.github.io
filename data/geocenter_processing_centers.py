@@ -1,19 +1,20 @@
 #!/usr/bin/env python
 u"""
 geocenter_processing_centers.py
-Written by Tyler Sutterley (11/2021)
+Written by Tyler Sutterley (12/2021)
 
 CALLING SEQUENCE:
     python geocenter_processing_centers.py --start 4 --end 216
 
 COMMAND LINE OPTIONS:
     -D X, --directory X: working data directory with geocenter files
-    -R X, --release X: GRACE/GRACE-FO data release
+    -r X, --release X: GRACE/GRACE-FO data release
     -S X, --start X: starting GRACE month for time series
     -E X, --end X: ending GRACE month for time series
     -M X, --missing X: Missing GRACE months in time series
 
 UPDATE HISTORY:
+    Updated 12/2021: adjust minimum x limit based on starting GRACE month
     Updated 11/2021: use new geocenter class for reading and converting units
     Updated 10/2021: numpy int and float to prevent deprecation warnings
     Updated 05/2021: additionally plot GFZ with pole tide replaced with SLR
@@ -53,10 +54,10 @@ def geocenter_processing_centers(grace_dir,DREL,START_MON,END_MON,MISSING):
     GAP = [187,188,189,190,191,192,193,194,195,196,197]
     months = sorted(set(np.arange(START_MON,END_MON+1)) - set(MISSING))
     #-- labels for each scenario
-    input_flags = ['','iter','SLF_iter','SLF_iter_wSLR21']
+    input_flags = ['','iter','SLF_iter','SLF_iter_wSLR21','SLF_iter_wSLR21_wSLR22']
     input_labels = ['Static','Iterated','Iterated SLF']
     #-- labels for Release-6
-    PROC = ['CSR','GFZ','GFZwPT','JPL']
+    PROC = ['CSR','GFZ','GFZ+CS21+CS22','JPL']
     model_str = 'OMCT' if DREL in ('RL04','RL05') else 'MPIOM'
     #-- degree one coefficient labels
     fig_labels = ['C11','S11','C10']
@@ -64,8 +65,10 @@ def geocenter_processing_centers(grace_dir,DREL,START_MON,END_MON,MISSING):
     ylabels = dict(C10='z',C11='x',S11='y')
 
     #-- plot colors for each dataset
-    plot_colors = dict(CSR='darkorange',GFZ='darkorchid',
-        GFZwPT='dodgerblue',JPL='mediumseagreen')
+    plot_colors = dict(CSR='darkorange',GFZ='darkorchid',JPL='mediumseagreen')
+    plot_colors['GFZwPT'] = 'dodgerblue'
+    plot_colors['GFZ+CS21'] = 'dodgerblue'
+    plot_colors['GFZ+CS21+CS22'] = 'dodgerblue'
 
     #-- 3 row plot (C10, C11 and S11)
     ax = {}
@@ -73,8 +76,10 @@ def geocenter_processing_centers(grace_dir,DREL,START_MON,END_MON,MISSING):
     #-- plot geocenter estimates for each processing center
     for k,pr in enumerate(PROC):
         #-- additionally plot GFZ with SLR replaced pole tide
-        if (pr == 'GFZwPT'):
+        if pr in ('GFZwPT','GFZ+CS21'):
             fargs = ('GFZ',DREL,model_str,input_flags[3])
+        elif (pr == 'GFZ+CS21+CS22'):
+            fargs = ('GFZ',DREL,model_str,input_flags[4])
         else:
             fargs = (pr,DREL,model_str,input_flags[2])
         #-- read geocenter file for processing center and model
@@ -119,12 +124,13 @@ def geocenter_processing_centers(grace_dir,DREL,START_MON,END_MON,MISSING):
             prop=dict(size=16,weight='bold'), frameon=False, loc=2))
         ax[j].set_xlabel('Time [Yr]', fontsize=14)
         #-- set ticks
+        xmin = 2002 + (START_MON + 1.0)//12.0
         xmax = 2002 + (END_MON + 1.0)/12.0
         major_ticks = np.arange(2005, xmax, 5)
         ax[j].xaxis.set_ticks(major_ticks)
         minor_ticks = sorted(set(np.arange(2002, xmax, 1)) - set(major_ticks))
         ax[j].xaxis.set_ticks(minor_ticks, minor=True)
-        ax[j].set_xlim(2002, xmax)
+        ax[j].set_xlim(xmin, xmax)
         ax[j].set_ylim(-9.5,8.5)
         #-- axes tick adjustments
         ax[j].get_xaxis().set_tick_params(which='both', direction='in')
@@ -174,7 +180,7 @@ def main():
         type=int, default=4,
         help='Starting GRACE/GRACE-FO month for time series')
     parser.add_argument('--end','-E',
-        type=int, default=236,
+        type=int, default=238,
         help='Ending GRACE/GRACE-FO month for time series')
     MISSING = [6,7,18,109,114,125,130,135,140,141,146,151,156,162,166,167,172,
         177,178,182,200,201]

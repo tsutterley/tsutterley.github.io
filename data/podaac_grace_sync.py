@@ -27,8 +27,8 @@ COMMAND LINE OPTIONS:
     --help: list the command line options
     -N X, --netrc X: path to .netrc file for authentication
     -D X, --directory X: working data directory
-    -C X, --center X: GRACE Processing Center
-    -R X, --release X: GRACE data releases to sync (RL06)
+    -c X, --center X: GRACE Processing Center
+    -r X, --release X: GRACE data releases to sync (RL06)
     -l, --log: output log of files downloaded
     -M X, --mode X: Local permissions mode of the directories and files synced
 

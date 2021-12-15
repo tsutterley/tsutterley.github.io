@@ -33,8 +33,7 @@ jobs:
     - name: Install dependencies
       run: |
         sudo apt-get update
-        sudo apt-get install gdal-bin libgdal-dev libgeos-dev
-        sudo apt-get install libhdf5-dev libnetcdf-dev
+        sudo apt-get install libgeos-dev libhdf5-dev libnetcdf-dev
         sudo apt-get install libstdc++6 libxml2-dev libxslt1-dev libsqlite3-dev
         sudo apt-get install texlive texlive-fonts-extra texlive-font-utils
         sudo apt-get install cm-super dvipng font-manager cmake curl gzip wget
@@ -69,7 +68,6 @@ jobs:
         make clean
         cd ${GITHUB_WORKSPACE}
         sudo ldconfig --verbose
-        sudo projsync --system-directory --all
     - name: Lint with flake8
       run: |
         # stop the build if there are Python syntax errors or undefined names
@@ -78,11 +76,9 @@ jobs:
         flake8 data --count --exit-zero --max-complexity=10 --max-line-length=127 --statistics
     - name: Install Python packages
       run: |
-        export CPLUS_INCLUDE_PATH=/usr/include/gdal
-        export C_INCLUDE_PATH=/usr/include/gdal
         pip install git+https://github.com/SciTools/cartopy.git
-        pip install git+https://github.com/tsutterley/geoid-toolkit.git
-        pip install git+https://github.com/tsutterley/read-GRACE-geocenter.git
+        pip install --no-deps git+https://github.com/tsutterley/geoid-toolkit.git
+        pip install --no-deps git+https://github.com/tsutterley/read-GRACE-geocenter.git
         pip install ./read-GRACE-harmonics
         pip install 'matplotlib>=3.4.0,<3.5.0' --force-reinstall
     - name: Test with pytest
