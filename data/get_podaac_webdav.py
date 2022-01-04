@@ -88,7 +88,7 @@ def podaac_webdav(USER, PASSWORD, parser=lxml.etree.HTMLParser()):
 
 #-- Main program that calls podaac_webdav()
 def main():
-   #-- Read the system arguments listed after the program
+    #-- Read the system arguments listed after the program
     parser = argparse.ArgumentParser(
         description="""Retrieves and prints a user's PO.DAAC WebDAV credentials
             """
