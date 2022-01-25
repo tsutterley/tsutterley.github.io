@@ -77,7 +77,8 @@ def plot_mascon(base_dir, parameters):
     #-- GRACE HDF5 file
     grace_file = {}
     grace_file['v02.4'] = 'GSFC.glb.200301_201607_v02.4.hdf'
-    grace_file['rl06v1.0'] = 'gsfc.glb_.200204_202009_rl06v1.0_sla-ice6gd.h5'
+    # grace_file['rl06v1.0'] = 'gsfc.glb_.200204_202009_rl06v1.0_sla-ice6gd.h5'
+    grace_file['rl06v1.0'] = 'gsfc.glb_.200204_202107_rl06v1.0_sla-ice6gd.h5'
     #-- valid date string (HDF5 attribute: 'days since 2002-01-00T00:00:00')
     date_string = 'days since 2002-01-01T00:00:00'
     epoch,to_secs = gravity_toolkit.time.parse_date_string(date_string)
