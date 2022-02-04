@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 u"""
 plot_GSFC_global_mascons.py
-Written by Tyler Sutterley (03/2021)
+Written by Tyler Sutterley (02/2022)
 Creates a series of GMT-like plots of GSFC GRACE mascon data for the globe in a
     Plate Carree (Equirectangular) projection
 
@@ -20,6 +20,8 @@ PYTHON DEPENDENCIES:
         https://github.com/GeospatialPython/pyshp
 
 UPDATE HISTORY:
+    Updated 02/2022: added links to newer GSFC mascons Release-6 Version 1.0
+    Updated 01/2022: added links to newer GSFC mascons Release-6 Version 1.0
     Updated 10/2021: numpy int and float to prevent deprecation warnings
         using time conversion routines for converting to and from months
     Updated 03/2021: added parameters for GSFC mascons Release-6 Version 1.0
@@ -78,7 +80,8 @@ def plot_mascon(base_dir, parameters):
     grace_file = {}
     grace_file['v02.4'] = 'GSFC.glb.200301_201607_v02.4.hdf'
     # grace_file['rl06v1.0'] = 'gsfc.glb_.200204_202009_rl06v1.0_sla-ice6gd.h5'
-    grace_file['rl06v1.0'] = 'gsfc.glb_.200204_202107_rl06v1.0_sla-ice6gd.h5'
+    # grace_file['rl06v1.0'] = 'gsfc.glb_.200204_202107_rl06v1.0_sla-ice6gd.h5'
+    grace_file['rl06v1.0'] = 'GSFC.glb_.200204_202110_RL06v1.0_SLA-ICE6GD_0.h5'
     #-- valid date string (HDF5 attribute: 'days since 2002-01-00T00:00:00')
     date_string = 'days since 2002-01-01T00:00:00'
     epoch,to_secs = gravity_toolkit.time.parse_date_string(date_string)
