@@ -100,18 +100,7 @@ jobs:
         path: |
             data/PODAAC_sync.log
             data/GRACE_months.txt
-    - name: Check for updates
-      id: changes
-      run: |
-        if [ -n "$(git status --porcelain data/GRACE_months.txt)" ] ; then
-            echo "::set-output name=detected::true";
-            echo "::debug::Changes detected";
-        else
-            echo "::set-output name=detected::false";
-            echo "::debug::No changes detected";
-        fi
     - name: Update GRACE/GRACE-FO tables
-      if: steps.changes.outputs.detected == 'true'
       run: |
         python -c "import gravity_toolkit.utilities; gravity_toolkit.utilities.from_gfz(directory='data')"
         curl https://www.atmosp.physics.utoronto.ca/~peltier/datasets/Ice6G_C_VM5a/ICE-6G_High_Res_Stokes_trend.txt.gz \
