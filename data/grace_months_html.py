@@ -413,7 +413,7 @@ def main():
     #-- GRACE/GRACE-FO data release
     parser.add_argument('--release','-r',
         metavar='DREL', type=str, nargs='+',
-        default=['RL06','rl06v1.0'],
+        default=['RL06','rl06v2.0'],
         help='GRACE/GRACE-FO data release')
     args = parser.parse_args()
 

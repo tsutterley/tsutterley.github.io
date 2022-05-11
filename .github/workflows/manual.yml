@@ -91,8 +91,8 @@ jobs:
         python data/podaac_grace_sync.py --directory data/ --netrc data/.netrc \
             --release RL06 --timeout=3600 --log --np=0
         grace_date.py --directory data/ --release RL06 --product GSM --output
-        python data/GSFC_grace_date.py --version rl06v1.0 --directory data/
-        grace_months_index.py --directory data/ --release RL06 rl06v1.0
+        python data/GSFC_grace_date.py --version rl06v2.0 --directory data/
+        grace_months_index.py --directory data/ --release RL06 rl06v2.0
     - name: Archive GRACE/GRACE-FO dates
       uses: actions/upload-artifact@v2
       with:
@@ -117,7 +117,7 @@ jobs:
             data/plot_parameters_JPL_RL06_L60_r350km.txt \
             data/plot_parameters_GRFO_JPL_RL06_L60_r350km.txt
         python data/plot_GSFC_global_mascons.py --directory data/ \
-            data/plot_parameters_GSFC_glb_rl06v1.0.txt
+            data/plot_parameters_GSFC_glb_rl06v2.0.txt
         python data/grace_months_html.py --directory data/
         python data/git_lfs_attributes.py --directory images/ \
             --regex "^(CSR|GFZ|GSFC|JPL)-(.*?)-(\d+).jpg"

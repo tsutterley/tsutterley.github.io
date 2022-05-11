@@ -51,7 +51,7 @@ import gravity_toolkit.utilities
 
 #-- PURPOSE: get GSFC GRACE mascon data
 def get_GSFC_grace_mascons(base_dir, TIMEOUT=None, RETRY=5,
-    VERSION='v02.4', MODE=0o775):
+    VERSION=None, MODE=0o775):
     #-- remote path for mascon versions
     HOST = {}
     HOST['v02.4'] = ['https://earth.gsfc.nasa.gov','sites','default','files',
@@ -62,6 +62,8 @@ def get_GSFC_grace_mascons(base_dir, TIMEOUT=None, RETRY=5,
     #     '2021-10','gsfc.glb_.200204_202107_rl06v1.0_sla-ice6gd.h5']
     HOST['rl06v1.0'] = ['https://earth.gsfc.nasa.gov','sites','default','files',
         '2022-01','GSFC.glb_.200204_202110_RL06v1.0_SLA-ICE6GD_0.h5']
+    HOST['rl06v2.0'] = ['https://earth.gsfc.nasa.gov','sites','default','files',
+        '2022-05','gsfc.glb_.200204_202112_rl06v2.0_sla-ice6gd.h5']
     #-- local file
     local = os.path.join(base_dir,'GSFC',VERSION,'GSM',HOST[VERSION][-1])
     #-- attempt to download up to the number of retries
@@ -126,6 +128,7 @@ def GSFC_grace_date(base_dir, VERSION='v02.4', MODE=0o775):
     # grace_file['rl06v1.0'] = 'gsfc.glb_.200204_202009_rl06v1.0_sla-ice6gd.h5'
     # grace_file['rl06v1.0'] = 'gsfc.glb_.200204_202107_rl06v1.0_sla-ice6gd.h5'
     grace_file['rl06v1.0'] = 'GSFC.glb_.200204_202110_RL06v1.0_SLA-ICE6GD_0.h5'
+    grace_file['rl06v2.0'] = 'gsfc.glb_.200204_202112_rl06v2.0_sla-ice6gd.h5'
     #-- valid date string (HDF5 attribute: 'days since 2002-01-00T00:00:00')
     date_string = 'days since 2002-01-01T00:00:00'
     epoch,to_secs = gravity_toolkit.time.parse_date_string(date_string)
@@ -156,8 +159,8 @@ def GSFC_grace_date(base_dir, VERSION='v02.4', MODE=0o775):
     end_day = np.zeros((nt))
     #-- days per month in a leap and a standard year
     #-- only difference is February (29 vs. 28)
-    dpm_leap = np.array([31,29,31,30,31,30,31,31,30,31,30,31], dtype=np.float)
-    dpm_stnd = np.array([31,28,31,30,31,30,31,31,30,31,30,31], dtype=np.float)
+    dpm_leap = np.array([31,29,31,30,31,30,31,31,30,31,30,31], dtype=np.float64)
+    dpm_stnd = np.array([31,28,31,30,31,30,31,31,30,31,30,31], dtype=np.float64)
     #-- create matrix with the lower half = 1
     mon_mat = np.tri(12,12,-1)
     #-- find indices for standard years and leap years
@@ -166,8 +169,8 @@ def GSFC_grace_date(base_dir, VERSION='v02.4', MODE=0o775):
     lp2, = np.nonzero(((end_yr % 4) == 0))
     sd2, = np.nonzero(((end_yr % 4) != 0))
     #-- convert from months to months indices
-    m1_m1 = np.array(M1, dtype=np.int) - 1
-    m2_m1 = np.array(M2, dtype=np.int) - 1
+    m1_m1 = np.array(M1, dtype=np.int64) - 1
+    m2_m1 = np.array(M2, dtype=np.int64) - 1
     #-- calculate the day of the year for leap and standard
     #-- use total days of all months before date
     #-- and add number of days before date in month
@@ -179,7 +182,7 @@ def GSFC_grace_date(base_dir, VERSION='v02.4', MODE=0o775):
     #-- calculate the GRACE month (Apr02 == 004)
     #-- https://grace.jpl.nasa.gov/data/grace-months/
     #-- Notes on special months (e.g. 119, 120) below
-    grace_month = np.array(12*(YY - 2002) + MM, dtype=np.int)
+    grace_month = np.array(12*(YY - 2002) + MM, dtype=np.int64)
     #-- calculating the month number of 'Special Months' with accelerometer
     #-- shutoffs is more complicated as days from other months are used
     grace_month = gravity_toolkit.time.adjust_months(grace_month)
@@ -202,7 +205,7 @@ def GSFC_grace_date(base_dir, VERSION='v02.4', MODE=0o775):
         end_cyclic = (end_yr[t] - start_yr[t])*dpy + end_day[t]
         #-- Calculation of total days since start of campaign
         count = 0
-        n_yrs = np.int(start_yr[t]-2002)
+        n_yrs = np.int64(start_yr[t]-2002)
         #-- for each of the GRACE years up to the file year
         for iyr in range(n_yrs):
             #-- year i
@@ -241,7 +244,7 @@ def main():
         help='Working data directory')
     #-- GSFC GRACE mascon version
     parser.add_argument('--version','-v',
-        type=str, default='v02.4',
+        type=str, default='rl06v2.0',
         help='GSFC GRACE mascon version')
     #-- connection timeout and number of retry attempts
     parser.add_argument('--timeout','-t',
