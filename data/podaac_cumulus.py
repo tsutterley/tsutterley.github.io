@@ -1,42 +1,35 @@
 #!/usr/bin/env python
 u"""
-podaac_grace_sync.py
+podaac_cumulus.py
 Written by Tyler Sutterley (08/2022)
 
-Syncs GRACE/GRACE-FO and auxiliary data from the NASA JPL PO.DAAC Drive Server
-Syncs CSR/GFZ/JPL GSM files for Release-06
-Gets the latest technical note (TN) files
-
-https://wiki.earthdata.nasa.gov/display/EL/How+To+Access+Data+With+Python
-https://nsidc.org/support/faq/what-options-are-available-bulk-downloading-data-
-    https-earthdata-login-enabled
-http://www.voidspace.org.uk/python/articles/authentication.shtml#base64
+Syncs GRACE/GRACE-FO data from NASA JPL PO.DAAC Cumulus AWS S3 bucket
+S3 Cumulus syncs are only available in AWS instances in us-west-2
 
 Register with NASA Earthdata Login system:
 https://urs.earthdata.nasa.gov
 
-Add PO.DAAC Drive OPS to NASA Earthdata Applications and get WebDAV Password
-https://podaac-tools.jpl.nasa.gov/drive
-
 CALLING SEQUENCE:
-    python podaac_grace_sync.py --user <username>
+    python podaac_cumulus.py --user <username>
     where <username> is your NASA Earthdata username
 
 OUTPUTS:
-    CSR/GFZ/JPL RL06 GSM
-    Tellus degree one coefficients (TN-13)
-    Technical notes for satellite laser ranging coefficients
+    CSR RL06: GAC/GAD/GSM
+    GFZ RL06: GAA/GAB/GAC/GAD/GSM
+    JPL RL06: GAA/GAB/GAC/GAD/GSM
+    GFZ RL06: Level-1b dealiasing solutions
 
 COMMAND LINE OPTIONS:
     --help: list the command line options
     -U X, --user X: username for NASA Earthdata Login
-    -W X, --webdav X: WebDAV password for JPL PO.DAAC Drive Login
+    -W X, --password X: password for NASA Earthdata Login
     -N X, --netrc X: path to .netrc file for authentication
     -D X, --directory X: working data directory
     -c X, --center X: GRACE/GRACE-FO Processing Center
     -r X, --release X: GRACE/GRACE-FO Data Releases to sync
     -v X, --version X: GRACE/GRACE-FO Level-2 Data Version to sync
     -t X, --timeout X: Timeout in seconds for blocking operations
+    --gzip, -G: Compress output GRACE/GRACE-FO Level-2 granules
     -l, --log: output log of files downloaded
     -M X, --mode X: Local permissions mode of the directories and files synced
 
@@ -46,9 +39,8 @@ PYTHON DEPENDENCIES:
         https://numpy.org/doc/stable/user/numpy-for-matlab-users.html
     dateutil: powerful extensions to datetime
         https://dateutil.readthedocs.io/en/stable/
-    lxml: Pythonic XML and HTML processing library using libxml2/libxslt
-        https://lxml.de/
-        https://github.com/lxml/lxml
+    boto3: Amazon Web Services (AWS) SDK for Python
+        https://boto3.amazonaws.com/v1/documentation/api/latest/index.html
     future: Compatibility layer between Python 2 and Python 3
         https://python-future.org/
 
@@ -61,40 +53,38 @@ from __future__ import print_function
 import sys
 import os
 import re
-import netrc
+import gzip
+import time
 import shutil
 import logging
 import argparse
 import traceback
-import posixpath
-import lxml.etree
 import multiprocessing as mp
 import gravity_toolkit.time
 import gravity_toolkit.utilities
 
-#-- PURPOSE: sync local GRACE/GRACE-FO files with JPL PO.DAAC drive server
-def podaac_grace_sync(DIRECTORY, PROC=[], DREL=[], VERSION=[],
-    PROCESSES=0, TIMEOUT=360, RETRY=5, LOG=False, MODE=None):
+#-- PURPOSE: sync local GRACE/GRACE-FO files with JPL PO.DAAC AWS bucket
+def podaac_cumulus(client, DIRECTORY, PROC=[], DREL=[], VERSION=[],
+    PROCESSES=0, TIMEOUT=360, RETRY=5, GZIP=False, LOG=False, MODE=None):
 
     #-- check if directory exists and recursively create if not
     os.makedirs(DIRECTORY,MODE) if not os.path.exists(DIRECTORY) else None
 
-    #-- remote https server for GRACE data
-    HOST = 'https://podaac-tools.jpl.nasa.gov'
+    #-- PO.DAAC cumulus bucket
+    bucket = 'podaac-ops-cumulus-protected'
     #-- mission shortnames
     shortname = {'grace':'GRAC', 'grace-fo':'GRFO'}
     #-- sync GSM datasets
     DSET = 'GSM'
-    #-- compile HTML parser for lxml
-    parser = lxml.etree.HTMLParser()
 
     #-- create log file with list of synchronized files (or print to terminal)
     if LOG:
         #-- format: PODAAC_sync_2002-04-01.log
-        LOGFILE = 'PODAAC_sync.log'
+        today = time.strftime('%Y-%m-%d',time.localtime())
+        LOGFILE = 'PODAAC_sync_{0}.log'.format(today)
         logging.basicConfig(filename=os.path.join(DIRECTORY,LOGFILE),
             level=logging.INFO)
-        logging.info('PO.DAAC Sync Log')
+        logging.info('PO.DAAC Cumulus Sync Log ({0})'.format(today))
         logging.info('CENTERS={0}'.format(','.join(PROC)))
         logging.info('RELEASES={0}'.format(','.join(DREL)))
     else:
@@ -105,40 +95,6 @@ def podaac_grace_sync(DIRECTORY, PROC=[], DREL=[], VERSION=[],
     remote_files = []
     remote_mtimes = []
     local_files = []
-
-    #-- SLR C2,0 coefficients
-    logging.info('C2,0 Coefficients:')
-    PATH = [HOST,'drive','files','allData','grace','docs']
-    remote_dir = posixpath.join(*PATH)
-    local_dir = os.path.expanduser(DIRECTORY)
-    #-- compile regular expression operator for remote files
-    R1 = re.compile(r'TN-(05|07|11)_C20_SLR.txt', re.VERBOSE)
-    #-- open connection with PO.DAAC drive server at remote directory
-    files,mtimes = gravity_toolkit.utilities.drive_list(PATH,
-        timeout=TIMEOUT,build=False,parser=parser,pattern=R1,sort=True)
-    #-- for each file on the remote server
-    for colname,remote_mtime in zip(files,mtimes):
-        #-- remote and local versions of the file
-        remote_files.append(posixpath.join(remote_dir,colname))
-        remote_mtimes.append(remote_mtime)
-        local_files.append(os.path.join(local_dir,colname))
-
-    #-- SLR C3,0 coefficients
-    logging.info('C3,0 Coefficients:')
-    PATH = [HOST,'drive','files','allData','gracefo','docs']
-    remote_dir = posixpath.join(*PATH)
-    local_dir = os.path.expanduser(DIRECTORY)
-    #-- compile regular expression operator for remote files
-    R1 = re.compile(r'TN-(14)_C30_C20_GSFC_SLR.txt', re.VERBOSE)
-    #-- open connection with PO.DAAC drive server at remote directory
-    files,mtimes = gravity_toolkit.utilities.drive_list(PATH,
-        timeout=TIMEOUT,build=False,parser=parser,pattern=R1,sort=True)
-    #-- for each file on the remote server
-    for colname,remote_mtime in zip(files,mtimes):
-        #-- remote and local versions of the file
-        remote_files.append(posixpath.join(remote_dir,colname))
-        remote_mtimes.append(remote_mtime)
-        local_files.append(os.path.join(local_dir,colname))
 
     #-- GRACE/GRACE-FO level-2 spherical harmonic products
     logging.info('GRACE/GRACE-FO L2 Global Spherical Harmonics:')
@@ -158,14 +114,16 @@ def podaac_grace_sync(DIRECTORY, PROC=[], DREL=[], VERSION=[],
                 #-- query CMR for dataset
                 ids,urls,mtimes = gravity_toolkit.utilities.cmr(
                     mission=mi, center=pr, release=rl, product=DSET,
-                    version=VERSION[i], provider='PODAAC', endpoint='data')
-                #-- for each id, url and modification time
+                    version=VERSION[i], provider='POCLOUD', endpoint='data')
+                #-- for each model id and url
                 for id,url,mtime in zip(ids,urls,mtimes):
                     #-- remote and local versions of the file
                     remote_files.append(url)
                     remote_mtimes.append(mtime)
                     granule = gravity_toolkit.utilities.url_split(url)[-1]
-                    local_files.append(os.path.join(local_dir,granule))
+                    suffix = '.gz' if GZIP else ''
+                    local_files.append(os.path.join(local_dir,
+                        '{0}{1}'.format(granule, suffix)))
 
     #-- sync in series if PROCESSES = 0
     if (PROCESSES == 0):
@@ -173,7 +131,8 @@ def podaac_grace_sync(DIRECTORY, PROC=[], DREL=[], VERSION=[],
         for i,remote_file in enumerate(remote_files):
             #-- sync GRACE/GRACE-FO files with PO.DAAC Drive server
             output = http_pull_file(remote_file, remote_mtimes[i],
-                local_files[i], TIMEOUT=TIMEOUT, RETRY=RETRY, MODE=MODE)
+                local_files[i], TIMEOUT=TIMEOUT, RETRY=RETRY,
+                GZIP=GZIP, MODE=MODE)
             #-- print the output string
             logging.info(output)
     else:
@@ -184,7 +143,7 @@ def podaac_grace_sync(DIRECTORY, PROC=[], DREL=[], VERSION=[],
         for i,remote_file in enumerate(remote_files):
             #-- sync GRACE/GRACE-FO files with PO.DAAC Drive server
             args = (remote_file,remote_mtimes[i],local_files[i])
-            kwds = dict(TIMEOUT=TIMEOUT, RETRY=RETRY, MODE=MODE)
+            kwds = dict(TIMEOUT=TIMEOUT, RETRY=RETRY, GZIP=GZIP, MODE=MODE)
             out.append(pool.apply_async(multiprocess_sync,args=args,kwds=kwds))
         #-- start multiprocessing jobs
         #-- close the pool
@@ -228,10 +187,10 @@ def podaac_grace_sync(DIRECTORY, PROC=[], DREL=[], VERSION=[],
 
 #-- PURPOSE: wrapper for running the sync program in multiprocessing mode
 def multiprocess_sync(remote_file, remote_mtime, local_file,
-    TIMEOUT=0, RETRY=5, MODE=0o775):
+    TIMEOUT=0, RETRY=5, GZIP=False, MODE=0o775):
     try:
         output = http_pull_file(remote_file,remote_mtime,local_file,
-            TIMEOUT=TIMEOUT,RETRY=RETRY,MODE=MODE)
+            TIMEOUT=TIMEOUT,RETRY=RETRY,GZIP=GZIP,MODE=MODE)
     except Exception as e:
         #-- if there has been an error exception
         #-- print the type, value, and stack trace of the
@@ -244,7 +203,7 @@ def multiprocess_sync(remote_file, remote_mtime, local_file,
 #-- PURPOSE: pull file from a remote host checking if file exists locally
 #-- and if the remote file is newer than the local file
 def http_pull_file(remote_file, remote_mtime, local_file,
-    TIMEOUT=0, RETRY=5, MODE=0o775):
+    TIMEOUT=0, RETRY=5, GZIP=False, MODE=0o775):
     #-- output string for printing files transferred
     output = '{0} --> \n\t{1}\n'.format(remote_file,local_file)
     #-- chunked transfer encoding size
@@ -262,8 +221,12 @@ def http_pull_file(remote_file, remote_mtime, local_file,
                 timeout=TIMEOUT)
             #-- copy contents to local file using chunked transfer encoding
             #-- transfer should work properly with ascii and binary formats
-            with open(local_file, 'wb') as f:
-                shutil.copyfileobj(response, f, CHUNK)
+            if GZIP:
+                with gzip.GzipFile(local_file, 'wb', 9, None, remote_mtime) as f:
+                    shutil.copyfileobj(response, f)
+            else:
+                with open(local_file, 'wb') as f:
+                    shutil.copyfileobj(response, f, CHUNK)
         except:
             pass
         else:
@@ -279,17 +242,21 @@ def http_pull_file(remote_file, remote_mtime, local_file,
     #-- return the output string
     return output
 
-#-- Main program that calls podaac_grace_sync()
-def main():
-    #-- Read the system arguments listed after the program
+#-- PURPOSE: create argument parser
+def arguments():
     parser = argparse.ArgumentParser(
         description="""Syncs GRACE/GRACE-FO and auxiliary data from the
-            NASA JPL PO.DAAC Drive Server.
-            Gets the latest technical note (TN) files.
+            NASA JPL PO.DAAC Cumulus AWS bucket.
             """
     )
     #-- command line parameters
     #-- NASA Earthdata credentials
+    parser.add_argument('--user','-U',
+        type=str, default=os.environ.get('EARTHDATA_USERNAME'),
+        help='Username for NASA Earthdata Login')
+    parser.add_argument('--password','-W',
+        type=str, default=os.environ.get('EARTHDATA_PASSWORD'),
+        help='Password for NASA Earthdata Login')
     parser.add_argument('--netrc','-N',
         type=lambda p: os.path.abspath(os.path.expanduser(p)),
         default=os.path.join(os.path.expanduser('~'),'.netrc'),
@@ -315,14 +282,19 @@ def main():
         help='GRACE/GRACE-FO data release')
     #-- GRACE/GRACE-FO data version
     parser.add_argument('--version','-v',
-        metavar='VERSION', type=str, nargs='+',
+        metavar='VERSION', type=str, nargs=2,
         default=['0','1'], choices=['0','1','2','3'],
         help='GRACE/GRACE-FO Level-2 data version')
     #-- connection timeout
     parser.add_argument('--timeout','-t',
         type=int, default=360,
         help='Timeout in seconds for blocking operations')
-    #-- Output log file in form PODAAC_sync.log
+    #-- output compressed files
+    parser.add_argument('--gzip','-G',
+        default=False, action='store_true',
+        help='Compress output GRACE/GRACE-FO Level-2 granules')
+    #-- Output log file in form
+    #-- PODAAC_sync_2002-04-01.log
     parser.add_argument('--log','-l',
         default=False, action='store_true',
         help='Output log file')
@@ -330,24 +302,33 @@ def main():
     parser.add_argument('--mode','-M',
         type=lambda x: int(x,base=8), default=0o775,
         help='Permission mode of directories and files synced')
+    #-- return the parser
+    return parser
+
+#-- This is the main part of the program that calls the individual functions
+def main():
+    #-- Read the system arguments listed after the program
+    parser = arguments()
     args,_ = parser.parse_known_args()
 
-    #-- JPL PO.DAAC drive hostname
-    HOST = 'podaac-tools.jpl.nasa.gov'
-    #-- get NASA Earthdata and JPL PO.DAAC drive credentials
-    USER,_,PASSWORD = netrc.netrc(args.netrc).authenticators(HOST)
-    #-- build a urllib opener for PO.DAAC Drive
-    #-- Add the username and password for NASA Earthdata Login system
-    gravity_toolkit.utilities.build_opener(USER,PASSWORD)
-
+    #-- NASA Earthdata hostname
+    URS = 'urs.earthdata.nasa.gov'
     #-- check internet connection before attempting to run program
-    #-- check JPL PO.DAAC Drive credentials before attempting to run program
-    DRIVE = 'https://{0}/drive/files'.format(HOST)
-    if gravity_toolkit.utilities.check_credentials(DRIVE):
-        podaac_grace_sync(args.directory, PROC=args.center,
-            DREL=args.release, VERSION=args.version,
-            PROCESSES=args.np, TIMEOUT=args.timeout,
-            LOG=args.log, MODE=args.mode)
+    opener = gravity_toolkit.utilities.attempt_login(URS,
+        username=args.user, password=args.password,
+        netrc=args.netrc)
+
+    #-- Create and submit request to create AWS session
+    #-- There are a range of exceptions that can be thrown here
+    #-- including HTTPError and URLError.
+    HOST = 'https://archive.podaac.earthdata.nasa.gov/s3credentials'
+    #-- get aws s3 client object
+    client = gravity_toolkit.utilities.s3_client(HOST, args.timeout)
+    #-- retrieve data objects from s3 client
+    podaac_cumulus(client, args.directory, PROC=args.center,
+        DREL=args.release, VERSION=args.version,
+        PROCESSES=args.np, TIMEOUT=args.timeout,
+        GZIP=args.gzip, LOG=args.log, MODE=args.mode)
 
 #-- run main program
 if __name__ == '__main__':
