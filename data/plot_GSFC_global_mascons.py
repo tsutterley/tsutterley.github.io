@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 u"""
 plot_GSFC_global_mascons.py
-Written by Tyler Sutterley (02/2022)
+Written by Tyler Sutterley (10/2022)
 Creates a series of GMT-like plots of GSFC GRACE mascon data for the globe in a
     Plate Carree (Equirectangular) projection
 
@@ -20,6 +20,9 @@ PYTHON DEPENDENCIES:
         https://github.com/GeospatialPython/pyshp
 
 UPDATE HISTORY:
+    Updated 10/2022: adjust colorbar labels for matplotlib version 3.5
+        added links to newer GSFC mascons Release-6 Version 2.0
+    Updated 05/2022: added links to newer GSFC mascons Release-6 Version 2.0
     Updated 02/2022: added links to newer GSFC mascons Release-6 Version 1.0
     Updated 01/2022: added links to newer GSFC mascons Release-6 Version 1.0
     Updated 10/2021: numpy int and float to prevent deprecation warnings
@@ -82,7 +85,8 @@ def plot_mascon(base_dir, parameters):
     # grace_file['rl06v1.0'] = 'gsfc.glb_.200204_202009_rl06v1.0_sla-ice6gd.h5'
     # grace_file['rl06v1.0'] = 'gsfc.glb_.200204_202107_rl06v1.0_sla-ice6gd.h5'
     grace_file['rl06v1.0'] = 'GSFC.glb_.200204_202110_RL06v1.0_SLA-ICE6GD_0.h5'
-    grace_file['rl06v2.0'] = 'gsfc.glb_.200204_202112_rl06v2.0_sla-ice6gd.h5'
+    # grace_file['rl06v2.0'] = 'gsfc.glb_.200204_202112_rl06v2.0_sla-ice6gd.h5'
+    grace_file['rl06v2.0'] = 'gsfc.glb_.200204_202207_rl06v2.0_sla-ice6gd.h5'
     #-- valid date string (HDF5 attribute: 'days since 2002-01-00T00:00:00')
     date_string = 'days since 2002-01-01T00:00:00'
     epoch,to_secs = gravity_toolkit.time.parse_date_string(date_string)
@@ -195,17 +199,17 @@ def plot_mascon(base_dir, parameters):
     sm = cm.ScalarMappable(cmap=cmap, norm=norm)
     sm.set_array([])
     cbar = plt.colorbar(sm, ax=ax1, extend='both', extendfrac=0.0375,
-        orientation='horizontal', pad=0.025, shrink=0.925, aspect=22,
-        drawedges=False)
+        orientation='horizontal', pad=0.025, shrink=0.925,
+        aspect=23, drawedges=False)
     #-- rasterized colorbar to remove lines
     cbar.solids.set_rasterized(True)
     #-- Add label to the colorbar
     CBTITLE = ' '.join(parameters['CBTITLE'].split('_'))
-    cbar.ax.set_xlabel(CBTITLE, labelpad=4, fontsize=13)
+    cbar.ax.set_title(CBTITLE, fontsize=13, rotation=0, y=-1.65, va='top')
     if (parameters['CBUNITS'].title() != 'None'):
         CBUNITS = ' '.join(parameters['CBUNITS'].split('_'))
-        cbar.ax.set_ylabel(CBUNITS, fontsize=13, rotation=0)
-        cbar.ax.yaxis.set_label_coords(1.035, 0.15)
+        cbar.ax.set_xlabel(CBUNITS, fontsize=13, rotation=0, va='center')
+        cbar.ax.xaxis.set_label_coords(1.075, 0.5)
     #-- Set the tick levels for the colorbar
     cbar.set_ticks(levels)
     cbar.set_ticklabels([parameters['CBFORMAT'].format(ct) for ct in levels])

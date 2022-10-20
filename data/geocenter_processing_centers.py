@@ -131,7 +131,7 @@ def geocenter_processing_centers(grace_dir,DREL,START_MON,END_MON,MISSING):
         minor_ticks = sorted(set(np.arange(2002, xmax, 1)) - set(major_ticks))
         ax[j].xaxis.set_ticks(minor_ticks, minor=True)
         ax[j].set_xlim(xmin, xmax)
-        ax[j].set_ylim(-9.5,8.5)
+        ax[j].set_ylim(-10.5,7.5)
         #-- axes tick adjustments
         ax[j].get_xaxis().set_tick_params(which='both', direction='in')
         ax[j].get_yaxis().set_tick_params(which='both', direction='in')
@@ -149,7 +149,7 @@ def geocenter_processing_centers(grace_dir,DREL,START_MON,END_MON,MISSING):
         text.set_weight('bold')
         text.set_color(plot_colors[text.get_text()])
     #-- labels and set limits
-    ax[0].set_ylabel('Geocenter Variation [mm]', fontsize=14)
+    ax[0].set_ylabel('Geocenter Variation [mm]', labelpad=-2, fontsize=14)
     #-- adjust locations of subplots and save to file
     fig.subplots_adjust(left=0.06,right=0.98,bottom=0.12,top=0.94,wspace=0.05)
     plt.savefig(os.path.join(filepath,'references','Sutterley-2019bx.png'),

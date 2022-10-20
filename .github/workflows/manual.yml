@@ -80,7 +80,6 @@ jobs:
         pip install --no-deps git+https://github.com/tsutterley/geoid-toolkit.git
         pip install --no-deps git+https://github.com/tsutterley/read-GRACE-geocenter.git
         pip install ./read-GRACE-harmonics
-        pip install 'matplotlib>=3.4.0,<3.5.0' --force-reinstall
     - name: Test with pytest
       run: |
         pytest --verbose --capture=no data/test_font_files.py

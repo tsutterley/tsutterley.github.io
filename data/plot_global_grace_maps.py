@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 u"""
 plot_global_grace_maps.py
-Written by Tyler Sutterley (03/2021)
+Written by Tyler Sutterley (10/2022)
 Creates a series of GMT-like plots of GRACE data for the globe in a Plate Carree
     (Equirectangular) projection
 
@@ -20,6 +20,7 @@ PYTHON DEPENDENCIES:
         https://scitools.org.uk/cartopy
 
 UPDATE HISTORY:
+    Updated 10/2022: adjust colorbar labels for matplotlib version 3.5
     Updated 10/2021: numpy int and float to prevent deprecation warnings
         using time conversion routines for converting to and from months
     Updated 03/2021: added correction for glacial isostatic adjustment (GIA)
@@ -95,6 +96,7 @@ def read_grace_harmonics(base_dir, parameters):
     SLR_21 = parameters['SLR_21']
     SLR_22 = parameters['SLR_22']
     SLR_C30 = parameters['SLR_C30']
+    SLR_C40 = parameters['SLR_C40']
     SLR_C50 = parameters['SLR_C50']
     #-- Degree 1 correction
     DEG1 = parameters['DEG1']
@@ -125,8 +127,8 @@ def read_grace_harmonics(base_dir, parameters):
     #-- include degree 1 (geocenter) harmonics if specified
     #-- correcting for Pole-Tide and Atmospheric Jumps if specified
     return grace_input_months(base_dir, PROC, DREL, DSET, LMAX,
-        start_mon, end_mon, missing, SLR_C20, DEG1, MMAX=MMAX,
-        SLR_21=SLR_21, SLR_22=SLR_22, SLR_C30=SLR_C30, SLR_C50=SLR_C50,
+        start_mon, end_mon, missing, SLR_C20, DEG1, MMAX=MMAX, SLR_21=SLR_21,
+        SLR_22=SLR_22, SLR_C30=SLR_C30, SLR_C40=SLR_C40, SLR_C50=SLR_C50,
         MODEL_DEG1=MODEL_DEG1, POLE_TIDE=POLE_TIDE, ATM=ATM)
 
 #-- plot grid program
@@ -278,17 +280,17 @@ def plot_grid(base_dir, parameters):
     #-- shrink = percent size of colorbar
     #-- aspect = lengthXwidth aspect of colorbar
     cbar = plt.colorbar(im, ax=ax1, extend=parameters['CBEXTEND'],
-        extendfrac=0.0375, orientation='horizontal', pad=0.025, shrink=0.925,
-        aspect=22, drawedges=False)
+        extendfrac=0.0375, orientation='horizontal', pad=0.025,
+        shrink=0.925, aspect=23, drawedges=False)
     #-- rasterized colorbar to remove lines
     cbar.solids.set_rasterized(True)
     #-- Add label to the colorbar
     CBTITLE = ' '.join(parameters['CBTITLE'].split('_'))
-    cbar.ax.set_xlabel(CBTITLE, labelpad=4, fontsize=13)
+    cbar.ax.set_title(CBTITLE, fontsize=13, rotation=0, y=-1.65, va='top')
     if (parameters['CBUNITS'].title() != 'None'):
         CBUNITS = ' '.join(parameters['CBUNITS'].split('_'))
-        cbar.ax.set_ylabel(CBUNITS, fontsize=13, rotation=0)
-        cbar.ax.yaxis.set_label_coords(1.035, 0.15)
+        cbar.ax.set_xlabel(CBUNITS, fontsize=13, rotation=0, va='center')
+        cbar.ax.xaxis.set_label_coords(1.075, 0.5)
     #-- Set the tick levels for the colorbar
     cbar.set_ticks(levels)
     cbar.set_ticklabels([parameters['CBFORMAT'].format(ct) for ct in levels])
