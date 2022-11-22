@@ -104,14 +104,14 @@ jobs:
       id: changes
       run: |
         if [ -n "$(git status --porcelain data/GRACE_months.txt)" ] ; then
-            echo "::set-output name=detected::true";
+            echo "DETECTED=true" >> $GITHUB_OUTPUT;
             echo "::debug::Changes detected";
         else
-            echo "::set-output name=detected::false";
+            echo "DETECTED=false" >> $GITHUB_OUTPUT;
             echo "::debug::No changes detected";
         fi
     - name: Update GRACE/GRACE-FO tables
-      if: steps.changes.outputs.detected == 'true'
+      if: steps.changes.outputs.DETECTED == 'true'
       run: |
         python -c "import gravity_toolkit.utilities; gravity_toolkit.utilities.from_gfz(directory='data')"
         curl https://www.atmosp.physics.utoronto.ca/~peltier/datasets/Ice6G_C_VM5a/ICE-6G_High_Res_Stokes_trend.txt.gz \
@@ -133,14 +133,14 @@ jobs:
         python data/git_lfs_attributes.py --directory images/ \
             --regex "^(CSR|GFZ|GSFC|JPL)-(.*?)-(\d+).jpg"
     - name: Commit changes
-      if: steps.changes.outputs.detected == 'true'
+      if: steps.changes.outputs.DETECTED == 'true'
       run: |
         git config user.name 'Github Actions'
         git config user.email 'actions@github.com'
         git add .gitattributes data/GRACE-Months.html data/GRACE_months.txt images/*.jpg
         git commit -am "Automatic table updates"
     - name: Create pull request
-      if: steps.changes.outputs.detected == 'true'
+      if: steps.changes.outputs.DETECTED == 'true'
       uses: peter-evans/create-pull-request@v3
       with:
         assignees: ${{ github.actor }}

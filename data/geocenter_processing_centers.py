@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 u"""
 geocenter_processing_centers.py
-Written by Tyler Sutterley (12/2021)
+Written by Tyler Sutterley (11/2022)
 
 CALLING SEQUENCE:
     python geocenter_processing_centers.py --start 4 --end 216
@@ -14,6 +14,8 @@ COMMAND LINE OPTIONS:
     -M X, --missing X: Missing GRACE months in time series
 
 UPDATE HISTORY:
+    Updated 11/2022: add minor ticks for y-axis
+    Updated 10/2022: adjust label positions for matplotlib version 3.5
     Updated 12/2021: adjust minimum x limit based on starting GRACE month
     Updated 11/2021: use new geocenter class for reading and converting units
     Updated 10/2021: numpy int and float to prevent deprecation warnings
@@ -123,15 +125,19 @@ def geocenter_processing_centers(grace_dir,DREL,START_MON,END_MON,MISSING):
         ax[j].add_artist(AnchoredText(axes_labels[key], pad=0.,
             prop=dict(size=16,weight='bold'), frameon=False, loc=2))
         ax[j].set_xlabel('Time [Yr]', fontsize=14)
-        #-- set ticks
+        #-- set x-axis ticks
         xmin = 2002 + (START_MON + 1.0)//12.0
         xmax = 2002 + (END_MON + 1.0)/12.0
         major_ticks = np.arange(2005, xmax, 5)
         ax[j].xaxis.set_ticks(major_ticks)
         minor_ticks = sorted(set(np.arange(2002, xmax, 1)) - set(major_ticks))
         ax[j].xaxis.set_ticks(minor_ticks, minor=True)
+        #-- set y-axis ticks
+        ax[j].yaxis.set_ticks(np.arange(-11, 9, 2))
+        ax[j].yaxis.set_ticks(np.arange(-10, 8, 2), minor=True)
+        #-- set x and y limits
         ax[j].set_xlim(xmin, xmax)
-        ax[j].set_ylim(-10.5,7.5)
+        ax[j].set_ylim(-11.75,7.75)
         #-- axes tick adjustments
         ax[j].get_xaxis().set_tick_params(which='both', direction='in')
         ax[j].get_yaxis().set_tick_params(which='both', direction='in')
