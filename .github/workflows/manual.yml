@@ -38,7 +38,7 @@ jobs:
         sudo apt-get install texlive texlive-fonts-extra texlive-font-utils
         sudo apt-get install cm-super dvipng font-manager cmake curl gzip wget
         pip install --upgrade pip
-        pip install flake8 pytest pytest-cov numpy requests matplotlib
+        pip install flake8 pytest pytest-cov numpy requests matplotlib h5py netCDF4
         sudo ln -sv $PWD/assets/fonts/Helvetica /usr/share/fonts/truetype
     - name: Install PROJ
       env:
