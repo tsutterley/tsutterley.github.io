@@ -121,20 +121,20 @@ def grace_months(base_dir, DREL=['RL06','rl06v1.0']):
                 #-- Adding data to dictionary for data processing and release
                 var_info[var_name] = {}
                 #-- allocate for output variables
-                var_info[var_name]['mon'] = np.zeros((nmon),dtype=np.int)
-                var_info[var_name]['styr'] = np.zeros((nmon),dtype=np.int)
-                var_info[var_name]['stday'] = np.zeros((nmon),dtype=np.int)
-                var_info[var_name]['endyr'] = np.zeros((nmon),dtype=np.int)
-                var_info[var_name]['endday'] = np.zeros((nmon),dtype=np.int)
+                var_info[var_name]['mon'] = np.zeros((nmon),dtype=int)
+                var_info[var_name]['styr'] = np.zeros((nmon),dtype=int)
+                var_info[var_name]['stday'] = np.zeros((nmon),dtype=int)
+                var_info[var_name]['endyr'] = np.zeros((nmon),dtype=int)
+                var_info[var_name]['endday'] = np.zeros((nmon),dtype=int)
                 #-- place output variables in dictionary
                 for i,key in enumerate(['mon','styr','stday','endyr','endday']):
                     #-- first column is date in decimal form (start at 1 not 0)
-                    var_info[var_name][key] = date_input[:,i+1].astype(np.int)
+                    var_info[var_name][key] = date_input[:,i+1].astype(int)
                 #-- Finding the maximum month measured
                 if (var_info[var_name]['mon'].max() > max_mon):
                     #-- if the maximum month in this dataset is greater
                     #-- than the previously read datasets
-                    max_mon = np.int(var_info[var_name]['mon'].max())
+                    max_mon = int(var_info[var_name]['mon'].max())
 
     #-- print HTML headers
     print('<!DOCTYPE html>', file=fid)

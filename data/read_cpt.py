@@ -72,16 +72,16 @@ def read_cpt(filename, REVERSE=False):
     b.append(b_end)
 
     #-- convert list objects to numpy arrays
-    x = np.array(x, dtype=np.float)
+    x = np.array(x, dtype=np.float64)
     #-- if flipping the colormap
     if REVERSE:
-        r = np.array(r[::-1], dtype=np.float)
-        g = np.array(g[::-1], dtype=np.float)
-        b = np.array(b[::-1], dtype=np.float)
+        r = np.array(r[::-1], dtype=np.float64)
+        g = np.array(g[::-1], dtype=np.float64)
+        b = np.array(b[::-1], dtype=np.float64)
     else:
-        r = np.array(r, dtype=np.float)
-        g = np.array(g, dtype=np.float)
-        b = np.array(b, dtype=np.float)
+        r = np.array(r, dtype=np.float64)
+        g = np.array(g, dtype=np.float64)
+        b = np.array(b, dtype=np.float64)
 
     #-- convert input color map to output
     if (colorModel == "HSV"):
