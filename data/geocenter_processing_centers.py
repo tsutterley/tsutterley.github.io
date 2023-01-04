@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 u"""
 geocenter_processing_centers.py
-Written by Tyler Sutterley (11/2022)
+Written by Tyler Sutterley (01/2023)
 
 CALLING SEQUENCE:
     python geocenter_processing_centers.py --start 4 --end 216
@@ -14,6 +14,7 @@ COMMAND LINE OPTIONS:
     -M X, --missing X: Missing GRACE months in time series
 
 UPDATE HISTORY:
+    Updated 01/2023: single implicit import of gravity toolkit
     Updated 11/2022: add minor ticks for y-axis
     Updated 10/2022: adjust label positions for matplotlib version 3.5
     Updated 12/2021: adjust minimum x limit based on starting GRACE month
@@ -38,8 +39,7 @@ import matplotlib
 import matplotlib.font_manager
 import matplotlib.pyplot as plt
 from matplotlib.offsetbox import AnchoredText
-import gravity_toolkit.time
-import gravity_toolkit.geocenter
+import gravity_toolkit as gravtk
 
 #-- rebuilt the matplotlib fonts and set parameters
 matplotlib.font_manager._load_fontmanager()
@@ -86,7 +86,7 @@ def geocenter_processing_centers(grace_dir,DREL,START_MON,END_MON,MISSING):
             fargs = (pr,DREL,model_str,input_flags[2])
         #-- read geocenter file for processing center and model
         grace_file = os.path.join(grace_dir,'{0}_{1}_{2}_{3}.txt'.format(*fargs))
-        DEG1 = gravity_toolkit.geocenter().from_UCI(grace_file)
+        DEG1 = gravtk.geocenter().from_UCI(grace_file)
         #-- indices for mean months
         kk, = np.nonzero((DEG1.month >= START_MON) & (DEG1.month <= 176))
         DEG1.mean(apply=True, indices=kk)
@@ -111,7 +111,7 @@ def geocenter_processing_centers(grace_dir,DREL,START_MON,END_MON,MISSING):
     #-- add axis labels and adjust font sizes for axis ticks
     for j,key in enumerate(fig_labels):
         #-- vertical line denoting the accelerometer shutoff
-        acc = gravity_toolkit.time.convert_calendar_decimal(2016,9,
+        acc = gravtk.time.convert_calendar_decimal(2016,9,
             day=3,hour=12,minute=12)
         ax[j].axvline(acc,color='0.5',ls='dashed',lw=0.5,dashes=(8,4))
         #-- vertical lines for end of the GRACE mission and start of GRACE-FO

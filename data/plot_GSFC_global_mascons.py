@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 u"""
 plot_GSFC_global_mascons.py
-Written by Tyler Sutterley (10/2022)
+Written by Tyler Sutterley (01/2023)
 Creates a series of GMT-like plots of GSFC GRACE mascon data for the globe in a
     Plate Carree (Equirectangular) projection
 
@@ -20,6 +20,7 @@ PYTHON DEPENDENCIES:
         https://github.com/GeospatialPython/pyshp
 
 UPDATE HISTORY:
+    Updated 01/2023: single implicit import of gravity toolkit
     Updated 10/2022: adjust colorbar labels for matplotlib version 3.5
         added links to newer GSFC mascons Release-6 Version 2.0
     Updated 05/2022: added links to newer GSFC mascons Release-6 Version 2.0
@@ -57,7 +58,7 @@ import matplotlib.patches as patches
 from matplotlib.collections import PatchCollection
 from matplotlib.offsetbox import AnchoredText
 import cartopy.crs as ccrs
-import gravity_toolkit.time
+import gravity_toolkit as gravtk
 from read_cpt import read_cpt
 
 #-- rebuild the matplotlib fonts and set parameters
@@ -89,7 +90,7 @@ def plot_mascon(base_dir, parameters):
     grace_file['rl06v2.0'] = 'gsfc.glb_.200204_202207_rl06v2.0_sla-ice6gd.h5'
     #-- valid date string (HDF5 attribute: 'days since 2002-01-00T00:00:00')
     date_string = 'days since 2002-01-01T00:00:00'
-    epoch,to_secs = gravity_toolkit.time.parse_date_string(date_string)
+    epoch,to_secs = gravtk.time.parse_date_string(date_string)
     #-- read the HDF5 file
     with h5py.File(os.path.join(grace_dir,grace_file[VERSION]),'r') as fileID:
         nmas,nt = fileID['solution']['cmwe'].shape
@@ -99,7 +100,7 @@ def plot_mascon(base_dir, parameters):
         lat_span = fileID['mascon']['lat_span'][:].flatten()
         lon_span = fileID['mascon']['lon_span'][:].flatten()
         julian = 2452275.5 + fileID['time']['ref_days_middle'][:].flatten()
-        MJD = gravity_toolkit.time.convert_delta_time(
+        MJD = gravtk.time.convert_delta_time(
             to_secs*fileID['time']['ref_days_middle'][:].flatten(),
             epoch1=epoch, epoch2=(1858,11,17,0,0,0), scale=1.0/86400.0)
     #-- sign to convert from center to patch
@@ -110,15 +111,15 @@ def plot_mascon(base_dir, parameters):
     lon_center[gt180] -= 360.0
 
     #-- convert Julian days to calendar days
-    cal_date = gravity_toolkit.time.convert_julian(MJD + 2400000.5)
+    cal_date = gravtk.time.convert_julian(MJD + 2400000.5)
     #-- calculate the GRACE month (Apr02 == 004)
     #-- https://grace.jpl.nasa.gov/data/grace-months/
     #-- Notes on special months (e.g. 119, 120) below
-    grace_month = gravity_toolkit.time.calendar_to_grace(cal_date['year'],
+    grace_month = gravtk.time.calendar_to_grace(cal_date['year'],
         month=cal_date['month'])
     #-- calculating the month number of 'Special Months' with accelerometer
     #-- shutoffs is more complicated as days from other months are used
-    grace_month = gravity_toolkit.time.adjust_months(grace_month)
+    grace_month = gravtk.time.adjust_months(grace_month)
 
     #-- use a mean range for the static field to remove
     MEAN = np.zeros((nmas))
@@ -144,10 +145,6 @@ def plot_mascon(base_dir, parameters):
     projection = ccrs.PlateCarree()
     fig,ax1 = plt.subplots(num=1, figsize=(5.5,3.5),
         subplot_kw=dict(projection=projection))
-    a_axis = 6378137.0#-- [m] semimajor axis of the ellipsoid
-    flat = 1.0/298.257223563#-- flattening of the ellipsoid
-    #-- (4pi/3)R^3 = (4pi/3)(a^2)b = (4pi/3)(a^3)(1 -f)
-    rad_e = a_axis*(1.0 -flat)**(1.0/3.0)
 
     #-- set transparency ALPHA
     ALPHA = np.float64(parameters['ALPHA'])
