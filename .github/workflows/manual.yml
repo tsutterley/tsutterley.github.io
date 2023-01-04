@@ -24,8 +24,8 @@ jobs:
     - name: Checkout git dependencies
       uses: actions/checkout@v2
       with:
-        repository: tsutterley/read-GRACE-harmonics
-        path: read-GRACE-harmonics
+        repository: tsutterley/gravity-toolkit
+        path: gravity-toolkit
     - name: Set up Python
       uses: actions/setup-python@v2
       with:
@@ -79,7 +79,7 @@ jobs:
         pip install git+https://github.com/SciTools/cartopy.git
         pip install --no-deps git+https://github.com/tsutterley/geoid-toolkit.git
         pip install --no-deps git+https://github.com/tsutterley/read-GRACE-geocenter.git
-        pip install ./read-GRACE-harmonics
+        pip install ./gravity-toolkit
     - name: Test with pytest
       run: |
         pytest --verbose --capture=no data/test_font_files.py

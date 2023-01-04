@@ -60,8 +60,7 @@ import logging
 import argparse
 import traceback
 import multiprocessing as mp
-import gravity_toolkit.time
-import gravity_toolkit.utilities
+import gravity_toolkit as gravtk
 
 #-- PURPOSE: sync local GRACE/GRACE-FO files with JPL PO.DAAC AWS bucket
 def podaac_cumulus(client, DIRECTORY, PROC=[], DREL=[], VERSION=[],
@@ -112,7 +111,7 @@ def podaac_cumulus(client, DIRECTORY, PROC=[], DREL=[], VERSION=[],
                 #-- print string of exact data product
                 logging.info('{0} {1}/{2}/{3}'.format(mi, pr, rl, DSET))
                 #-- query CMR for dataset
-                ids,urls,mtimes = gravity_toolkit.utilities.cmr(
+                ids,urls,mtimes = gravtk.utilities.cmr(
                     mission=mi, center=pr, release=rl, product=DSET,
                     version=VERSION[i], provider='POCLOUD', endpoint='data')
                 #-- for each model id and url
@@ -120,7 +119,7 @@ def podaac_cumulus(client, DIRECTORY, PROC=[], DREL=[], VERSION=[],
                     #-- remote and local versions of the file
                     remote_files.append(url)
                     remote_mtimes.append(mtime)
-                    granule = gravity_toolkit.utilities.url_split(url)[-1]
+                    granule = gravtk.utilities.url_split(url)[-1]
                     suffix = '.gz' if GZIP else ''
                     local_files.append(os.path.join(local_dir,
                         '{0}{1}'.format(granule, suffix)))
@@ -166,12 +165,12 @@ def podaac_cumulus(client, DIRECTORY, PROC=[], DREL=[], VERSION=[],
             #-- for each satellite mission (grace, grace-fo)
             for i,mi in enumerate(['grace','grace-fo']):
                 #-- regular expression operator for data product
-                rx = gravity_toolkit.utilities.compile_regex_pattern(
+                rx = gravtk.utilities.compile_regex_pattern(
                     pr, rl, DSET, mission=shortname[mi])
                 #-- find local GRACE/GRACE-FO files to create index
                 granules = sorted([f for f in os.listdir(local_dir) if rx.match(f)])
                 #-- reduce list of GRACE/GRACE-FO files to unique dates
-                granules = gravity_toolkit.time.reduce_by_date(granules)
+                granules = gravtk.time.reduce_by_date(granules)
                 #-- extend list of GRACE/GRACE-FO files with granules
                 grace_files.extend(granules)
             #-- outputting GRACE/GRACE-FO filenames to index
@@ -216,8 +215,8 @@ def http_pull_file(remote_file, remote_mtime, local_file,
             #-- Create and submit request.
             #-- There are a wide range of exceptions that can be thrown here
             #-- including HTTPError and URLError.
-            request = gravity_toolkit.utilities.urllib2.Request(remote_file)
-            response = gravity_toolkit.utilities.urllib2.urlopen(request,
+            request = gravtk.utilities.urllib2.Request(remote_file)
+            response = gravtk.utilities.urllib2.urlopen(request,
                 timeout=TIMEOUT)
             #-- copy contents to local file using chunked transfer encoding
             #-- transfer should work properly with ascii and binary formats
@@ -314,7 +313,7 @@ def main():
     #-- NASA Earthdata hostname
     URS = 'urs.earthdata.nasa.gov'
     #-- check internet connection before attempting to run program
-    opener = gravity_toolkit.utilities.attempt_login(URS,
+    opener = gravtk.utilities.attempt_login(URS,
         username=args.user, password=args.password,
         netrc=args.netrc)
 
@@ -323,7 +322,7 @@ def main():
     #-- including HTTPError and URLError.
     HOST = 'https://archive.podaac.earthdata.nasa.gov/s3credentials'
     #-- get aws s3 client object
-    client = gravity_toolkit.utilities.s3_client(HOST, args.timeout)
+    client = gravtk.utilities.s3_client(HOST, args.timeout)
     #-- retrieve data objects from s3 client
     podaac_cumulus(client, args.directory, PROC=args.center,
         DREL=args.release, VERSION=args.version,

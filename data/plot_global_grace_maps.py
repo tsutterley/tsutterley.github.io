@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 u"""
 plot_global_grace_maps.py
-Written by Tyler Sutterley (10/2022)
+Written by Tyler Sutterley (01/2023)
 Creates a series of GMT-like plots of GRACE data for the globe in a Plate Carree
     (Equirectangular) projection
 
@@ -20,6 +20,7 @@ PYTHON DEPENDENCIES:
         https://scitools.org.uk/cartopy
 
 UPDATE HISTORY:
+    Updated 01/2023: single implicit import of gravity toolkit
     Updated 10/2022: adjust colorbar labels for matplotlib version 3.5
     Updated 10/2021: numpy int and float to prevent deprecation warnings
         using time conversion routines for converting to and from months
@@ -55,17 +56,7 @@ import matplotlib.pyplot as plt
 import matplotlib.cm as cm
 import matplotlib.colors as colors
 import cartopy.crs as ccrs
-import gravity_toolkit.time
-from gravity_toolkit.utilities import get_data_path
-from gravity_toolkit.grace_find_months import grace_find_months
-from gravity_toolkit.grace_input_months import grace_input_months
-from gravity_toolkit.read_GIA_model import read_GIA_model
-from gravity_toolkit.harmonics import harmonics
-from gravity_toolkit.units import units
-from gravity_toolkit.read_love_numbers import load_love_numbers
-from gravity_toolkit.plm_holmes import plm_holmes
-from gravity_toolkit.gauss_weights import gauss_weights
-from gravity_toolkit.harmonic_summation import harmonic_summation
+import gravity_toolkit as gravtk
 from read_cpt import read_cpt
 
 #-- rebuilt the matplotlib fonts and set parameters
@@ -84,7 +75,7 @@ def read_grace_harmonics(base_dir, parameters):
     #-- GRACE/GRACE-FO dataset
     DSET = parameters['DSET']
     #-- find GRACE/GRACE-FO months for a dataset
-    grace_months = grace_find_months(base_dir, PROC, DREL, DSET=DSET)
+    grace_months = gravtk.grace_find_months(base_dir, PROC, DREL, DSET=DSET)
     #-- maximum degree and order
     LMAX = np.int64(parameters['LMAX'])
     if (parameters['MMAX'].title() == 'None'):
@@ -126,7 +117,7 @@ def read_grace_harmonics(base_dir, parameters):
     #-- replacing low-degree harmonics with SLR values if specified
     #-- include degree 1 (geocenter) harmonics if specified
     #-- correcting for Pole-Tide and Atmospheric Jumps if specified
-    return grace_input_months(base_dir, PROC, DREL, DSET, LMAX,
+    return gravtk.grace_input_months(base_dir, PROC, DREL, DSET, LMAX,
         start_mon, end_mon, missing, SLR_C20, DEG1, MMAX=MMAX, SLR_21=SLR_21,
         SLR_22=SLR_22, SLR_C30=SLR_C30, SLR_C40=SLR_C40, SLR_C50=SLR_C50,
         MODEL_DEG1=MODEL_DEG1, POLE_TIDE=POLE_TIDE, ATM=ATM)
@@ -160,19 +151,16 @@ def plot_grid(base_dir, parameters):
     UNITS = np.int64(parameters['UNITS'])
 
     #-- read the GRACE/GRACE-FO data for the date range
-    grace_Ylms=harmonics().from_dict(read_grace_harmonics(base_dir,parameters))
+    grace_Ylms = gravtk.harmonics().from_dict(
+        read_grace_harmonics(base_dir,parameters)
+    )
     #-- use a mean file for the static field to remove
     if (parameters['MEAN_FILE'].title() == 'None'):
         grace_Ylms.mean(apply=True)
     else:
         #-- data form for input mean file (ascii, netCDF4, HDF5)
-        if (parameters['MEANFORM'] == 'ascii'):
-            mean_Ylms=harmonics().from_ascii(parameters['MEAN_FILE'],date=False)
-        if (parameters['MEANFORM'] == 'netCDF4'):
-            mean_Ylms=harmonics().from_netCDF4(parameters['MEAN_FILE'],date=False)
-        if (parameters['MEANFORM'] == 'HDF5'):
-            mean_Ylms=harmonics().from_HDF5(parameters['MEAN_FILE'],date=False)
-        #-- remove the input mean
+        mean_Ylms = gravtk.harmonics().from_file(parameters['MEAN_FILE'],
+            format=parameters['MEANFORM'], date=False)
         grace_Ylms.subtract(mean_Ylms)
 
     #-- filter harmonics for correlated striping errors
@@ -183,19 +171,17 @@ def plot_grid(base_dir, parameters):
     GIA = parameters['GIA'] if (parameters['GIA'].title() != 'None') else None
     GIA_FILE = os.path.expanduser(parameters['GIA_FILE'])
     #-- input GIA spherical harmonic datafiles
-    GIA_Ylms_rate = read_GIA_model(GIA_FILE,GIA=GIA,LMAX=LMAX,MMAX=MMAX)
-    #-- GIA monthly coefficients
-    GIA_Ylms = grace_Ylms.zeros_like()
-    GIA_Ylms.time[:] = np.copy(grace_Ylms.time)
+    GIA_Ylms_rate = gravtk.GIA(lmax=LMAX).from_file(GIA_FILE,
+        GIA=GIA, mmax=MMAX)
+    # calculate the monthly mass change from GIA
+    # monthly GIA calculated by gia_rate*time elapsed
+    # finding change in GIA each month
+    GIA_Ylms = GIA_Ylms_rate.drift(grace_Ylms.time, epoch=2007.0)
     GIA_Ylms.month[:] = np.copy(grace_Ylms.month)
-    #-- finding change in GIA each month
-    for t,tdec in enumerate(GIA_Ylms.time):
-        GIA_Ylms.clm[:,:,t] = GIA_Ylms_rate['clm']*(tdec-2007.0)
-        GIA_Ylms.slm[:,:,t] = GIA_Ylms_rate['slm']*(tdec-2007.0)
 
     #-- Gaussian smoothing
     if (RAD != 0):
-        wt = 2.0*np.pi*gauss_weights(RAD,LMAX)
+        wt = 2.0*np.pi*gravtk.gauss_weights(RAD, LMAX)
     else:
         wt = np.ones((LMAX+1))
 
@@ -219,29 +205,29 @@ def plot_grid(base_dir, parameters):
         nlat = len(glat)
 
     #-- Computing plms for converting to spatial domain
-    theta = (90.0-glat)*np.pi/180.0
-    PLM,dPLM = plm_holmes(LMAX,np.cos(theta))
+    theta = (90.0 - glat)*np.pi/180.0
+    PLM, dPLM = gravtk.plm_holmes(LMAX,np.cos(theta))
 
     #-- read load love numbers
-    hl,kl,ll = load_love_numbers(LMAX, REFERENCE='CF')
+    hl,kl,ll = gravtk.load_love_numbers(LMAX, REFERENCE='CF')
 
     #-- Setting units factor for output
     #-- dfactor computes the degree dependent coefficients
     if (UNITS == 1):
         #-- 1: cmH2O, centimeters water equivalent
-        dfactor = units(lmax=LMAX).harmonic(hl,kl,ll).cmwe
+        dfactor = gravtk.units(lmax=LMAX).harmonic(hl,kl,ll).cmwe
     elif (UNITS == 2):
         #-- 2: mmGH, mm geoid height
-        dfactor = units(lmax=LMAX).harmonic(hl,kl,ll).mmGH
+        dfactor = gravtk.units(lmax=LMAX).harmonic(hl,kl,ll).mmGH
     elif (UNITS == 3):
         #-- 3: mmCU, mm elastic crustal deformation
-        dfactor = units(lmax=LMAX).harmonic(hl,kl,ll).mmCU
+        dfactor = gravtk.units(lmax=LMAX).harmonic(hl,kl,ll).mmCU
     elif (UNITS == 4):
         #-- 4: micGal, microGal gravity perturbations
-        dfactor = units(lmax=LMAX).harmonic(hl,kl,ll).microGal
+        dfactor = gravtk.units(lmax=LMAX).harmonic(hl,kl,ll).microGal
     elif (UNITS == 5):
         #-- 5: Pa, equivalent surface pressure in Pascals
-        dfactor = units(lmax=LMAX).harmonic(hl,kl,ll).Pa
+        dfactor = gravtk.units(lmax=LMAX).harmonic(hl,kl,ll).Pa
     else:
         raise ValueError(('UNITS is invalid:\n1: cmH2O\n2: mmGH\n3: mmCU '
             '(elastic)\n4:microGal\n5: Pa\n6: cmCU (viscoelastic)'))
@@ -249,10 +235,6 @@ def plot_grid(base_dir, parameters):
     #-- setup Plate Carree projection
     fig, ax1 = plt.subplots(num=1, nrows=1, ncols=1, figsize=(5.5,3.5),
         subplot_kw=dict(projection=ccrs.PlateCarree()))
-    a_axis = 6378137.0#-- [m] semimajor axis of the ellipsoid
-    flat = 1.0/298.257223563#-- flattening of the ellipsoid
-    #-- (4pi/3)R^3 = (4pi/3)(a^2)b = (4pi/3)(a^3)(1 -f)
-    rad_e = a_axis*(1.0 -flat)**(1.0/3.0)
 
     #-- set transparency ALPHA
     ALPHA = np.float64(parameters['ALPHA'])
@@ -324,13 +306,13 @@ def plot_grid(base_dir, parameters):
         Ylms.subtract(GIA_Ylms.index(t))
         Ylms.convolve(dfactor*wt)
         #-- convert spherical harmonics to output spatial grid
-        data = harmonic_summation(Ylms.clm,Ylms.slm,glon,glat,
-            LMIN=LMIN,LMAX=LMAX,MMAX=MMAX,PLM=PLM).T
+        data = gravtk.harmonic_summation(Ylms.clm, Ylms.slm, glon, glat,
+            LMIN=LMIN, LMAX=LMAX, MMAX=MMAX, PLM=PLM).T
         #-- set image
         im.set_data(data)
         #-- add date label (year-calendar month e.g. 2002-01)
-        year,month = gravity_toolkit.time.grace_to_calendar(grace_month)
-        date_label = r'\textbf{{{0:4d}--{1:02d}}}'.format(year,month)
+        year,month = gravtk.time.grace_to_calendar(grace_month)
+        date_label = r'\textbf{{{0:4d}--{1:02d}}}'.format(year, month)
         time_text.set_text(date_label)
         #-- output to file
         args = (parameters['PROC'],parameters['DREL'],grace_month,figure_format)
