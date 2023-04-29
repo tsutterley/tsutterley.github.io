@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 u"""
 plot_GSFC_global_mascons.py
-Written by Tyler Sutterley (01/2023)
+Written by Tyler Sutterley (04/2023)
 Creates a series of GMT-like plots of GSFC GRACE mascon data for the globe in a
     Plate Carree (Equirectangular) projection
 
@@ -20,6 +20,7 @@ PYTHON DEPENDENCIES:
         https://github.com/GeospatialPython/pyshp
 
 UPDATE HISTORY:
+    Updated 04/2023: added newer GSFC mascons for RL06v2.0
     Updated 01/2023: single implicit import of gravity toolkit
     Updated 10/2022: adjust colorbar labels for matplotlib version 3.5
         added links to newer GSFC mascons Release-6 Version 2.0
@@ -83,11 +84,12 @@ def plot_mascon(base_dir, parameters):
     #-- GRACE HDF5 file
     grace_file = {}
     grace_file['v02.4'] = 'GSFC.glb.200301_201607_v02.4.hdf'
-    # grace_file['rl06v1.0'] = 'gsfc.glb_.200204_202009_rl06v1.0_sla-ice6gd.h5'
-    # grace_file['rl06v1.0'] = 'gsfc.glb_.200204_202107_rl06v1.0_sla-ice6gd.h5'
-    grace_file['rl06v1.0'] = 'GSFC.glb_.200204_202110_RL06v1.0_SLA-ICE6GD_0.h5'
-    # grace_file['rl06v2.0'] = 'gsfc.glb_.200204_202112_rl06v2.0_sla-ice6gd.h5'
-    grace_file['rl06v2.0'] = 'gsfc.glb_.200204_202207_rl06v2.0_sla-ice6gd.h5'
+    # grace_file['rl06v1.0'] = 'gsfc.glb_.200204_202009_rl06v1.0_obp-ice6gd.h5'
+    # grace_file['rl06v1.0'] = 'gsfc.glb_.200204_202107_rl06v1.0_obp-ice6gd.h5'
+    grace_file['rl06v1.0'] = 'GSFC.glb_.200204_202110_RL06v1.0_OBP-ICE6GD_0.h5'
+    # grace_file['rl06v2.0'] = 'gsfc.glb_.200204_202112_rl06v2.0_obp-ice6gd.h5'
+    # grace_file['rl06v2.0'] = 'gsfc.glb_.200204_202207_rl06v2.0_obp-ice6gd.h5'
+    grace_file['rl06v2.0'] = 'gsfc.glb_.200204_202211_rl06v2.0_obp-ice6gd.h5'
     #-- valid date string (HDF5 attribute: 'days since 2002-01-00T00:00:00')
     date_string = 'days since 2002-01-01T00:00:00'
     epoch,to_secs = gravtk.time.parse_date_string(date_string)

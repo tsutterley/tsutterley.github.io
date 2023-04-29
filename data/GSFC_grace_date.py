@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 u"""
 GSFC_grace_date.py
-Written by Tyler Sutterley (01/2023)
+Written by Tyler Sutterley (04/2023)
 
 Reads dates of GSFC GRACE mascon data file and assigns the month number
     reads the start and end date from the filename,
@@ -27,6 +27,7 @@ PROGRAM DEPENDENCIES:
     utilities.py: download and management utilities for syncing files
 
 UPDATE HISTORY:
+    Updated 04/2023: added newer GSFC mascons for RL06v2.0
     Updated 01/2023: single implicit import of gravity toolkit
     Updated 10/2022: added links to newer GSFC mascons Release-6 Version 2.0
     Updated 05/2022: added links to newer GSFC mascons Release-6 Version 2.0
@@ -59,15 +60,17 @@ def get_GSFC_grace_mascons(base_dir, TIMEOUT=None, RETRY=5,
     HOST['v02.4'] = ['https://earth.gsfc.nasa.gov','sites','default','files',
         'neptune','grace','mascons_2.4','GSFC.glb.200301_201607_v02.4.hdf']
     # HOST['rl06v1.0'] = ['https://earth.gsfc.nasa.gov','sites','default','files',
-    #     '2021-03','gsfc.glb_.200204_202009_rl06v1.0_sla-ice6gd.h5']
+    #     '2021-03','gsfc.glb_.200204_202009_rl06v1.0_obp-ice6gd.h5']
     # HOST['rl06v1.0'] = ['https://earth.gsfc.nasa.gov','sites','default','files',
-    #     '2021-10','gsfc.glb_.200204_202107_rl06v1.0_sla-ice6gd.h5']
+    #     '2021-10','gsfc.glb_.200204_202107_rl06v1.0_obp-ice6gd.h5']
     HOST['rl06v1.0'] = ['https://earth.gsfc.nasa.gov','sites','default','files',
-        '2022-01','GSFC.glb_.200204_202110_RL06v1.0_SLA-ICE6GD_0.h5']
+        '2022-01','GSFC.glb_.200204_202110_RL06v1.0_OBP-ICE6GD_0.h5']
     # HOST['rl06v2.0'] = ['https://earth.gsfc.nasa.gov','sites','default','files',
-    #     '2022-05','gsfc.glb_.200204_202112_rl06v2.0_sla-ice6gd.h5']
+    #     '2022-05','gsfc.glb_.200204_202112_rl06v2.0_obp-ice6gd.h5']
+    # HOST['rl06v2.0'] = ['https://earth.gsfc.nasa.gov','sites','default','files',
+    #     '2022-10','gsfc.glb_.200204_202207_rl06v2.0_obp-ice6gd.h5']
     HOST['rl06v2.0'] = ['https://earth.gsfc.nasa.gov','sites','default','files',
-        '2022-10','gsfc.glb_.200204_202207_rl06v2.0_sla-ice6gd.h5']
+        '2023-03','gsfc.glb_.200204_202211_rl06v2.0_obp-ice6gd.h5']
     #-- local file
     local = os.path.join(base_dir,'GSFC',VERSION,'GSM',HOST[VERSION][-1])
     #-- attempt to download up to the number of retries
@@ -129,11 +132,12 @@ def GSFC_grace_date(base_dir, VERSION='v02.4', MODE=0o775):
     #-- dictionary of GSFC GRACE mascon files
     grace_file = {}
     grace_file['v02.4'] = 'GSFC.glb.200301_201607_v02.4.hdf'
-    # grace_file['rl06v1.0'] = 'gsfc.glb_.200204_202009_rl06v1.0_sla-ice6gd.h5'
-    # grace_file['rl06v1.0'] = 'gsfc.glb_.200204_202107_rl06v1.0_sla-ice6gd.h5'
-    grace_file['rl06v1.0'] = 'GSFC.glb_.200204_202110_RL06v1.0_SLA-ICE6GD_0.h5'
-    # grace_file['rl06v2.0'] = 'gsfc.glb_.200204_202112_rl06v2.0_sla-ice6gd.h5'
-    grace_file['rl06v2.0'] = 'gsfc.glb_.200204_202207_rl06v2.0_sla-ice6gd.h5'
+    # grace_file['rl06v1.0'] = 'gsfc.glb_.200204_202009_rl06v1.0_obp-ice6gd.h5'
+    # grace_file['rl06v1.0'] = 'gsfc.glb_.200204_202107_rl06v1.0_obp-ice6gd.h5'
+    grace_file['rl06v1.0'] = 'GSFC.glb_.200204_202110_RL06v1.0_OBP-ICE6GD_0.h5'
+    # grace_file['rl06v2.0'] = 'gsfc.glb_.200204_202112_rl06v2.0_obp-ice6gd.h5'
+    # grace_file['rl06v2.0'] = 'gsfc.glb_.200204_202207_rl06v2.0_obp-ice6gd.h5'
+    grace_file['rl06v2.0'] = 'gsfc.glb_.200204_202211_rl06v2.0_obp-ice6gd.h5'
     #-- valid date string (HDF5 attribute: 'days since 2002-01-00T00:00:00')
     date_string = 'days since 2002-01-01T00:00:00'
     epoch,to_secs = gravtk.time.parse_date_string(date_string)

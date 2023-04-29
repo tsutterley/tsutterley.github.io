@@ -6,6 +6,7 @@ on:
   schedule:
     # * is a special character in YAML so you have to quote this string
     - cron:  '0 0 * * *'
+  workflow_dispatch:
 
 jobs:
   build:
@@ -85,11 +86,10 @@ jobs:
         pytest --verbose --capture=no data/test_cartopy.py
     - name: Download GRACE/GRACE-FO data
       run: |
-        python data/get_podaac_webdav.py
-        python data/podaac_grace_sync.py --directory data/ --netrc data/.netrc \
-            --release RL06 --timeout=3600 --log --np=0
         python data/podaac_cumulus.py --directory data/ --netrc data/.netrc \
-            --release RL06 --version 0 0 --timeout=3600 --log --np=0
+          --release RL06 --version 0 1 --timeout=3600 --log --np=0
+        python data/podaac_cumulus.py --directory data/ --netrc data/.netrc \
+          --release RL06 --version 0 0 --timeout=3600 --log --np=0
         grace_date.py --directory data/ --release RL06 --product GSM --output
         python data/GSFC_grace_date.py --version rl06v2.0 --directory data/
         grace_months_index.py --directory data/ --release RL06 rl06v2.0
@@ -117,9 +117,9 @@ jobs:
         #curl https://www.atmosp.physics.utoronto.ca/~peltier/datasets/Ice6G_C_VM5a/ICE-6G_High_Res_Stokes_trend.txt.gz \
         #  -o data/ICE-6G_High_Res_Stokes_trend.txt.gz
         #gunzip data/ICE-6G_High_Res_Stokes_trend.txt.gz
-        grace_mean_harmonics.py --directory data/ @data/parameters_CSR_RL06_mean_Ylms_013-108.txt
-        grace_mean_harmonics.py --directory data/ @data/parameters_GFZ_RL06_mean_Ylms_013-108.txt
-        grace_mean_harmonics.py --directory data/ @data/parameters_JPL_RL06_mean_Ylms_013-108.txt
+        grace_mean_harmonics.py --directory data/ --verbose @data/parameters_CSR_RL06_mean_Ylms_013-108.txt
+        grace_mean_harmonics.py --directory data/ --verbose @data/parameters_GFZ_RL06_mean_Ylms_013-108.txt
+        grace_mean_harmonics.py --directory data/ --verbose @data/parameters_JPL_RL06_mean_Ylms_013-108.txt
         python data/plot_global_grace_maps.py --directory data/ \
             data/plot_parameters_CSR_RL06_L60_r350km.txt \
             data/plot_parameters_GRFO_CSR_RL06_L60_r350km.txt \
