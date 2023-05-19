@@ -43,7 +43,7 @@ jobs:
     - name: Install PROJ
       env:
         JOBS: 2
-        PROJ_VERSION: 8.0.1
+        PROJ_VERSION: 9.2.0
         PROJ_DATUMGRID_VERSION: 1.8
         PROJ_NETWORK: ON
         SQLITE3_CFLAGS: "-I/usr/local/include"
