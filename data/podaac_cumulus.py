@@ -322,7 +322,7 @@ def arguments():
     # GRACE/GRACE-FO data version
     parser.add_argument('--version','-v',
         metavar='VERSION', type=str, nargs=2,
-        default=['0','1'], choices=['0','1','2','3'],
+        default=['0','1'],
         help='GRACE/GRACE-FO Level-2 data version')
     # connection timeout
     parser.add_argument('--timeout','-t',
