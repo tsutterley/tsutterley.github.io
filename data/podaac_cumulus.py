@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 u"""
 podaac_cumulus.py
-Written by Tyler Sutterley (04/2023)
+Written by Tyler Sutterley (09/2023)
 
 Syncs GRACE/GRACE-FO data from NASA JPL PO.DAAC Cumulus AWS S3 bucket
 S3 Cumulus syncs are only available in AWS instances in us-west-2
@@ -118,6 +118,9 @@ def podaac_cumulus(DIRECTORY, PROC=[], DREL=[], VERSION=[],
                     mission='grace-fo', center=pr, release=rl,
                     version=version, provider='POCLOUD',
                     endpoint='data')
+                # verify that urls exist
+                if not urls:
+                    continue
                 # TN-13 JPL degree 1 files
                 url, = [url for url in urls if R1.search(url)]
                 granule = gravtk.utilities.url_split(url)[-1]

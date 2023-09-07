@@ -18,11 +18,11 @@ jobs:
       PODAAC_PASSWORD: ${{ secrets.PODAAC_PASSWORD }}
 
     steps:
-    - uses: actions/checkout@v2
+    - uses: actions/checkout@v3
       with:
         lfs: true
     - name: Checkout git dependencies
-      uses: actions/checkout@v2
+      uses: actions/checkout@v3
       with:
         repository: tsutterley/gravity-toolkit
         path: gravity-toolkit
@@ -94,7 +94,7 @@ jobs:
         python data/GSFC_grace_date.py --version rl06v2.0 --directory data/
         grace_months_index.py --directory data/ --release RL06 rl06v2.0
     - name: Archive GRACE/GRACE-FO dates
-      uses: actions/upload-artifact@v2
+      uses: actions/upload-artifact@v3
       with:
         name: grace-months
         path: |
