@@ -18,16 +18,16 @@ jobs:
       PODAAC_PASSWORD: ${{ secrets.PODAAC_PASSWORD }}
 
     steps:
-    - uses: actions/checkout@v3
+    - uses: actions/checkout@v4
       with:
         lfs: true
     - name: Checkout git dependencies
-      uses: actions/checkout@v3
+      uses: actions/checkout@v4
       with:
         repository: tsutterley/gravity-toolkit
         path: gravity-toolkit
     - name: Set up Python
-      uses: actions/setup-python@v2
+      uses: actions/setup-python@v4
       with:
         python-version: 3.9
     - name: Install dependencies
@@ -87,7 +87,9 @@ jobs:
     - name: Download GRACE/GRACE-FO data
       run: |
         python data/podaac_cumulus.py --directory data/ --netrc data/.netrc \
-          --release RL06 --version 0 1 --timeout=3600 --log --np=0
+          --center CSR --release RL06 --version 0 2 --timeout=3600 --log --np=0
+        python data/podaac_cumulus.py --directory data/ --netrc data/.netrc \
+          --center GFZ JPL --release RL06 --version 0 1 --timeout=3600 --log --np=0
         python data/podaac_cumulus.py --directory data/ --netrc data/.netrc \
           --release RL06 --version 0 0 --timeout=3600 --log --np=0
         grace_date.py --directory data/ --release RL06 --product GSM --output
@@ -141,7 +143,7 @@ jobs:
         git commit -am "Automatic table updates"
     - name: Create pull request
       if: steps.changes.outputs.DETECTED == 'true'
-      uses: peter-evans/create-pull-request@v3
+      uses: peter-evans/create-pull-request@v5
       with:
         assignees: ${{ github.actor }}
         author: ${{ github.actor }} <${{ github.actor }}@users.noreply.github.com>
