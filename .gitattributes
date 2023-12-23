@@ -223,6 +223,7 @@ images/CSR-RL06-258.jpg filter=lfs diff=lfs merge=lfs -text
 images/CSR-RL06-259.jpg filter=lfs diff=lfs merge=lfs -text
 images/CSR-RL06-260.jpg filter=lfs diff=lfs merge=lfs -text
 images/CSR-RL06-261.jpg filter=lfs diff=lfs merge=lfs -text
+images/CSR-RL06-262.jpg filter=lfs diff=lfs merge=lfs -text
 images/GFZ-RL06-004.jpg filter=lfs diff=lfs merge=lfs -text
 images/GFZ-RL06-005.jpg filter=lfs diff=lfs merge=lfs -text
 images/GFZ-RL06-008.jpg filter=lfs diff=lfs merge=lfs -text
@@ -445,6 +446,10 @@ images/GFZ-RL06-255.jpg filter=lfs diff=lfs merge=lfs -text
 images/GFZ-RL06-256.jpg filter=lfs diff=lfs merge=lfs -text
 images/GFZ-RL06-257.jpg filter=lfs diff=lfs merge=lfs -text
 images/GFZ-RL06-258.jpg filter=lfs diff=lfs merge=lfs -text
+images/GFZ-RL06-259.jpg filter=lfs diff=lfs merge=lfs -text
+images/GFZ-RL06-260.jpg filter=lfs diff=lfs merge=lfs -text
+images/GFZ-RL06-261.jpg filter=lfs diff=lfs merge=lfs -text
+images/GFZ-RL06-262.jpg filter=lfs diff=lfs merge=lfs -text
 images/GSFC-rl06v1.0-004.jpg filter=lfs diff=lfs merge=lfs -text
 images/GSFC-rl06v1.0-005.jpg filter=lfs diff=lfs merge=lfs -text
 images/GSFC-rl06v1.0-008.jpg filter=lfs diff=lfs merge=lfs -text
