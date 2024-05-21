@@ -89,7 +89,8 @@ def plot_mascon(base_dir, parameters):
     grace_file['rl06v1.0'] = 'GSFC.glb_.200204_202110_RL06v1.0_OBP-ICE6GD_0.h5'
     # grace_file['rl06v2.0'] = 'gsfc.glb_.200204_202112_rl06v2.0_obp-ice6gd.h5'
     # grace_file['rl06v2.0'] = 'gsfc.glb_.200204_202207_rl06v2.0_obp-ice6gd.h5'
-    grace_file['rl06v2.0'] = 'gsfc.glb_.200204_202211_rl06v2.0_obp-ice6gd.h5'
+    # grace_file['rl06v2.0'] = 'gsfc.glb_.200204_202211_rl06v2.0_obp-ice6gd.h5'
+    grace_file['rl06v2.0'] = 'gsfc.glb_.200204_202312_rl06v2.0_obp-ice6gd.h5'
     #-- valid date string (HDF5 attribute: 'days since 2002-01-00T00:00:00')
     date_string = 'days since 2002-01-01T00:00:00'
     epoch,to_secs = gravtk.time.parse_date_string(date_string)
