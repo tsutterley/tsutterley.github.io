@@ -57,6 +57,12 @@ jobs:
         sudo apt-get install texlive texlive-fonts-extra texlive-font-utils cm-super dvipng font-manager
         sudo ln -sv $PWD/assets/fonts/Helvetica /usr/share/fonts/truetype
         pip install --no-deps ./gravity-toolkit
+    - name: Lint with flake8
+      run: |
+        # stop the build if there are Python syntax errors or undefined names
+        flake8 data --count --select=E9,F63,F7,F82 --show-source --statistics
+        # exit-zero treats all errors as warnings. The GitHub editor is 127 chars wide
+        flake8 data --count --exit-zero --max-complexity=10 --max-line-length=127 --statistics
     - name: Test with pytest
       run: |
         pytest --verbose --capture=no data/test_font_files.py
