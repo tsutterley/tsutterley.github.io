@@ -54,12 +54,11 @@ jobs:
     - name: Install dependencies
       run: |
         sudo apt-get update
-        sudo apt-get install texlive texlive-fonts-extra texlive-font-utils
-        sudo apt-get install cm-super dvipng font-manager
-    - name: Test with pytest
-      run: |
+        sudo apt-get install texlive texlive-fonts-extra texlive-font-utils cm-super dvipng font-manager
         sudo ln -sv $PWD/assets/fonts/Helvetica /usr/share/fonts/truetype
         pip install --no-deps ./gravity-toolkit
+    - name: Test with pytest
+      run: |
         pytest --verbose --capture=no data/test_font_files.py
         pytest --verbose --capture=no data/test_cartopy.py
     - name: Download GRACE/GRACE-FO data
