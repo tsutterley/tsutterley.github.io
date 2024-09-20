@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 u"""
 podaac_cumulus.py
-Written by Tyler Sutterley (09/2023)
+Written by Tyler Sutterley (09/2024)
 
 Syncs GRACE/GRACE-FO data from NASA JPL PO.DAAC Cumulus AWS S3 bucket
 S3 Cumulus syncs are only available in AWS instances in us-west-2
@@ -118,23 +118,32 @@ def podaac_cumulus(DIRECTORY, PROC=[], DREL=[], VERSION=[],
                     mission='grace-fo', center=pr, release=rl,
                     version=version, provider='POCLOUD',
                     endpoint='data')
-                # verify that urls exist
-                if not urls:
-                    continue
                 # TN-13 JPL degree 1 files
-                url, = [url for url in urls if R1.search(url)]
-                granule = gravtk.utilities.url_split(url)[-1]
-                local_file = local_dir.joinpath(granule)
-                # access auxiliary data from endpoint
-                http_pull_file(url, mtime, local_file,
-                    TIMEOUT=TIMEOUT, GZIP=False, MODE=MODE)
+                try:
+                    url, = [url for url in urls if R1.search(url)]
+                except ValueError:
+                    logging.info('No TN-13 Files Available')
+                    pass
+                else:
+                    # extract the granule name from the url
+                    granule = gravtk.utilities.url_split(url)[-1]
+                    local_file = local_dir.joinpath(granule)
+                    # access auxiliary data from endpoint
+                    http_pull_file(url, mtime, local_file,
+                        TIMEOUT=TIMEOUT, GZIP=False, MODE=MODE)
                 # TN-14 SLR C2,0 and C3,0 files
-                url, = [url for url in urls if R2.search(url)]
-                granule = gravtk.utilities.url_split(url)[-1]
-                local_file = DIRECTORY.joinpath(granule)
-                # access auxiliary data from endpoint
-                http_pull_file(url, mtime, local_file,
-                    TIMEOUT=TIMEOUT, GZIP=False, MODE=MODE)
+                try:
+                    url, = [url for url in urls if R2.search(url)]
+                except ValueError:
+                    logging.info('No TN-14 Files Available')
+                    pass
+                else:
+                    # extract the granule name from the url
+                    granule = gravtk.utilities.url_split(url)[-1]
+                    local_file = DIRECTORY.joinpath(granule)
+                    # access auxiliary data from endpoint
+                    http_pull_file(url, mtime, local_file,
+                        TIMEOUT=TIMEOUT, GZIP=False, MODE=MODE)
 
     # GRACE/GRACE-FO level-2 spherical harmonic products
     logging.info('GRACE/GRACE-FO L2 Global Spherical Harmonics:')
