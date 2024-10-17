@@ -231,6 +231,8 @@ images/CSR-RL06-266.jpg filter=lfs diff=lfs merge=lfs -text
 images/CSR-RL06-267.jpg filter=lfs diff=lfs merge=lfs -text
 images/CSR-RL06-268.jpg filter=lfs diff=lfs merge=lfs -text
 images/CSR-RL06-269.jpg filter=lfs diff=lfs merge=lfs -text
+images/CSR-RL06-270.jpg filter=lfs diff=lfs merge=lfs -text
+images/CSR-RL06-271.jpg filter=lfs diff=lfs merge=lfs -text
 images/GFZ-RL06-004.jpg filter=lfs diff=lfs merge=lfs -text
 images/GFZ-RL06-005.jpg filter=lfs diff=lfs merge=lfs -text
 images/GFZ-RL06-008.jpg filter=lfs diff=lfs merge=lfs -text
@@ -464,6 +466,8 @@ images/GFZ-RL06-266.jpg filter=lfs diff=lfs merge=lfs -text
 images/GFZ-RL06-267.jpg filter=lfs diff=lfs merge=lfs -text
 images/GFZ-RL06-268.jpg filter=lfs diff=lfs merge=lfs -text
 images/GFZ-RL06-269.jpg filter=lfs diff=lfs merge=lfs -text
+images/GFZ-RL06-270.jpg filter=lfs diff=lfs merge=lfs -text
+images/GFZ-RL06-271.jpg filter=lfs diff=lfs merge=lfs -text
 images/GSFC-rl06v1.0-004.jpg filter=lfs diff=lfs merge=lfs -text
 images/GSFC-rl06v1.0-005.jpg filter=lfs diff=lfs merge=lfs -text
 images/GSFC-rl06v1.0-008.jpg filter=lfs diff=lfs merge=lfs -text
@@ -894,6 +898,9 @@ images/GSFC-rl06v2.0-261.jpg filter=lfs diff=lfs merge=lfs -text
 images/GSFC-rl06v2.0-262.jpg filter=lfs diff=lfs merge=lfs -text
 images/GSFC-rl06v2.0-263.jpg filter=lfs diff=lfs merge=lfs -text
 images/GSFC-rl06v2.0-264.jpg filter=lfs diff=lfs merge=lfs -text
+images/GSFC-rl06v2.0-265.jpg filter=lfs diff=lfs merge=lfs -text
+images/GSFC-rl06v2.0-266.jpg filter=lfs diff=lfs merge=lfs -text
+images/GSFC-rl06v2.0-267.jpg filter=lfs diff=lfs merge=lfs -text
 images/GSFC-v02.4-013.jpg filter=lfs diff=lfs merge=lfs -text
 images/GSFC-v02.4-014.jpg filter=lfs diff=lfs merge=lfs -text
 images/GSFC-v02.4-015.jpg filter=lfs diff=lfs merge=lfs -text
@@ -1275,3 +1282,5 @@ images/JPL-RL06-266.jpg filter=lfs diff=lfs merge=lfs -text
 images/JPL-RL06-267.jpg filter=lfs diff=lfs merge=lfs -text
 images/JPL-RL06-268.jpg filter=lfs diff=lfs merge=lfs -text
 images/JPL-RL06-269.jpg filter=lfs diff=lfs merge=lfs -text
+images/JPL-RL06-270.jpg filter=lfs diff=lfs merge=lfs -text
+images/JPL-RL06-271.jpg filter=lfs diff=lfs merge=lfs -text
