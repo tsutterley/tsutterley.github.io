@@ -70,12 +70,6 @@ jobs:
     - name: Download GRACE/GRACE-FO data
       run: |
         python data/podaac_cumulus.py --directory data/ --netrc data/.netrc \
-          --center GFZ --release RL06 --version 0 1 \
-          --timeout=3600 --log --np=0
-        python data/podaac_cumulus.py --directory data/ --netrc data/.netrc \
-          --center CSR --release RL06 --version 0 2 \
-          --timeout=3600 --log --np=0
-        python data/podaac_cumulus.py --directory data/ --netrc data/.netrc \
           --center CSR GFZ JPL --release RL06 --version 0 3 \
           --timeout=3600 --log --np=0
         grace_date.py --directory data/ --release RL06 --product GSM --output
