@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 u"""
 GSFC_grace_date.py
-Written by Tyler Sutterley (09/2024)
+Written by Tyler Sutterley (11/2024)
 
 Reads dates of GSFC GRACE mascon data file and assigns the month number
     reads the start and end date from the filename,
@@ -27,6 +27,7 @@ PROGRAM DEPENDENCIES:
     utilities.py: download and management utilities for syncing files
 
 UPDATE HISTORY:
+    Updated 11/2024: automatically parse for latest GSFC mascon file
     Updated 09/2024: added newer GSFC mascons for RL06v2.0
     Updated 05/2023: use pathlib to define and operate on paths
     Updated 04/2023: added newer GSFC mascons for RL06v2.0
@@ -45,6 +46,7 @@ UPDATE HISTORY:
     Written 07/2018
 """
 import sys
+import re
 import os
 import h5py
 import inspect
@@ -65,24 +67,12 @@ def get_GSFC_grace_mascons(base_dir, TIMEOUT=None, RETRY=5,
     HOST = {}
     HOST['v02.4'] = ['https://earth.gsfc.nasa.gov','sites','default','files',
         'neptune','grace','mascons_2.4','GSFC.glb.200301_201607_v02.4.hdf']
-    # HOST['rl06v1.0'] = ['https://earth.gsfc.nasa.gov','sites','default','files',
-    #     '2021-03','gsfc.glb_.200204_202009_rl06v1.0_obp-ice6gd.h5']
-    # HOST['rl06v1.0'] = ['https://earth.gsfc.nasa.gov','sites','default','files',
-    #     '2021-10','gsfc.glb_.200204_202107_rl06v1.0_obp-ice6gd.h5']
     HOST['rl06v1.0'] = ['https://earth.gsfc.nasa.gov','sites','default','files',
         '2022-01','GSFC.glb_.200204_202110_RL06v1.0_OBP-ICE6GD_0.h5']
-    # HOST['rl06v2.0'] = ['https://earth.gsfc.nasa.gov','sites','default','files',
-    #     '2022-05','gsfc.glb_.200204_202112_rl06v2.0_obp-ice6gd.h5']
-    # HOST['rl06v2.0'] = ['https://earth.gsfc.nasa.gov','sites','default','files',
-    #     '2022-10','gsfc.glb_.200204_202207_rl06v2.0_obp-ice6gd.h5']
-    # HOST['rl06v2.0'] = ['https://earth.gsfc.nasa.gov','sites','default','files',
-    #     '2023-03','gsfc.glb_.200204_202211_rl06v2.0_obp-ice6gd.h5']
-    # HOST['rl06v2.0'] = ['https://earth.gsfc.nasa.gov','sites','default','files',
-    #     'geo','gsfc.glb_.200204_202312_rl06v2.0_obp-ice6gd.h5']
-    # HOST['rl06v2.0'] = ['https://earth.gsfc.nasa.gov','sites','default','files',
-    #     'geo','gsfc.glb_.200204_202403_rl06v2.0_obp-ice6gd.h5']
-    HOST['rl06v2.0'] = ['https://earth.gsfc.nasa.gov','sites','default','files',
-        'geo','gsfc.glb_.200204_202406_rl06v2.0_obp-ice6gd.h5']
+    # get latest GSFC GRACE mascons
+    url, = gravtk.utilities.gsfc_list(pattern=r'obp-ice6gd\.h5')
+    m = re.search(r'(rl\d+(v\d+(\.\d+)?)?)', url, re.IGNORECASE)
+    HOST[m.group(0)] = gravtk.utilities.url_split(url)
     # local file
     base_dir = pathlib.Path(base_dir).expanduser().absolute()
     local = base_dir.joinpath(PROC,VERSION,DSET,HOST[VERSION][-1])
@@ -99,7 +89,8 @@ def get_GSFC_grace_mascons(base_dir, TIMEOUT=None, RETRY=5,
         except:
             pass
         else:
-            return
+            # return the local file path
+            return local
         # add to retry counter
         retry_counter += 1
     # check if maximum number of retries were reached
@@ -141,31 +132,19 @@ def from_http(HOST,timeout=None,local=None,verbose=False,mode=0o775):
     # change the permissions mode
     local.chmod(mode=mode)
 
-def GSFC_grace_date(base_dir, VERSION='v02.4', MODE=0o775):
+def GSFC_grace_date(input_file, VERSION='v02.4', MODE=0o775):
     # set GRACE parameters
     PROC, DSET = 'GSFC', 'GSM'
+    # validate the input GRACE file
+    input_file = pathlib.Path(input_file).expanduser().absolute()
     # set the GRACE directory
-    base_dir = pathlib.Path(base_dir).expanduser().absolute()
-    grace_dir = base_dir.joinpath(PROC,VERSION,DSET)
-    # dictionary of GSFC GRACE mascon files
-    grace_file = {}
-    grace_file['v02.4'] = 'GSFC.glb.200301_201607_v02.4.hdf'
-    # grace_file['rl06v1.0'] = 'gsfc.glb_.200204_202009_rl06v1.0_obp-ice6gd.h5'
-    # grace_file['rl06v1.0'] = 'gsfc.glb_.200204_202107_rl06v1.0_obp-ice6gd.h5'
-    grace_file['rl06v1.0'] = 'GSFC.glb_.200204_202110_RL06v1.0_OBP-ICE6GD_0.h5'
-    # grace_file['rl06v2.0'] = 'gsfc.glb_.200204_202112_rl06v2.0_obp-ice6gd.h5'
-    # grace_file['rl06v2.0'] = 'gsfc.glb_.200204_202207_rl06v2.0_obp-ice6gd.h5'
-    # grace_file['rl06v2.0'] = 'gsfc.glb_.200204_202211_rl06v2.0_obp-ice6gd.h5'
-    # grace_file['rl06v2.0'] = 'gsfc.glb_.200204_202312_rl06v2.0_obp-ice6gd.h5'
-    # grace_file['rl06v2.0'] = 'gsfc.glb_.200204_202403_rl06v2.0_obp-ice6gd.h5'
-    grace_file['rl06v2.0'] = 'gsfc.glb_.200204_202406_rl06v2.0_obp-ice6gd.h5'
+    grace_dir = input_file.parent
     # valid date string (HDF5 attribute: 'days since 2002-01-00T00:00:00')
     date_string = 'days since 2002-01-01T00:00:00'
     epoch,to_secs = gravtk.time.parse_date_string(date_string)
     # dictionary of start, end and mid-dates as Modified Julian Days
     MJD = {}
     # read the HDF5 file
-    input_file = grace_dir.joinpath(grace_file[VERSION])
     with h5py.File(input_file, mode='r') as fileID:
         # output HDF5 file information
         logging.info(fileID.filename)
@@ -302,10 +281,10 @@ def main():
     logging.basicConfig(level=loglevels[args.verbose])
 
     # get GSFC GRACE mascon data
-    get_GSFC_grace_mascons(args.directory, TIMEOUT=args.timeout,
+    local = get_GSFC_grace_mascons(args.directory, TIMEOUT=args.timeout,
         RETRY=args.retry, VERSION=args.version, MODE=args.mode)
     # run GSFC GRACE mascon date program
-    GSFC_grace_date(args.directory, VERSION=args.version, MODE=args.mode)
+    GSFC_grace_date(local, VERSION=args.version, MODE=args.mode)
 
 # run main program
 if __name__ == '__main__':
