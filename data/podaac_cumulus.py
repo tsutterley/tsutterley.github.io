@@ -117,7 +117,7 @@ def podaac_cumulus(DIRECTORY, PROC=[], DREL=[], VERSION=[],
                 urls = gravtk.utilities.cmr_metadata(
                     mission='grace-fo', center=pr, release=rl,
                     version=version, provider='POCLOUD',
-                    endpoint='data')
+                    endpoint='documentation')
                 # TN-13 JPL degree 1 files
                 try:
                     url, = [url for url in urls if R1.search(url)]
