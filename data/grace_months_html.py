@@ -211,6 +211,7 @@ def grace_months(base_dir, DREL=['RL06','rl06v1.0']):
     print('\t\t\t<a href="../resources/index.html">Resources</a>', file=fid)
     print('\t\t\t<a href="../animations/greenland.html">GRACE Greenland Animation</a>', file=fid)
     print('\t\t\t<a href="../animations/antarctica.html">GRACE Antarctic Animation</a>', file=fid)
+    print('\t\t\t<a href="./ICESat-2-Cycles.html">ICESat-2 Cycles</a>', file=fid)
     print(('\t\t</div>\n\t\t<span style="font-size:20px;cursor:pointer" '
         'onclick="openNav()">&#9776;</span>'), file=fid)
     print('\t\t<table>', file=fid)

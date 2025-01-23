@@ -139,10 +139,8 @@ def nsidc_subset_altimetry(PRODUCT, filepath, BOUNDS=None, LATITUDE=None,
         ax1.set_xlabel(u'Longitude [\u00B0]', fontsize=12)
         ax1.xaxis.set_major_formatter(ticker.FormatStrFormatter('%g'))
         ax1.yaxis.set_major_formatter(ticker.FormatStrFormatter('%g'))
-        for tick in ax1.xaxis.get_major_ticks():
-            tick.label.set_fontsize(12)
-        for tick in ax1.yaxis.get_major_ticks():
-            tick.label.set_fontsize(12)
+        ax1.tick_params(axis='both', which='both',
+            labelsize=12, direction='in')
         #-- show the plot
         plt.show()
 
