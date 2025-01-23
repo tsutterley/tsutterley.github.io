@@ -31,6 +31,8 @@ jobs:
       with:
         micromamba-version: 'latest'
         init-shell: bash
+        environment-name: icesat2
+        cache-environment: true
         post-cleanup: 'all'
         create-args: >-
           python=${{ matrix.python-version }}
