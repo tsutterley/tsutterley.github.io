@@ -76,7 +76,7 @@ jobs:
         python data/GSFC_grace_date.py --version rl06v2.0 --directory data/
         grace_months_index.py --directory data/ --release RL06 rl06v2.0
     - name: Archive GRACE/GRACE-FO dates
-      uses: actions/upload-artifact@v3
+      uses: actions/upload-artifact@v4
       with:
         name: grace-months
         path: |
