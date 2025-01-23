@@ -139,12 +139,8 @@ def geocenter_processing_centers(grace_dir,DREL,START_MON,END_MON,MISSING):
         ax[j].set_xlim(xmin, xmax)
         ax[j].set_ylim(-11.75,7.75)
         #-- axes tick adjustments
-        ax[j].get_xaxis().set_tick_params(which='both', direction='in')
-        ax[j].get_yaxis().set_tick_params(which='both', direction='in')
-        for tick in ax[j].xaxis.get_major_ticks():
-            tick.label.set_fontsize(14)
-        for tick in ax[j].yaxis.get_major_ticks():
-            tick.label.set_fontsize(14)
+        ax[j].tick_params(axis='both', which='both',
+            labelsize=14, direction='in')
 
     #-- add legend
     lgd = ax[0].legend(loc=3,frameon=False)

@@ -1,0 +1,81 @@
+# This workflow will install Python dependencies and update the html tables
+
+name: Auto-Update Cycles
+
+on:
+  schedule:
+    # * is a special character in YAML so you have to quote this string
+    - cron:  '0 0 * * *'
+  workflow_dispatch:
+  pull_request:
+
+jobs:
+  build:
+
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        os: [ubuntu-latest]
+        python-version: [3.11]
+    env:
+      OS: ${{ matrix.os }}
+      PYTHON: ${{ matrix.python-version }}
+    defaults:
+      run:
+        shell: bash -l {0}
+
+    steps:
+    - uses: actions/checkout@v4
+    - name: Set up mamba ${{ matrix.python-version }}
+      uses: mamba-org/setup-micromamba@v1
+      with:
+        micromamba-version: 'latest'
+        init-shell: bash
+        environment-name: icesat2
+        cache-environment: true
+        post-cleanup: 'all'
+        create-args: >-
+          python=${{ matrix.python-version }}
+          flake8
+          pytest
+          pytest-cov
+          lxml
+    - name: Lint with flake8
+      run: |
+        # stop the build if there are Python syntax errors or undefined names
+        flake8 data --count --select=E9,F63,F7,F82 --show-source --statistics
+        # exit-zero treats all errors as warnings. The GitHub editor is 127 chars wide
+        flake8 data --count --exit-zero --max-complexity=10 --max-line-length=127 --statistics
+    - name: Make Tables
+      run: |
+        python data/icesat2_cycles_html.py
+    - name: Archive ICESat-2 cycles
+      uses: actions/upload-artifact@v4
+      with:
+        name: icesat-2-cycles
+        path: |
+            data/ICESat2_cycles.csv
+    - name: Check for updates
+      id: changes
+      run: |
+        if [ -n "$(git status --porcelain data/ICESat2_cycles.csv)" ] ; then
+            echo "DETECTED=true" >> $GITHUB_OUTPUT;
+            echo "::debug::Changes detected";
+        else
+            echo "DETECTED=false" >> $GITHUB_OUTPUT;
+            echo "::debug::No changes detected";
+        fi
+    - name: Commit changes
+      if: steps.changes.outputs.DETECTED == 'true'
+      run: |
+        git config user.name 'Github Actions'
+        git config user.email 'actions@github.com'
+        git add data/ICESat-2-Cycles.html data/ICESat2_cycles.csv 
+        git commit -am "Automatic cycle updates"
+    - name: Create pull request
+      if: steps.changes.outputs.DETECTED == 'true'
+      uses: peter-evans/create-pull-request@v5
+      with:
+        assignees: ${{ github.actor }}
+        author: ${{ github.actor }} <${{ github.actor }}@users.noreply.github.com>
+        title: "Automatic cycle updates"
