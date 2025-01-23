@@ -48,7 +48,7 @@ jobs:
         flake8 data --count --exit-zero --max-complexity=10 --max-line-length=127 --statistics
     - name: Make Tables
       run: |
-        python data/icesat2_cycle_html.py
+        python data/icesat2_cycles_html.py
     - name: Archive ICESat-2 cycles
       uses: actions/upload-artifact@v4
       with:
