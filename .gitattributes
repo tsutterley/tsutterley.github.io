@@ -479,6 +479,7 @@ images/GFZ-RL06-273.jpg filter=lfs diff=lfs merge=lfs -text
 images/GFZ-RL06-274.jpg filter=lfs diff=lfs merge=lfs -text
 images/GFZ-RL06-275.jpg filter=lfs diff=lfs merge=lfs -text
 images/GFZ-RL06-276.jpg filter=lfs diff=lfs merge=lfs -text
+images/GFZ-RL06-277.jpg filter=lfs diff=lfs merge=lfs -text
 images/GSFC-rl06v1.0-004.jpg filter=lfs diff=lfs merge=lfs -text
 images/GSFC-rl06v1.0-005.jpg filter=lfs diff=lfs merge=lfs -text
 images/GSFC-rl06v1.0-008.jpg filter=lfs diff=lfs merge=lfs -text
