@@ -239,6 +239,8 @@ images/CSR-RL06-274.jpg filter=lfs diff=lfs merge=lfs -text
 images/CSR-RL06-275.jpg filter=lfs diff=lfs merge=lfs -text
 images/CSR-RL06-276.jpg filter=lfs diff=lfs merge=lfs -text
 images/CSR-RL06-277.jpg filter=lfs diff=lfs merge=lfs -text
+images/CSR-RL06-278.jpg filter=lfs diff=lfs merge=lfs -text
+images/CSR-RL06-279.jpg filter=lfs diff=lfs merge=lfs -text
 images/GFZ-RL06-004.jpg filter=lfs diff=lfs merge=lfs -text
 images/GFZ-RL06-005.jpg filter=lfs diff=lfs merge=lfs -text
 images/GFZ-RL06-008.jpg filter=lfs diff=lfs merge=lfs -text
@@ -480,6 +482,8 @@ images/GFZ-RL06-274.jpg filter=lfs diff=lfs merge=lfs -text
 images/GFZ-RL06-275.jpg filter=lfs diff=lfs merge=lfs -text
 images/GFZ-RL06-276.jpg filter=lfs diff=lfs merge=lfs -text
 images/GFZ-RL06-277.jpg filter=lfs diff=lfs merge=lfs -text
+images/GFZ-RL06-278.jpg filter=lfs diff=lfs merge=lfs -text
+images/GFZ-RL06-279.jpg filter=lfs diff=lfs merge=lfs -text
 images/GSFC-rl06v1.0-004.jpg filter=lfs diff=lfs merge=lfs -text
 images/GSFC-rl06v1.0-005.jpg filter=lfs diff=lfs merge=lfs -text
 images/GSFC-rl06v1.0-008.jpg filter=lfs diff=lfs merge=lfs -text
@@ -1309,3 +1313,5 @@ images/JPL-RL06-274.jpg filter=lfs diff=lfs merge=lfs -text
 images/JPL-RL06-275.jpg filter=lfs diff=lfs merge=lfs -text
 images/JPL-RL06-276.jpg filter=lfs diff=lfs merge=lfs -text
 images/JPL-RL06-277.jpg filter=lfs diff=lfs merge=lfs -text
+images/JPL-RL06-278.jpg filter=lfs diff=lfs merge=lfs -text
+images/JPL-RL06-279.jpg filter=lfs diff=lfs merge=lfs -text
