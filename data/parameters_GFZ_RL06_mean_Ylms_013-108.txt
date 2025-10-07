@@ -12,7 +12,7 @@
 --slr-c30	GSFC		# Use SLR C3,0 values (CSR/GFZ/GSFC)
 #--slr-c50	None		# Use SLR C5,0 values (CSR/GSFC)
 #--geocenter	None	#-- Degree 1 (None, Tellus, SLR, SLF)
---mean-file	data/GFZ/RL06/GSM/GFZ_RL06_GSM_MEAN_CLM_wSLR_C20_L60_013-108.nc
+--mean-file	GFZ/RL06/GSM/GFZ_RL06_GSM_MEAN_CLM_wSLR_C20_L60_013-108.nc
 --mean-format netCDF4   # Output data format (ascii, netCDF, HDF5)
 #--pole-tide	#-- Pole Tide Correction from Wahr et al. (2015)
 #--atm-correction	#-- Use GAE/GAF/GAG atmospheric correction coefficients

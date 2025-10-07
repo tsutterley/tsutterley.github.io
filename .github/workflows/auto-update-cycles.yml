@@ -26,29 +26,19 @@ jobs:
 
     steps:
     - uses: actions/checkout@v4
-    - name: Set up mamba ${{ matrix.python-version }}
-      uses: mamba-org/setup-micromamba@v1
       with:
-        micromamba-version: 'latest'
-        init-shell: bash
-        environment-name: icesat2
-        cache-environment: true
-        post-cleanup: 'all'
-        create-args: >-
-          python=${{ matrix.python-version }}
-          flake8
-          pytest
-          pytest-cov
-          lxml
+        lfs: true
+    - name: Set up pixi environment
+      uses: prefix-dev/setup-pixi@v0.9.1
     - name: Lint with flake8
       run: |
         # stop the build if there are Python syntax errors or undefined names
-        flake8 data --count --select=E9,F63,F7,F82 --show-source --statistics
+        pixi run lint
         # exit-zero treats all errors as warnings. The GitHub editor is 127 chars wide
-        flake8 data --count --exit-zero --max-complexity=10 --max-line-length=127 --statistics
+        pixi run lint "--exit-zero --max-complexity=10 --max-line-length=127"
     - name: Make Tables
       run: |
-        python data/icesat2_cycles_html.py
+        pixi run python data/icesat2_cycles_html.py
     - name: Archive ICESat-2 cycles
       uses: actions/upload-artifact@v4
       with:

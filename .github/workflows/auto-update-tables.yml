@@ -16,7 +16,6 @@ jobs:
     strategy:
       matrix:
         os: [ubuntu-latest]
-        python-version: [3.11]
     env:
       OS: ${{ matrix.os }}
       PYTHON: ${{ matrix.python-version }}
@@ -31,50 +30,27 @@ jobs:
     - uses: actions/checkout@v4
       with:
         lfs: true
-    - name: Checkout git dependencies
-      uses: actions/checkout@v4
-      with:
-        repository: tsutterley/gravity-toolkit
-        path: gravity-toolkit
-    - name: Set up mamba ${{ matrix.python-version }}
-      uses: mamba-org/setup-micromamba@v1
-      with:
-        micromamba-version: 'latest'
-        environment-file: ./gravity-toolkit/.binder/environment.yml
-        init-shell: bash
-        environment-name: gravity_toolkit
-        cache-environment: true
-        post-cleanup: 'all'
-        create-args: >-
-          python=${{ matrix.python-version }}
-          flake8
-          pytest
-          pytest-cov
-          cython
     - name: Install dependencies
       run: |
         sudo apt-get update
         sudo apt-get install texlive texlive-fonts-extra texlive-font-utils cm-super dvipng font-manager
         sudo ln -sv $PWD/assets/fonts/Helvetica /usr/share/fonts/truetype
-        pip install --no-deps ./gravity-toolkit
+    - name: Set up pixi environment
+      uses: prefix-dev/setup-pixi@v0.9.1
     - name: Lint with flake8
       run: |
         # stop the build if there are Python syntax errors or undefined names
-        flake8 data --count --select=E9,F63,F7,F82 --show-source --statistics
+        pixi run lint
         # exit-zero treats all errors as warnings. The GitHub editor is 127 chars wide
-        flake8 data --count --exit-zero --max-complexity=10 --max-line-length=127 --statistics
+        pixi run lint "--exit-zero --max-complexity=10 --max-line-length=127"
     - name: Test with pytest
       run: |
-        pytest --verbose --capture=no data/test_font_files.py
-        pytest --verbose --capture=no data/test_cartopy.py
+        pixi run pytest --verbose --capture=no data/test_font_files.py
+        pixi run pytest --verbose --capture=no data/test_cartopy.py
     - name: Download GRACE/GRACE-FO data
       run: |
-        python data/podaac_cumulus.py --directory data/ --netrc data/.netrc \
-          --center CSR GFZ JPL --release RL06 --version 0 3 \
-          --timeout=3600 --log --np=0
-        grace_date.py --directory data/ --release RL06 --product GSM --output
-        python data/GSFC_grace_date.py --version rl06v2.0 --directory data/
-        grace_months_index.py --directory data/ --release RL06 rl06v2.0
+        pixi run fetch
+        pixi run date-index
     - name: Archive GRACE/GRACE-FO dates
       uses: actions/upload-artifact@v4
       with:
@@ -95,25 +71,7 @@ jobs:
     - name: Update GRACE/GRACE-FO tables
       if: steps.changes.outputs.DETECTED == 'true'
       run: |
-        python -c "import gravity_toolkit.utilities; gravity_toolkit.utilities.from_gfz(directory='data')"
-        #curl https://www.atmosp.physics.utoronto.ca/~peltier/datasets/Ice6G_C_VM5a/ICE-6G_High_Res_Stokes_trend.txt.gz \
-        #  -o data/ICE-6G_High_Res_Stokes_trend.txt.gz
-        #gunzip data/ICE-6G_High_Res_Stokes_trend.txt.gz
-        grace_mean_harmonics.py --directory data/ --verbose @data/parameters_CSR_RL06_mean_Ylms_013-108.txt
-        grace_mean_harmonics.py --directory data/ --verbose @data/parameters_GFZ_RL06_mean_Ylms_013-108.txt
-        grace_mean_harmonics.py --directory data/ --verbose @data/parameters_JPL_RL06_mean_Ylms_013-108.txt
-        python data/plot_global_grace_maps.py --directory data/ \
-            data/plot_parameters_CSR_RL06_L60_r350km.txt \
-            data/plot_parameters_GRFO_CSR_RL06_L60_r350km.txt \
-            data/plot_parameters_GFZ_RL06_L60_r350km.txt \
-            data/plot_parameters_GRFO_GFZ_RL06_L60_r350km.txt \
-            data/plot_parameters_JPL_RL06_L60_r350km.txt \
-            data/plot_parameters_GRFO_JPL_RL06_L60_r350km.txt
-        python data/plot_GSFC_global_mascons.py --directory data/ \
-            data/plot_parameters_GSFC_glb_rl06v2.0.txt
-        python data/grace_months_html.py --directory data/
-        python data/git_lfs_attributes.py --directory images/ \
-            --regex "^(CSR|GFZ|GSFC|JPL)-(.*?)-(\d+).jpg"
+        pixi run update-tables
     - name: Commit changes
       if: steps.changes.outputs.DETECTED == 'true'
       run: |

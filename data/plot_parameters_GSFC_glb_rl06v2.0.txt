@@ -2,7 +2,7 @@ PROC	GSFC			#-- Processing Center
 DREL	rl06v2.0		#-- GSFC Data Version
 DSET	GSM				#-- Data Product
 MEAN	13,108		#-- Start and End Month for mean (or None)
-DIRECTORY	images
+DIRECTORY	../images
 PRANGE		-100,100,20
 CRANGE		-200,200,20
 BOUNDARY	None

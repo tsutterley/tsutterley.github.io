@@ -15,12 +15,12 @@ SLR_C50	None		# Use SLR C5,0 values (CSR/GSFC)
 DEG1	None	#-- Degree 1 (None, Tellus, SLR, SLF)
 MODEL_DEG1 N	#-- Model missing degree 1 values by least-squares fit
 GIA	ICE6G-D	#-- GIA model group (AW13, IJ05-R2, W12a, M09, ICE6G, Wu10, IJ05-Test, AW13-ICE6G, Caron, ICE6G-D)
-GIA_FILE	data/Stokes_trend_VM5a_O512.txt	#-- Specific GIA file to read
+GIA_FILE	Stokes_trend_VM5a_O512.txt	#-- Specific GIA file to read
 UNITS	1			#-- Output units (1: cm Water Eq, 2: mm Geoid, 3: mm Crustal, 4: micGal gravity)
 DATAFORM	netCDF4		#-- Input and output data format (ascii, netCDF4, HDF5)
-DIRECTORY	images
+DIRECTORY	../images
 MEAN		Y	#-- Remove Mean gravity field (default mean of imported months)
-MEAN_FILE	data/JPL/RL05/GSM/JPL_RL05_GSM_MEAN_CLM_wSLR_C20_L60_013-108.nc	#-- choose a file to remove as static field (if MEAN == Y).  None is Default
+MEAN_FILE	JPL/RL05/GSM/JPL_RL05_GSM_MEAN_CLM_wSLR_C20_L60_013-108.nc	#-- choose a file to remove as static field (if MEAN == Y).  None is Default
 MEANFORM	netCDF4	#-- Data format for input MEAN_FILE (ascii, netCDF4, HDF5)
 DESTRIPE	Y	#-- filter coefficients with a destriping algorithm
 RAD	350		#-- Gaussian Smoothing Radius

@@ -36,17 +36,24 @@
 *.gmtdefaults4
 .RData
 .Rhistory
+octave-workspace
 __pycache__
 build/
+_build/
 dist/
 develop-eggs/
 run/
 wheels/
+.eggs/
 *.egg-info/
 .installed.cfg
 *.egg
 .pytest_cache
+.coverage
 pythonenv*/
+venv/
+*build-commands.txt
+setup-miniconda-patched-environment.yml
 
 # OS generated files #
 ######################
@@ -61,7 +68,7 @@ Thumbs.db
 .uuid
 
 # LaTeX and Vim #
-######################
+#################
 *.aux
 *.bbl
 *.blg
@@ -75,6 +82,7 @@ Thumbs.db
 *.ilg
 *.ind
 *.ist
+*.jats
 *.lof
 *.log
 *.lot
@@ -101,11 +109,17 @@ Thumbs.db
 .!*
 *.hidden
 None*.png
+*.gfc
 
 # Jupyter Checkpoints #
 #######################
 .ipynb_checkpoints
 Untitled.ipynb
+core.*
+
+# Large data files #
+####################
+*-complete.dat
 
 # Untracked GitHub Actions #
 ############################
@@ -118,3 +132,11 @@ data/geocenter/
 data/TN-*
 data/ICE-6G_High_Res_Stokes_trend.*
 data/*.dat
+
+# pixi environments #
+#####################
+.pixi/*
+!.pixi/config.toml
+# pixi environments
+.pixi/*
+!.pixi/config.toml
