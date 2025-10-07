@@ -1334,3 +1334,5 @@ images/JPL-RL06-280.jpg filter=lfs diff=lfs merge=lfs -text
 images/JPL-RL06-281.jpg filter=lfs diff=lfs merge=lfs -text
 images/JPL-RL06-282.jpg filter=lfs diff=lfs merge=lfs -text
 images/JPL-RL06-283.jpg filter=lfs diff=lfs merge=lfs -text
+# SCM syntax highlighting & preventing 3-way merges
+pixi.lock merge=binary linguist-language=YAML linguist-generated=true

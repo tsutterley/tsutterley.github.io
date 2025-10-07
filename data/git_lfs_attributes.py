@@ -12,6 +12,9 @@ def git_lfs_attributes(d, regex):
     lfs_files = [os.path.join(d,f) for f in os.listdir(d) if regex.match(f)]
     # open git attributes file
     with open('.gitattributes','w') as fid:
+        # print pixi header
+        fid.write('# SCM syntax highlighting & preventing 3-way merges\n')
+        fid.write('pixi.lock merge=binary linguist-language=YAML linguist-generated=true\n')
         # print files in order
         for f in sorted(lfs_files):
             fid.write('{0} filter=lfs diff=lfs merge=lfs -text\n'.format(f))
