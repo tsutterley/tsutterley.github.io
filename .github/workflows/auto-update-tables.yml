@@ -72,6 +72,7 @@ jobs:
       if: steps.changes.outputs.DETECTED == 'true'
       run: |
         pixi run update-tables
+        pixi run update-lfs-attributes
     - name: Commit changes
       if: steps.changes.outputs.DETECTED == 'true'
       run: |
