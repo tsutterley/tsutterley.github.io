@@ -36,7 +36,7 @@ jobs:
         sudo apt-get install texlive texlive-fonts-extra texlive-font-utils cm-super dvipng font-manager
         sudo ln -sv $PWD/assets/fonts/Helvetica /usr/share/fonts/truetype
     - name: Set up pixi environment
-      uses: prefix-dev/setup-pixi@v0.9.1
+      uses: prefix-dev/setup-pixi@v0.9.6
     - name: Lint with flake8
       run: |
         # stop the build if there are Python syntax errors or undefined names
