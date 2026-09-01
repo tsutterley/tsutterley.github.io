@@ -45,10 +45,9 @@ jobs:
         pixi run lint
         # exit-zero treats all errors as warnings. The GitHub editor is 127 chars wide
         pixi run lint "--exit-zero --max-complexity=10 --max-line-length=127"
-    - name: Test with pytest
+    - name: Check installations for creating tables
       run: |
-        pixi run pytest --verbose --capture=no static/data/test_font_files.py
-        pixi run pytest --verbose --capture=no static/data/test_cartopy.py
+        pixi run test
     - name: Download GRACE/GRACE-FO data
       run: |
         pixi run fetch
