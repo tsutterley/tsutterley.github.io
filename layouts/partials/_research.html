@@ -1,0 +1,14 @@
+{{ if .Research }}
+<div id="research" class="section">
+    <div class="section__heading">
+        <h2 class="section__title">{{ i18n "research" }}</h2>
+    </div>
+    <div class="section__content">
+        <ul class="research">
+            {{ range .Research }}
+            <li>{{ . | safeHTML | emojify }}</li>
+            {{ end }}
+        </ul>
+    </div>
+</div>
+{{ end }}

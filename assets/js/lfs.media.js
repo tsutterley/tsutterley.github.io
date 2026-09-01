@@ -1,6 +1,6 @@
 function lfsmedia() {
     var media = document.getElementsByClassName("lfs");
-    var lfs = "https://media.githubusercontent.com/media/tsutterley/tsutterley.github.io/main/";
+    var lfs = "https://media.githubusercontent.com/media/tsutterley/tsutterley.github.io/main/static/";
     for (var i = 0; i < media.length; i++) {
         media[i].src = lfs + media[i].getAttribute('data-path') + "?raw=true";
     }

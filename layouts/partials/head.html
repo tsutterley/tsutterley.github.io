@@ -1,10 +1,14 @@
 {{ $style := resources.Get "scss/main.scss" | resources.ExecuteAsTemplate "style.main.scss" . | toCSS | fingerprint }}
 {{ $data := .Scratch.Get "data" }}
-{{ $js := resources.Get "js/lfs.media.js" | resources.Minify }}
 
+{{- $scripts := slice -}}
+{{- range resources.Match "js/*.js" -}}
+{{ $scripts = $scripts | append (resources.ExecuteAsTemplate .Name $ .) }}
+{{- end -}}
+{{- $js := $scripts | resources.Concat "js/main.js" | minify | fingerprint -}}
 
 <head>
-    <script>{{ $js.Content | safeJS }}</script>
+    <script src="{{ $js.RelPermalink }}" integrity="{{ $js.Data.Integrity }}"></script>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>{{ .Site.Title }}</title>

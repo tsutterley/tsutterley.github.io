@@ -23,6 +23,23 @@ Profile: |
   I help monitor changes in ice mass and ice volume of the Greenland
   and Antarctic ice sheets using airborne and satellite measurements.
 
+Links:
+  - <a class="links__link" href="/data/ICESat-2-Cycles.html">ICESat-2 Cycles</a>
+  - <a class="links__link" href="/data/GRACE-Months.html">GRACE Months</a>
+  - <a class="links__link" href="/animations/antarctica.html">GRACE Antarctic Animation</a>
+  - <a class="links__link" href="/animations/greenland.html">GRACE Greenland Animation</a>
+  - <a class="links__link" href="/references/publications.html">Publications</a>
+  - <a class="links__link" href="/references/presentations.html">Presentations</a>
+  - <a class="links__link" href="/resources">Resources</a>
+
+Research:
+  - Measuring <span>surface elevation and elevation-change</span> of the Greenland and Antarctic ice sheets using airborne and satellite altimetry, such as from NASA's ICESat-2 mission
+  - Estimating <span>glacier and ice sheet mass-change</span> using observations of <span>time-variable gravity</span> provided by the NASA/DLR GRACE and NASA/GFZ GRACE Follow-On missions
+  - Improving predictions of <span>ocean and Earth tides</span>, particularly in the Southern Ocean and under Antarctic ice shelves
+  - Developing <span>on-demand and cloud-based services</span> for accessing and processing satellite data
+  - Developing techniques for fusing datasets from multiple sensors in order to resolve <span>ice sheet topography at high resolution</span> and over rough, crevassed and marginal terrains
+  - Trying to understand the present-day contributions of glaciers and ice sheets to sea level, and translate remote sensing observations into <span>relevant and actionable pieces of information</span>.
+
 Experience:
   - Employer: |
       <a class="links__link" href="https://www.washington.edu/">University of Washington</a>,
@@ -41,7 +58,7 @@ Experience:
     Positions:
       - Title: NASA Postdoctoral Program Fellow
         Date: Apr 2018 -- May 2019
-        Details: <a class="links__link" href="https://earth.gsfc.nasa.gov/cryo/">GSFC Cryospheric Sciences Laboratory</a>
+        Details: <a class="links__link" href="https://science.gsfc.nasa.gov/earth/cryosphere/">GSFC Cryospheric Sciences Laboratory</a>
   - Employer: |
       <a class="links__link" href="https://ess.uci.edu/">University of California, Irvine</a>
     Place: Irvine, CA
@@ -66,19 +83,10 @@ Education:
     Class: "education__extra_padding"
     Place: University of California, Irvine
     Date: Sep 2010 -- Jun 2012
-  - Course: B.S. Earth System Science
+  - Course: B.S. Mechanical Engineering
     Class: "education__extra_padding"
     Place: University of California, San Diego
     Date: Sep 2004 -- Jun 2008
-
-Links:
-  - <a class="links__link" href="/data/ICESat-2-Cycles.html">ICESat-2 Cycles</a>
-  - <a class="links__link" href="/data/GRACE-Months.html">GRACE Months</a>
-  - <a class="links__link" href="/animations/antarctica.html">GRACE Antarctic Animation</a>
-  - <a class="links__link" href="/animations/greenland.html">GRACE Greenland Animation</a>
-  - <a class="links__link" href="/references/publications.html">Publications</a>
-  - <a class="links__link" href="/references/presentations.html">Presentations</a>
-  - <a class="links__link" href="/resources">Resources</a>
 
 Software:
   - Family: <a class="links__link" href="https://geoid-toolkit.readthedocs.org/">geoid-toolkit</a>

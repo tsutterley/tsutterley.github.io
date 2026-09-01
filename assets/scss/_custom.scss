@@ -131,6 +131,30 @@
     }
 }
 
+.links {
+    &__link {
+        text-decoration: none;
+        color: $color-secondary;
+        transition: all 0.2s ease-in-out;        
+        &:hover {
+            color: $color-primary;
+            text-decoration: underline !important;
+        }
+    }
+
+    & li{
+        font-size: 105%;
+        font-weight: 400;
+    }
+}
+
+.research {
+    & span {
+        color: $color-secondary;
+        font-weight: 700;
+    }
+}
+
 .software {
     &__group {
         margin-bottom: 0.8rem;
@@ -168,23 +192,6 @@
                 color: $color-light;
             }
         }
-    }
-}
-
-.links {
-    &__link {
-        text-decoration: none;
-        color: $color-secondary;
-        transition: all 0.2s ease-in-out;        
-        &:hover {
-            color: $color-primary;
-            text-decoration: underline !important;
-        }
-    }
-
-    & li{
-        font-size: 105%;
-        font-weight: 400;
     }
 }
 

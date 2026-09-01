@@ -1,11 +1,17 @@
 [profile]
-other = "Profile"
+other = "About Me"
+
+[education]
+other = "Some Cool Schools"
 
 [experience]
-other = "Places I've Been"
+other = "Some Places I've Been"
+
+[research]
+other = "Some Research Focuses"
 
 [software]
 other = "Some Software"
 
 [links]
-other = "Main Menu"
+other = "Links to Things"
