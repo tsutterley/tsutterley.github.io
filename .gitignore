@@ -117,6 +117,24 @@ None*.png
 Untitled.ipynb
 core.*
 
+# Hugo output
+public/
+resources/
+.hugo_build.lock
+
+# Editor
+.vscode/
+
+# OS files
+.DS_Store
+
+# backup files
+*.bak
+
+# pixi environments
+.pixi/*
+!.pixi/config.toml
+
 # Large data files #
 ####################
 *-complete.dat
@@ -132,11 +150,3 @@ data/geocenter/
 data/TN-*
 data/ICE-6G_High_Res_Stokes_trend.*
 data/*.dat
-
-# pixi environments #
-#####################
-.pixi/*
-!.pixi/config.toml
-# pixi environments
-.pixi/*
-!.pixi/config.toml

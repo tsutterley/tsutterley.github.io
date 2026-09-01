@@ -1,16 +1,35 @@
 [workspace]
-authors = ["Tyler Sutterley <tsutterl@uw.edu>"]
+authors = ["Tyler C. Sutterley"]
 channels = ["conda-forge"]
 name = "tsutterley.github.io"
 platforms = ["linux-64"]
-version = "0.1.0"
+version = "2026"
 
-[tasks.lint]
+[environments]
+default = { solve-group = "default" }
+dev = { features = ["dev"], solve-group = "default" }
+
+[tasks.webserver]
+args = [ { "arg" = "port", "default" = "1313" } ]
+cmd = "hugo server --disableFastRender --port {{ port }}"
+description = "Locally build and serve the site with hugo"
+
+[tasks.build]
+args = [ { "arg" = "flags", "default" = "" } ]
+cmd = "hugo --gc --minify {{ flags }}"
+description = "Build the site for deployment with hugo"
+
+[feature.dev.tasks.lint]
 args = [ { "arg" = "flags", "default" = "--select=E9,F63,F7,F82 --show-source" }, { "arg" = "test", "default" = "." } ]
 cmd = "flake8 {{ test }} --count {{ flags }} --statistics --extend-exclude 'build/,.pixi/'"
 description = "Run flake8 to check for compilation errors"
 
-[tasks.fetch]
+[feature.dev.tasks.test]
+cmd = "pytest --verbose --capture=no test_*"
+cwd = "static/data"
+description = "Run pytest to check fonts and cartopy installations"
+
+[feature.dev.tasks.fetch]
 args = [ 
     { "arg" = "directory", "default" = "--directory ." }, 
     { "arg" = "center", "default" = "--center CSR GFZ JPL" },
@@ -20,10 +39,10 @@ args = [
 
 ]
 cmd = "python podaac_cumulus.py {{ directory }} {{ center }} {{ version }} {{ flags }}"
-cwd = "data"
+cwd = "static/data"
 description = "Fetch GRACE/GRACE-FO data from PO.DAAC"
 
-[tasks.podaac-date]
+[feature.dev.tasks.podaac-date]
 args = [ 
     { "arg" = "directory", "default" = "--directory ." }, 
     { "arg" = "release", "default" = "--release RL06" },
@@ -31,40 +50,51 @@ args = [
 
 ]
 cmd = "grace_date.py {{ directory }} {{ release }} {{ product }} --output"
-cwd = "data"
+cwd = "static/data"
 description = "Run GRACE/GRACE-FO date programs"
 
-[tasks.gsfc-date]
+[feature.dev.tasks.gsfc-date]
   args = [ 
     { "arg" = "directory", "default" = "--directory ." }, 
     { "arg" = "version", "default" = "--version rl06v2.0" },
 
 ]
 cmd = "python GSFC_grace_date.py {{ directory }} {{ version }}"
-cwd = "data"
+cwd = "static/data"
 description = "Run GRACE/GRACE-FO GSFC date programs"
 
-[tasks.date-index]
+[feature.dev.tasks.date-index]
 args = [ 
     { "arg" = "directory", "default" = "--directory ." }, 
     { "arg" = "release", "default" = "--release RL06 rl06v2.0" },
 
 ]
 cmd = "grace_months_index.py {{ directory }} {{ release }}"
-cwd = "data"
+cwd = "static/data"
 depends-on = ["podaac-date", "gsfc-date"]
 description = "Make the GRACE/GRACE-FO date index file"
 
-[tasks.update-tables]
-cmd = "bash update_tables.sh"
-cwd = "data"
-description = "Update the html table and images"
+[feature.dev.tasks.update-cycles]
+cmd = "python icesat2_cycles_markdown.py"
+cwd = "static/data"
+description = "Update the ICESat-2 cycles markdown table"
 
-[tasks.update-lfs-attributes]
-cmd = "python data/git_lfs_attributes.py --directory images/ --regex '^(CSR|GFZ|GSFC|JPL)-(.*?)-(\\d+).jpg'"
-description = "Update the git-lfs attributes file"
+[feature.dev.tasks.update-tables]
+cmd = "bash update_tables.sh"
+cwd = "static/data"
+description = "Update the GRACE months markdown table"
 
 [dependencies]
+# Golang open-source programming language
+go = "*"
+# extended version of the Hugo static site generator
+hugo = "==0.164.0"
+# pandoc for bibliographies
+pandoc = "*"
+
+[feature.dev.dependencies]
+flake8 = "*"
+gh = "*"
 gravity-toolkit = "*"
 pytest = "*"
-flake8 = "*"
+pytest-cov = "*"

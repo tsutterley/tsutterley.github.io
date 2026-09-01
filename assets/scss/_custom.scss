@@ -1,0 +1,296 @@
+.mainHeading {
+    display: flex;
+    justify-content: center;
+    text-transform: uppercase;
+    font-size: 2rem;
+    color: $color-secondary;
+}
+
+.csl-bib-body {
+    display: block;
+}
+
+.csl-entry {
+    display: list-item;
+    list-style-type: disc;
+    margin-left: 0rem;
+    margin-bottom: 0.5rem;
+
+    & a {
+        text-decoration: none;
+        color: $color-secondary;
+        transition: all 0.2s ease-in-out;        
+        &:hover {
+            color: $color-primary;
+            text-decoration: underline !important;
+        }
+    }
+}
+
+.github-corner:hover .octo-arm {
+    animation: octocat-wave 560ms ease-in-out
+}
+@keyframes octocat-wave {
+    0%, 100% {
+        transform: rotate(0)
+    }
+    20%,
+    60% {
+        transform: rotate(-25deg)
+    }
+    40%,
+    80% {
+        transform: rotate(10deg)
+    }
+}
+@media (max-width: 500px) {
+    .github-corner:hover .octo-arm {
+        animation: none
+    }
+    .github-corner .octo-arm {
+        animation: octocat-wave 560ms ease-in-out
+    }
+}
+
+
+.section {
+    &__title {
+        color: $color-primary;
+
+        &::after {
+            border-color: $color-primary;
+            width: 100%;
+        }
+    }
+}
+
+.sideSection {
+    &__title {
+        color: $color-primary;
+
+        &::after,
+        &::before {
+            border-color: $color-primary;
+        }
+    }
+}
+
+.education {
+    &__extra_padding {
+        padding-top: 4rem !important;
+    }
+
+    &__subheader {
+        display: flex;
+        width: 100%;
+        height: 2.4rem;
+    }
+
+    &__title {
+        text-align: left;
+        font-weight: 400;
+        width: 70%;
+        float: left;
+    }
+
+    &__date {
+        float: right;
+        text-align: right;
+        width: 30%;
+        color: $color-secondary;
+        font-weight: 400;
+    }
+}
+
+.experience {
+    &__position {
+        text-transform: none;
+        font-size: 1.3rem;
+        font-weight: 400;
+        color: $color-dark;
+        margin-left: 1rem;
+    }
+
+    &__details {
+        text-align: left;
+        font-weight: 400;
+        float: left;
+        width: 70%;
+        margin-left: 1rem;
+    }
+
+    &__item {
+        display: block;
+        position: relative;
+        @include avoid-break;
+        &:not(:first-child) {
+            padding-top: 1.5rem;
+        }
+        margin-bottom: 10px;
+        margin-top: 10px;
+    }
+}
+
+.software {
+    &__group {
+        margin-bottom: 0.8rem;
+
+        & span {
+            font-weight: 700;
+            font-size: 105%;
+            display: inline-block;
+
+            &::after{
+                content: ":"
+            }
+
+            &:hover ~ li {
+                background-color: $color-primary;
+                color: $color-light;
+            }
+
+        }
+
+        & li{
+            display: inline-block;
+            font-size: 105%;
+            font-weight: 400;
+            transition: all 0.2s ease-in-out;
+            padding: 0 1px;
+            border-radius: 2px;
+
+            &:not(:last-child)::after{
+                content: ", "
+            }
+
+            &:hover {
+                background-color: $color-primary;
+                color: $color-light;
+            }
+        }
+    }
+}
+
+.links {
+    &__link {
+        text-decoration: none;
+        color: $color-secondary;
+        transition: all 0.2s ease-in-out;        
+        &:hover {
+            color: $color-primary;
+            text-decoration: underline !important;
+        }
+    }
+
+    & li{
+        font-size: 105%;
+        font-weight: 400;
+    }
+}
+
+.content {
+    position: absolute;
+    overflow: hidden;
+
+    &__center {
+        float: left;
+        width: 100%;
+        height: 100%;
+        padding: 3rem 4rem;
+
+        @media screen {
+            &::after {
+                content: $footer-note;
+                height: 4rem;
+                width: 100%;
+                position: absolute;
+                bottom: 0.5rem;
+                color: darken($color-light, 10%);
+            }
+        }
+    }
+
+    &__left {
+        float: left;
+        width: $width-left-col;
+        height: 100%;
+        padding: 3rem 4rem;
+
+        @media screen {
+            &::after {
+                content: $footer-note;
+                height: 4rem;
+                width: 100%;
+                position: absolute;
+                bottom: 0.5rem;
+                color: darken($color-light, 10%);
+            }
+        }
+    }
+
+    &__right {
+        position: absolute;
+        float: right;
+        width: $width-right-col;
+        background-color: $color-right-col-background;
+        color: $color-right-col-body-text;
+        height: 100%;
+        padding: 2rem 3rem;
+        right: 1rem;
+
+        @include shadow(0.5);
+    }
+
+    &__swapped {
+        &__left {
+            float: right;
+        }
+
+        &__right {
+            float: left;
+            left: 1rem;
+        }
+    }
+}
+
+.tooltip {
+    width: flex;
+    border-collapse: collapse;
+    margin-left: auto;
+    margin-right: auto;
+  
+    th {
+        padding: 5px;
+        text-align: center;
+        background-color: $color-primary;
+        color: $color-light;
+    }
+    td {
+        padding: 5px;
+        text-align: center;
+        &:hover span{
+            visibility: visible;
+            left:0%;
+            z-index:1;
+            pointer-events: none;
+        }
+    }
+    tr {
+        &:hover {
+            background-color: darken($color-light, 10%);
+        }
+    }
+    span {
+        position: fixed;
+        visibility: hidden;
+    }
+
+    &__dates {
+        font-weight: 700;
+        color: $color-secondary;
+    }
+
+    &__missing {
+        font-weight: 700;
+    }
+}

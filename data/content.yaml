@@ -1,0 +1,123 @@
+
+BasicInfo:
+  FirstName: Tyler C.
+  LastName: Sutterley
+  Photo: img/2023_APL_headshot.jpg
+  Contacts:
+    - Icon: fas fa-globe
+      Info: <a class="links__link" href="https://polargeodesy.github.io" target="_blank">UW/APL Polar Geodesy Lab</a>
+    - Icon: fa-brands fa-google-scholar
+      Info: <a class="links__link" href="https://scholar.google.com/citations?user=vGmrnbYAAAAJ" target="_blank">Google Scholar Profile</a>
+    # - Icon: ai ai-researchgate ai-lg
+    #   Info: <a class="links__link" href="https://www.researchgate.net/profile/Tyler_Sutterley" target="_blank">ResearchGate Profile</a>
+    - Icon: ai ai-orcid ai-sm
+      Info: <a class="links__link" href="https://orcid.org/0000-0002-6964-1194" target="_blank">ORCID Profile</a>
+    - Icon: fa-brands fa-github
+      Info: <a class="links__link" href="https://github.com/tsutterley" target="_blank"">GitHub Profile</a>
+    - Icon: fas fa-map-marker-alt
+      Info: <a class="links__link" href="https://apl.washington.edu/about/directions.php" target="_blank">Seattle, WA</a>
+
+Profile: |
+  Hey I'm Tyler Clark Sutterley, a Research Scientist at the 
+  <a class="links__link" href="http://psc.apl.uw.edu/">UW-APL Polar Science Center</a>.
+  I help monitor changes in ice mass and ice volume of the Greenland
+  and Antarctic ice sheets using airborne and satellite measurements.
+
+Experience:
+  - Employer: |
+      <a class="links__link" href="https://www.washington.edu/">University of Washington</a>,
+      <a class="links__link" href="https://apl.uw.edu/">Applied Physics Laboratory</a>
+    Place: Seattle, WA
+    Positions:
+      - Title: Senior Research Scientist
+        Date: Jun 2021 -- Present
+        Details: <a class="links__link" href="https://psc.apl.uw.edu/">Polar Science Center</a>
+      - Title: Research Associate
+        Date: Jun 2019 -- Jun 2021
+        Details: <a class="links__link" href="https://psc.apl.uw.edu/">Polar Science Center</a>
+  - Employer: |
+      <a class="links__link" href="https://science.gsfc.nasa.gov/">NASA Goddard Space Flight Center</a>
+    Place: Greenbelt, MD
+    Positions:
+      - Title: NASA Postdoctoral Program Fellow
+        Date: Apr 2018 -- May 2019
+        Details: <a class="links__link" href="https://earth.gsfc.nasa.gov/cryo/">GSFC Cryospheric Sciences Laboratory</a>
+  - Employer: |
+      <a class="links__link" href="https://ess.uci.edu/">University of California, Irvine</a>
+    Place: Irvine, CA
+    Positions:
+      - Title: Postdoctoral Scholar
+        Details: <a class="links__link" href="https://www.ess.uci.edu/~velicogna/">Velicogna Research Group</a>
+        Date: Mar 2016 -- Mar 2017
+      - Title: Graduate Student Researcher
+        Details: <a class="links__link" href="https://www.ess.uci.edu/~velicogna/">Velicogna Research Group</a>
+        Date: Sep 2010 -- Mar 2016
+
+Education:
+  - Course: Ph.D. Earth System Science
+    Class: "education__extra_padding"
+    Place: University of California, Irvine
+    Date: Sep 2010 -- Mar 2016
+  - Course: International Summer School in Glaciology
+    Class: "education__extra_padding"
+    Place: University of Alaska, Fairbanks
+    Date: Summer 2014
+  - Course: M.S. Earth System Science
+    Class: "education__extra_padding"
+    Place: University of California, Irvine
+    Date: Sep 2010 -- Jun 2012
+  - Course: B.S. Earth System Science
+    Class: "education__extra_padding"
+    Place: University of California, San Diego
+    Date: Sep 2004 -- Jun 2008
+
+Links:
+  - <a class="links__link" href="/data/ICESat-2-Cycles.html">ICESat-2 Cycles</a>
+  - <a class="links__link" href="/data/GRACE-Months.html">GRACE Months</a>
+  - <a class="links__link" href="/animations/antarctica.html">GRACE Antarctic Animation</a>
+  - <a class="links__link" href="/animations/greenland.html">GRACE Greenland Animation</a>
+  - <a class="links__link" href="/references/publications.html">Publications</a>
+  - <a class="links__link" href="/references/presentations.html">Presentations</a>
+  - <a class="links__link" href="/resources">Resources</a>
+
+Software:
+  - Family: <a class="links__link" href="https://geoid-toolkit.readthedocs.org/">geoid-toolkit</a>
+    Items:
+      - geodesy
+      - geophysics
+      - gravity
+      - spherical-harmonics
+  - Family: <a class="links__link" href="https://gravity-toolkit.readthedocs.org/">gravity-toolkit</a>
+    Items:
+      - geodesy
+      - GRACE
+      - GRACE-FO
+      - gravity
+      - spherical-harmonics
+  - Family: <a class="links__link" href="https://is2view.readthedocs.org/">IS2view</a>
+    Items:
+      - altimetry
+      - ICESat-2
+      - ipyleaflet
+      - visualization
+      - xarray
+  - Family: <a class="links__link" href="https://pytmd.readthedocs.org/">pyTMD</a>
+    Items:
+      - geodesy
+      - geophysics
+      - oceanography
+      - tides
+      - xarray
+  - Family: <a class="links__link" href="https://slideruleearth.io/">SlideRule</a>
+    Items:
+      - AWS
+      - NASA
+      - data-access
+      - earth-data
+      - ICESat-2
+      - GEDI
+  - Family: <a class="links__link" href="https://timescale.readthedocs.org/">timescale</a>
+    Items:
+      - astronomy
+      - earth-orientation
+      - time

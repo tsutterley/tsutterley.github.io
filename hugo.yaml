@@ -1,0 +1,59 @@
+# Hugo configuration file
+baseURL: https://tsutterley.github.io/
+locale: en-us
+defaultContentLanguage: "en"
+title: "tsutterley.GitHub.io"
+enableGitInfo: true
+enableRobotsTXT: true
+enableEmoji: true
+disablePathToLower: true
+disableKinds: ["taxonomy", "term", "RSS", "sitemap"]
+uglyURLs:
+  animations: true
+  data: true
+  references: true
+  resources: false
+
+# import almeida-cv as module
+module:
+  imports:
+    - path: github.com/ineesalmeida/almeida-cv
+
+outputs:
+  home: [html]
+  page: [html]
+  section: [html]
+
+markup:
+  # allow raw html
+  goldmark:
+    renderer:
+      unsafe: true
+
+params:
+  enableMetaTags: true
+  colorLight: "#fff"
+  colorDark: "#666"
+  colorPageBackground: "#ddd"
+  colorPrimary: "#32006e"
+  colorSecondary: "#4b2e83"
+  colorIconPrimary: "#fff"
+  colorIconBackground: "#32006e"
+  colorRightColumnBackground: "#f5f5f5"
+  colorRightColumnHeadingText: "#666"
+  colorRightColumnBodyText: "#666"
+  colorRightColumnIconPrimary: "#fff"
+  colorRightColumnIconBackground: "#32006e"
+  footerNote: " "
+  displayUpdatedDate: true
+  dateFormat: "January 2, 2006"
+  swapColumns: true
+
+security:
+  exec:
+    allow:
+    - ^go$
+    - ^git$
+    - ^node$
+    - ^pandoc$
+    - ^postcss$

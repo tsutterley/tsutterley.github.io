@@ -1,0 +1,33 @@
+{{ if .Experience }}
+<div id="experience" class="section">
+    <div class="section__heading">
+        <h2 class="section__title">{{ i18n "experience" }}</h2>
+    </div>
+    <div class="section__content">
+        <div class="experience">
+            {{ range .Experience }}
+            {{ if .Class }}
+            <div class="experience__item {{ .Class }}">
+            {{ else }}
+            <div class="experience__item">
+            {{ end }}
+                <div class="experience__header">
+                    <h3 class="experience__company">
+                        {{ .Employer | safeHTML }}
+                    </h3>
+                </div>
+                {{ range .Positions }}
+                <div class="experience__job">
+                    <div class="experience__subheader">
+                        <h3 class="experience__details">{{ .Details | safeHTML }}</h3>
+                        <h3 class="experience__date">{{ .Date | safeHTML }}</h3>
+                    </div>
+                    <h3 class="experience__position">{{ .Title | safeHTML}}</h3>
+                </div>
+                {{ end }}
+            </div>
+            {{ end }}
+        </div>
+    </div>
+</div>
+{{ end }}
