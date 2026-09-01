@@ -1,0 +1,22 @@
+---
+title: GRACE Greenland Animation
+summary: Animation of Greenland ice sheet mass change from GRACE
+---
+
+<video width="100%" controls autoplay>
+    <source src="greenland_movie.mp4" type="video/mp4">
+</video>
+
+## Footnotes
+
+Movie generated on 2018-09-05 using 163 RL05 GRACE spherical harmonic solutions from the University of Texas, Center for Space Research (CSR).
+Data is corrected for glacial isostatic adjustment (GIA) using coefficients from @Simpson:2009hg, corrected for pole tide drift following @Wahr:2015dg, 
+smoothed using a 250km radius Gaussian filter [@Wahr:1998hy],
+and filtered for seasonal effects [@Velicogna:2009ft].
+
+## Bibliography
+
+---
+bibliography: assets/pdc/pub.bib
+citation-style: assets/pdc/american-geophysical-union.csl
+---

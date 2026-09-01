@@ -1,0 +1,47 @@
+---
+title: Publications
+---
+
+---
+bibliography: assets/pdc/pub.bib
+citation-style: assets/pdc/american-geophysical-union.csl
+nocite: |
+  @Sutterley:2014gw
+  @Sutterley:2014it
+  @Velicogna:2014km
+  @Basha:2015je
+  @Khazendar:2016is
+  @Kishore:2016do
+  @Kishore:2016cn
+  @Kishore:2017bt
+  @Ciraci:2018bd
+  @Kishore:2018gp
+  @Peltier:2018dp
+  @Shepherd:2018ca
+  @Sutterley:2018cc
+  @Sutterley:2019cl
+  @Sutterley:2019bx
+  @Hawley:2020fm
+  @Shepherd:2020jx
+  @Sutterley:2020js
+  @Velicogna:2020ek
+  @Alley:2021ds
+  @Brunt:2021io
+  @Mohajerani:2021ki
+  @Otosaka:2023kq
+  @Ryan:2023en
+  @Scheick:2023ku
+  @Shean:2023ej
+  @Smith:2023bt
+  @Greene:2024di
+  @Studinger:2024gr
+  @BishopTaylor:2025dc
+  @Magruder:2025eq
+  @Robbins:2025ct
+  @Smith:2025fz
+  @Sutterley:2025ko
+  @Verboncoeur:2025js
+  @Zemp:2025ge
+  @Zemp:2025dr
+  @Smith:2026jr
+---

@@ -1,0 +1,34 @@
+{{ $style := resources.Get "scss/main.scss" | resources.ExecuteAsTemplate "style.main.scss" . | toCSS | fingerprint }}
+{{ $data := .Scratch.Get "data" }}
+{{ $js := resources.Get "js/lfs.media.js" | resources.Minify }}
+
+
+<head>
+    <script>{{ $js.Content | safeJS }}</script>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{ .Site.Title }}</title>
+
+    <link rel="canonical" href="{{ .Permalink }}" />
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Oswald" />
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto" />
+    <link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/7.3.1/css/all.min.css" />
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/jpswalsh/academicons@1/css/academicons.min.css">
+    <link rel="stylesheet" href="{{ $style.RelPermalink }}" integrity="{{ $style.Data.Integrity }}" crossorigin="anonymous" media="screen,print" />
+
+
+    {{ if .Site.Params.enableMetaTags }}
+        <meta property="og:title" content="{{ .Site.Title }}" />
+        <meta property="og:url" content="{{ .Permalink }}" />
+        <meta property="og:type" content="website" />
+        {{ with $data.BasicInfo.Photo }}
+            <meta property="og:image" content="{{ . | absURL }}" />
+        {{ end }}
+        {{ with $data.Profile | htmlUnescape | emojify | truncate 200 }}
+            <meta property="og:description" content="{{ . }}" />
+            <meta name="description" content="{{ . }}" />
+        {{ end }}
+    {{ end }}
+
+</head>

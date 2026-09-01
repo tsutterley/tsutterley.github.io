@@ -1,0 +1,9 @@
+<!DOCTYPE html>
+<html>
+    {{- partial "head.html" . -}}
+    <body id="preview" onload="lfsmedia()">
+        <div id="content">
+        {{- block "main" . }}{{- end }}
+        </div>
+    </body>
+</html>

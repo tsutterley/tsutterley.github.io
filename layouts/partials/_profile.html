@@ -1,0 +1,10 @@
+{{ if .Profile }}
+<div id="profile" class="sideSection">
+    <div class="sideSection__heading">
+        <h2 class="sideSection__title">{{ i18n "profile" }}</h2>
+    </div>
+    <div class="sideSection__content">
+        <p>{{ .Profile | safeHTML | emojify }}</p>
+    </div>
+</div>
+{{ end }}
