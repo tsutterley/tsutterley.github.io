@@ -1,0 +1,16 @@
+{{/*
+  layouts/shortcodes/include.html
+
+  Include a HTML snippet from a file in the same directory
+
+  Usage:
+    {{< include src="snippet.table" >}}
+
+*/}}
+{{ $src := .Get "src" }}
+{{- $path := path.Join .Page.File.Dir $src -}}
+{{- if fileExists $path -}}
+  {{- $path | readFile | safeHTML -}}
+{{- else -}}
+  {{- errorf "The file %q provided to the include shortcode does not exist." $path -}}
+{{- end -}}

@@ -1,9 +1,9 @@
 #!/usr/bin/env python
 """
-grace_months_markdown.py
+grace_months_table.py
 Written by Tyler Sutterley (10/2020)
 
-Creates a markdown file with the start and end days for each dataset
+Creates a file with the start and end days for each dataset
 Shows the range of each month for CSR/GFZ/JPL (RL06) and GSFC (rl06v1.0)
 Shows which months are missing for each dataset as **missing**
 
@@ -34,7 +34,7 @@ PYTHON DEPENDENCIES:
     numpy: Scientific Computing Tools For Python (https://numpy.org)
 
 UPDATE HISTORY:
-    Updated 08/2026: forked for markdown table creation
+    Updated 08/2026: forked to just make the table
     Updated 03/2021: added options for GSFC Release-6 Version 1.0
     Updated 10/2020: use argparse to set command line parameters
     Updated 09/2020: add link to plain text table
@@ -78,16 +78,17 @@ import pathlib
 import numpy as np
 import calendar, time
 
-def element(el, c="tooltip", s="text-align:center"):
+def element(el, c="tooltip", s="text-align:center", t=None):
     # build element
     cls = f' class="{c}"' if c is not None else ""
     sty = f' style="{s}"' if s is not None else ""
-    return f"<{el}{cls}{sty}>"
+    title = f' title="{t}"' if t is not None else ""
+    return f"<{el}{cls}{sty}{title}>"
 
 def close(el):
     return f"</{el}>"
 
-# PURPOSE: create markdown file of GRACE "nominal" months
+# PURPOSE: create table of GRACE "nominal" months
 def grace_months(base_dir, DREL=["RL06", "rl06v1.0"]):
     # verify input path
     base_dir = pathlib.Path(base_dir).expanduser().absolute()
@@ -95,8 +96,8 @@ def grace_months(base_dir, DREL=["RL06", "rl06v1.0"]):
     filename = inspect.getframeinfo(inspect.currentframe()).filename
     filepath = pathlib.Path(filename).absolute().parent
     content = filepath.parents[1].joinpath("content", "data")
-    # Opening output GRACE months markdown file
-    output_file = content.joinpath("GRACE-Months.pdc")
+    # Opening output GRACE months table file
+    output_file = content.joinpath("GRACE-Months.table")
     fid = output_file.open("w")
 
     # Initial parameters
@@ -150,16 +151,11 @@ def grace_months(base_dir, DREL=["RL06", "rl06v1.0"]):
                     # than the previously read datasets
                     max_mon = int(var_info[var_name]["mon"].max())
 
-    # print markdown headers
-    print("---", file=fid)
-    print("title: GRACE Months", file=fid)
-    print("summary: Date ranges of monthly GRACE/GRACE-FO products", file=fid)
-    print("---", file=fid)
-    print("", file=fid)
-
-    # print table header
+    # print table headers
     print(element('table', s=None), file=fid)
-    print(element('thead', c=None, s=None), file=fid)
+    today = time.strftime("%Y-%m-%d", time.localtime())
+    title = f"Table last modified {today}"
+    print(element('thead', c=None, s=None, t=title), file=fid)
     print(element('tr', c=None, s=None), file=fid)
     print(f"\t{element('th', c=None)}Month{close('th')}", file=fid)
     print(f"\t{element('th', c=None)}Date{close('th')}", file=fid)
@@ -216,65 +212,15 @@ def grace_months(base_dir, DREL=["RL06", "rl06v1.0"]):
                 print(f"\t{close('td')}", file=fid)
             else:
                 # if there is no matching month: missing or not yet processed
-                missing = r"\*\*missing\*\*"
+                missing = "**missing**"
                 print(f"\t{element('td', c='tooltip__missing')}{missing}{close('td')}", file=fid)
         # end of table row
         print(close('tr'), file=fid)
     # print table body footer text
     print(close('tbody'), file=fid)
     print(close('table'), file=fid)
-
-    # print footer text
-    today = time.strftime("%Y-%m-%d", time.localtime())
-    lineage = pathlib.Path(sys.argv[0]).name
-    print('\n\n## Footnotes', file=fid)
-    # base processing
-    print(
-        (
-        '- GRACE/GRACE-FO anomalies for harmonic solutions are calculated in ' 
-        'reference to the 2003--2010 mean and are smoothed using a '
-        '350km radius Gaussian filter [@Wahr:1998hy] after '
-        'destriping with a decorrelation algorithm [@Swenson:2006hu]. '
-        ),
-        file=fid,
-    )
-    # pole tide drift
-    if "RL05" in DREL:
-        print(
-            (
-            'GRACE/GRACE-FO Release-5 products have been corrected for '
-            'pole tide drift using coefficients from @Wahr:2015dg. '
-            ),
-            file=fid,
-        )
-    # GRACE/GRACE-FO mascon products
-    print(
-        (
-        'GSFC GRACE/GRACE-FO mascon data products are calculated as '
-        'described in @Loomis:2019ef. '
-        ),
-        file=fid,
-    )
-    # GIA correction
-    print(
-        (
-        'GRACE/GRACE-FO fields have been corrected for '
-        'Glacial Isostatic Adjustment (GIA) using coefficients from '
-        'ICE6G Version-D [@Peltier:2018dp].'),
-        file=fid,
-    )
-    fid.write(f'- _Generated on {today} with ')
-    fid.write(f'[<code>{lineage}</code>]({lineage}){{.links__link}}_\n')
-    fid.write(f'- _[Table as plain text](GRACE_months.txt){{.links__link}}_\n')
-
-    # print bibliography text
-    print('\n\n## Bibliography\n', file=fid)
-    print('---', file=fid)
-    print('bibliography: assets/pdc/pub.bib', file=fid)
-    print('citation-style: assets/pdc/american-geophysical-union.csl', file=fid)
-    print('---', file=fid)
     
-    # close output markdown file
+    # close output table file
     fid.close()
 
 
@@ -282,7 +228,7 @@ def grace_months(base_dir, DREL=["RL06", "rl06v1.0"]):
 def main():
     # Read the system arguments listed after the program
     parser = argparse.ArgumentParser(
-        description="""Creates a markdown file with the
+        description="""Creates a table file with the
             start and end days for each dataset
             """
     )

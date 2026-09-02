@@ -1,12 +1,12 @@
 #!/usr/bin/env python
 """
-icesat2_cycles_markdown.py
-Written by Tyler Sutterley (08/2026)
+icesat2_cycles_table.py
+Written by Tyler Sutterley (09/2026)
 
-Creates a markdown file with the date range for each ICESat-2 cycle
+Creates a file with the date range for each ICESat-2 cycle
 
 UPDATE HISTORY:
-    Updated 08/2026: forked for markdown table creation
+    Updated 09/2026: forked to just make the table and csv files
     Written 01/2025
 """
 
@@ -19,11 +19,12 @@ import pathlib
 import lxml.etree
 import urllib.request
 
-def element(el, c="tooltip", s="text-align:center"):
+def element(el, c="tooltip", s="text-align:center", t=None):
     # build element
     cls = f' class="{c}"' if c is not None else ""
     sty = f' style="{s}"' if s is not None else ""
-    return f"<{el}{cls}{sty}>"
+    title = f' title="{t}"' if t is not None else ""
+    return f"<{el}{cls}{sty}{title}>"
 
 def close(el):
     return f"</{el}>"
@@ -33,26 +34,19 @@ def main():
     filename = inspect.getframeinfo(inspect.currentframe()).filename
     filepath = pathlib.Path(filename).absolute().parent
     content = filepath.parents[1].joinpath("content", "data")
-    # output markdown and csv files
-    markdown_file = content.joinpath("ICESat-2-Cycles.md")
+    # output html table and csv files
+    table_file = content.joinpath("ICESat-2-Cycles.table")
     csv_file = filepath.joinpath("ICESat2_cycles.csv")
     # open output files
-    f1 = markdown_file.open("w")
+    f1 = table_file.open("w")
     f2 = csv_file.open("w")
     print("cycle,start,end", file=f2)
-    HOST = "https://icesat-2.gsfc.nasa.gov/science/specs"
 
-    # print markdown headers
-    print("---", file=f1)
-    print("title: ICESat-2 Cycles", file=f1)
-    print("summary: Date ranges of ICESat-2 91-day cycles", file=f1)
-    print("---", file=f1)
-    print("", file=f1)
-
-    # print markdown headers
+    # print table headers
     print(element('table', s=None), file=f1)
-    # print table header
-    print(element('thead', c=None, s=None), file=f1)
+    today = time.strftime("%Y-%m-%d", time.localtime())
+    title = f"Table last modified {today}"
+    print(element('thead', c=None, s=None, t=title), file=f1)
     print(element('tr', c=None, s=None), file=f1)
     print(f"\t{element('th', c=None)}ICESat-2 Cycle{close('th')}", file=f1)
     print(f"\t{element('th', c=None)}Start Date{close('th')}", file=f1)
@@ -62,9 +56,11 @@ def main():
     # print table body
     print(element('tbody', c=None, s=None), file=f1)
 
+
     # read the data spec page
     parser = lxml.etree.HTMLParser()
     timeout = None
+    HOST = "https://icesat-2.gsfc.nasa.gov/science/specs"
     request = urllib.request.Request(HOST)
     response = urllib.request.urlopen(request, timeout=timeout)
     tree = lxml.etree.parse(response, parser)
@@ -104,18 +100,8 @@ def main():
     # print table body footer text
     print(close('tbody'), file=f1)
     print(close('table'), file=f1)
-
-    # print footer text
-    today = time.strftime("%Y-%m-%d", time.localtime())
-    lineage = pathlib.Path(sys.argv[0]).name
-    f1.write('\n\n## Footnotes\n')
-    f1.write(f'- _Generated on {today} with ')
-    f1.write(f'[<code>{lineage}</code>]({lineage} "links__link")_\n')
-    f1.write('- _Mission information provided by the ')
-    f1.write(f'[ICESat-2 Website]({HOST} "links__link")_\n')
-    f1.write(f'- _[Table as csv file]({csv_file.name} "links__link")_\n')
     
-    # close output markdown and csv files
+    # close output table and csv files
     f1.close()
     f2.close()
 

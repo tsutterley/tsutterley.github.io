@@ -4,7 +4,7 @@ title: Presentations
 
 ---
 bibliography: assets/pdc/pub.bib
-citation-style: assets/pdc/american-geophysical-union.csl
+citation-style: assets/pdc/agu-sort-year.csl
 nocite: |
   @Sutterley:2011ug
   @Sutterley:2012ve

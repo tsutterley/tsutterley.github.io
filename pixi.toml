@@ -75,7 +75,7 @@ depends-on = ["podaac-date", "gsfc-date"]
 description = "Make the GRACE/GRACE-FO date index file"
 
 [feature.dev.tasks.update-cycles]
-cmd = "python icesat2_cycles_markdown.py"
+cmd = "python icesat2_cycles_table.py"
 cwd = "static/data"
 description = "Update the ICESat-2 cycles markdown table"
 

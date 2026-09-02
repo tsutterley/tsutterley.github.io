@@ -13,4 +13,4 @@ python plot_global_grace_maps.py plot_parameters_GRFO_GFZ_RL06_L60_r350km.txt
 python plot_global_grace_maps.py plot_parameters_JPL_RL06_L60_r350km.txt
 python plot_global_grace_maps.py plot_parameters_GRFO_JPL_RL06_L60_r350km.txt
 python plot_GSFC_global_mascons.py plot_parameters_GSFC_glb_rl06v2.0.txt
-python grace_months_markdown.py
+python grace_months_table.py
