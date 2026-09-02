@@ -10,17 +10,20 @@ default = { solve-group = "default" }
 dev = { features = ["dev"], solve-group = "default" }
 
 [tasks.webserver]
-args = [ { "arg" = "port", "default" = "1313" } ]
+args = [{ "arg" = "port", "default" = "1313" }]
 cmd = "hugo server --disableFastRender --port {{ port }}"
 description = "Locally build and serve the site with hugo"
 
 [tasks.build]
-args = [ { "arg" = "flags", "default" = "" } ]
+args = [{ "arg" = "flags", "default" = "" }]
 cmd = "hugo --gc --minify {{ flags }}"
 description = "Build the site for deployment with hugo"
 
 [feature.dev.tasks.lint]
-args = [ { "arg" = "flags", "default" = "--select=E9,F63,F7,F82 --show-source" }, { "arg" = "test", "default" = "." } ]
+args = [
+    { "arg" = "flags", "default" = "--select=E9,F63,F7,F82 --show-source" },
+    { "arg" = "test", "default" = "." },
+]
 cmd = "flake8 {{ test }} --count {{ flags }} --statistics --extend-exclude 'build/,.pixi/'"
 description = "Run flake8 to check for compilation errors"
 
@@ -30,12 +33,12 @@ cwd = "static/data"
 description = "Run pytest to check fonts and cartopy installations"
 
 [feature.dev.tasks.fetch]
-args = [ 
-    { "arg" = "directory", "default" = "--directory ." }, 
+args = [
+    { "arg" = "directory", "default" = "--directory ." },
     { "arg" = "center", "default" = "--center CSR GFZ JPL" },
     { "arg" = "release", "default" = "--release RL06" },
     { "arg" = "version", "default" = "--version 0 3" },
-    { "arg" = "flags", "default" = "--timeout=3600 --log --np=0"}
+    { "arg" = "flags", "default" = "--timeout=3600 --log --np=0" },
 
 ]
 cmd = "python podaac_cumulus.py {{ directory }} {{ center }} {{ version }} {{ flags }}"
@@ -43,8 +46,8 @@ cwd = "static/data"
 description = "Fetch GRACE/GRACE-FO data from PO.DAAC"
 
 [feature.dev.tasks.podaac-date]
-args = [ 
-    { "arg" = "directory", "default" = "--directory ." }, 
+args = [
+    { "arg" = "directory", "default" = "--directory ." },
     { "arg" = "release", "default" = "--release RL06" },
     { "arg" = "product", "default" = "--product GSM" },
 
@@ -54,8 +57,8 @@ cwd = "static/data"
 description = "Run GRACE/GRACE-FO date programs"
 
 [feature.dev.tasks.gsfc-date]
-  args = [ 
-    { "arg" = "directory", "default" = "--directory ." }, 
+args = [
+    { "arg" = "directory", "default" = "--directory ." },
     { "arg" = "version", "default" = "--version rl06v2.0" },
 
 ]
@@ -64,8 +67,8 @@ cwd = "static/data"
 description = "Run GRACE/GRACE-FO GSFC date programs"
 
 [feature.dev.tasks.date-index]
-args = [ 
-    { "arg" = "directory", "default" = "--directory ." }, 
+args = [
+    { "arg" = "directory", "default" = "--directory ." },
     { "arg" = "release", "default" = "--release RL06 rl06v2.0" },
 
 ]
