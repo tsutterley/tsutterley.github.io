@@ -34,7 +34,7 @@ description = "Run pytest to check fonts and cartopy installations"
 
 [feature.dev.tasks.fetch]
 args = [
-    { "arg" = "directory", "default" = "--directory ." },
+    { "arg" = "directory", "default" = "" },
     { "arg" = "center", "default" = "--center CSR GFZ JPL" },
     { "arg" = "release", "default" = "--release RL06" },
     { "arg" = "version", "default" = "--version 0 3" },
@@ -47,7 +47,7 @@ description = "Fetch GRACE/GRACE-FO data from PO.DAAC"
 
 [feature.dev.tasks.podaac-date]
 args = [
-    { "arg" = "directory", "default" = "--directory ." },
+    { "arg" = "directory", "default" = "" },
     { "arg" = "release", "default" = "--release RL06" },
     { "arg" = "product", "default" = "--product GSM" },
 
@@ -58,7 +58,7 @@ description = "Run GRACE/GRACE-FO date programs"
 
 [feature.dev.tasks.gsfc-date]
 args = [
-    { "arg" = "directory", "default" = "--directory ." },
+    { "arg" = "directory", "default" = "" },
     { "arg" = "version", "default" = "--version rl06v2.0" },
 
 ]
@@ -68,12 +68,11 @@ description = "Run GRACE/GRACE-FO GSFC date programs"
 
 [feature.dev.tasks.date-index]
 args = [
-    { "arg" = "directory", "default" = "--directory ." },
+    { "arg" = "directory", "default" = "" },
     { "arg" = "release", "default" = "--release RL06 rl06v2.0" },
 
 ]
 cmd = "grace_months_index.py {{ directory }} {{ release }}"
-cwd = "static/data"
 depends-on = ["podaac-date", "gsfc-date"]
 description = "Make the GRACE/GRACE-FO date index file"
 

@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 """
 GSFC_grace_date.py
-Written by Tyler Sutterley (11/2024)
+Written by Tyler Sutterley (09/2026)
 
 Reads dates of GSFC GRACE mascon data file and assigns the month number
     reads the start and end date from the filename,
@@ -27,6 +27,7 @@ PROGRAM DEPENDENCIES:
     utilities.py: download and management utilities for syncing files
 
 UPDATE HISTORY:
+    Updated 09/2026: separate html query function to use in other programs
     Updated 11/2024: automatically parse for latest GSFC mascon file
     Updated 09/2024: added newer GSFC mascons for RL06v2.0
     Updated 05/2023: use pathlib to define and operate on paths
@@ -60,10 +61,7 @@ import numpy as np
 import gravity_toolkit as gravtk
 
 
-# PURPOSE: get GSFC GRACE mascon data
-def get_GSFC_grace_mascons(base_dir, TIMEOUT=None, RETRY=5, VERSION=None, MODE=0o775):
-    # set GRACE parameters
-    PROC, DSET = "GSFC", "GSM"
+def GSFC_mascon_list(VERSION):
     # remote path for mascon versions
     HOST = {}
     HOST["v02.4"] = [
@@ -88,9 +86,25 @@ def get_GSFC_grace_mascons(base_dir, TIMEOUT=None, RETRY=5, VERSION=None, MODE=0
     (url,) = gravtk.utilities.gsfc_list(pattern=r"obp-ice6gd\.h5")
     m = re.search(r"(rl\d+(v\d+(\.\d+)?)?)", url, re.IGNORECASE)
     HOST[m.group(0)] = gravtk.utilities.url_split(url)
+    # return URL to the remote file
+    return HOST[VERSION]
+
+
+# PURPOSE: get GSFC GRACE mascon data
+def get_GSFC_grace_mascons(
+    base_dir,
+    TIMEOUT=None,
+    RETRY=5,
+    VERSION=None,
+    MODE=0o775,
+):
+    # set GRACE parameters
+    PROC, DSET = "GSFC", "GSM"
+    # get url to the latest mascon file (as list)
+    URL = GSFC_mascon_list(VERSION)
     # local file
     base_dir = pathlib.Path(base_dir).expanduser().absolute()
-    local = base_dir.joinpath(PROC, VERSION, DSET, HOST[VERSION][-1])
+    local = base_dir.joinpath(PROC, VERSION, DSET, URL[-1])
     # check if the local file exists
     if local.exists():
         return
@@ -100,7 +114,11 @@ def get_GSFC_grace_mascons(base_dir, TIMEOUT=None, RETRY=5, VERSION=None, MODE=0
         try:
             # get GSFC GRACE mascon file
             from_http(
-                HOST[VERSION], timeout=TIMEOUT, local=local, verbose=True, mode=MODE
+                URL,
+                timeout=TIMEOUT,
+                local=local,
+                verbose=True,
+                mode=MODE,
             )
         except:
             pass
@@ -151,6 +169,8 @@ def from_http(HOST, timeout=None, local=None, verbose=False, mode=0o775):
 
 
 def GSFC_grace_date(input_file, VERSION="v02.4", MODE=0o775):
+    # get logger
+    logger = logging.getLogger(__name__)
     # set GRACE parameters
     PROC, DSET = "GSFC", "GSM"
     # validate the input GRACE file
@@ -165,8 +185,8 @@ def GSFC_grace_date(input_file, VERSION="v02.4", MODE=0o775):
     # read the HDF5 file
     with h5py.File(input_file, mode="r") as fileID:
         # output HDF5 file information
-        logging.info(fileID.filename)
-        logging.info(list(fileID.keys()))
+        logger.info(fileID.filename)
+        logger.info(list(fileID.keys()))
         # get GSFC mascon dates
         nmas, nt = fileID["solution"]["cmwe"].shape
         # convert from reference days to Modified Julian Days
@@ -288,15 +308,12 @@ def main():
             the month number
             """
     )
-    # current file path
-    filename = inspect.getframeinfo(inspect.currentframe()).filename
-    filepath = pathlib.Path(filename).absolute().parent
     # working data directory
     parser.add_argument(
         "--directory",
         "-D",
         type=pathlib.Path,
-        default=filepath,
+        default=gravtk.utilities.get_cache_path(),
         help="Working data directory",
     )
     # GSFC GRACE mascon version
@@ -316,7 +333,11 @@ def main():
         help="Timeout in seconds for blocking operations",
     )
     parser.add_argument(
-        "--retry", "-r", type=int, default=5, help="Connection retry attempts"
+        "--retry",
+        "-r",
+        type=int,
+        default=5,
+        help="Connection retry attempts",
     )
     parser.add_argument(
         "--verbose",
@@ -337,7 +358,7 @@ def main():
 
     # create logger
     loglevels = [logging.CRITICAL, logging.INFO, logging.DEBUG]
-    logging.basicConfig(level=loglevels[args.verbose])
+    logger = gravtk.utilities.build_logger(__name__, level=loglevels[args.verbose])
 
     # get GSFC GRACE mascon data
     local = get_GSFC_grace_mascons(

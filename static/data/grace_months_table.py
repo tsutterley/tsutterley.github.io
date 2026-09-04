@@ -77,6 +77,8 @@ import argparse
 import pathlib
 import numpy as np
 import calendar, time
+from gravity_toolkit.utilities import get_cache_path
+
 
 def element(el, c="tooltip", s="text-align:center", t=None):
     # build element
@@ -85,8 +87,10 @@ def element(el, c="tooltip", s="text-align:center", t=None):
     title = f' title="{t}"' if t is not None else ""
     return f"<{el}{cls}{sty}{title}>"
 
+
 def close(el):
     return f"</{el}>"
+
 
 # PURPOSE: create table of GRACE "nominal" months
 def grace_months(base_dir, DREL=["RL06", "rl06v1.0"]):
@@ -152,21 +156,21 @@ def grace_months(base_dir, DREL=["RL06", "rl06v1.0"]):
                     max_mon = int(var_info[var_name]["mon"].max())
 
     # print table headers
-    print(element('table', s=None), file=fid)
+    print(element("table", s=None), file=fid)
     today = time.strftime("%Y-%m-%d", time.localtime())
     title = f"Table last modified {today}"
-    print(element('thead', c=None, s=None, t=title), file=fid)
-    print(element('tr', c=None, s=None), file=fid)
+    print(element("thead", c=None, s=None, t=title), file=fid)
+    print(element("tr", c=None, s=None), file=fid)
     print(f"\t{element('th', c=None)}Month{close('th')}", file=fid)
     print(f"\t{element('th', c=None)}Date{close('th')}", file=fid)
     # sort datasets alphanumerically
     var_name = sorted(var_info.keys())
     for v in var_name:
         print(f"\t{element('th', c=None)}{v}{close('th')}", file=fid)
-    print(close('tr'), file=fid)
-    print(close('thead'), file=fid)
+    print(close("tr"), file=fid)
+    print(close("thead"), file=fid)
     # print table body
-    print(element('tbody', c=None, s=None), file=fid)
+    print(element("tbody", c=None, s=None), file=fid)
     # for each possible month
     # GRACE starts at month 004 (April 2002)
     # max_mon+1 to include max_mon
@@ -177,7 +181,7 @@ def grace_months(base_dir, DREL=["RL06", "rl06v1.0"]):
         month_string = calendar.month_abbr[calendar_month]
         date = f"{month_string}{calendar_year:4d}"
         # printing table lines to file
-        print(element('tr', s=None), file=fid)
+        print(element("tr", s=None), file=fid)
         print(f"\t{element('td', c='tooltip__dates')}{m:03d}{close('td')}", file=fid)
         print(f"\t{element('td', c=None)}{date}{close('td')}", file=fid)
         # for each processing center and data release
@@ -199,8 +203,8 @@ def grace_months(base_dir, DREL=["RL06", "rl06v1.0"]):
                 (end_day,) = var_info[var]["endday"][ind]
                 # output table element is the date range
                 # string format: 2002_102--2002_120
-                start = f'{st_yr:4d}_{st_day:03d}'
-                end = f'{end_yr:4d}_{end_day:03d}'
+                start = f"{st_yr:4d}_{st_day:03d}"
+                end = f"{end_yr:4d}_{end_day:03d}"
                 print(f"\t{element('td')}{start}&ndash;{end}", file=fid)
                 print(f"\t\t{element('span', s=None)}", file=fid)
                 src = f"{PROC}-{DREL}-{m:03d}.jpg"
@@ -213,13 +217,16 @@ def grace_months(base_dir, DREL=["RL06", "rl06v1.0"]):
             else:
                 # if there is no matching month: missing or not yet processed
                 missing = "**missing**"
-                print(f"\t{element('td', c='tooltip__missing')}{missing}{close('td')}", file=fid)
+                print(
+                    f"\t{element('td', c='tooltip__missing')}{missing}{close('td')}",
+                    file=fid,
+                )
         # end of table row
-        print(close('tr'), file=fid)
+        print(close("tr"), file=fid)
     # print table body footer text
-    print(close('tbody'), file=fid)
-    print(close('table'), file=fid)
-    
+    print(close("tbody"), file=fid)
+    print(close("table"), file=fid)
+
     # close output table file
     fid.close()
 
@@ -238,7 +245,7 @@ def main():
         "--directory",
         "-D",
         type=pathlib.Path,
-        default=pathlib.Path().cwd(),
+        default=get_cache_path(ensure_exists=False),
         help="Working data directory",
     )
     # GRACE/GRACE-FO data release
