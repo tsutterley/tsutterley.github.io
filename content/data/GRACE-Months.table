@@ -1,5 +1,5 @@
 <table class="tooltip">
-<thead title="Table last modified 2026-08-22">
+<thead title="Table last modified 2026-09-04">
 <tr>
 	<th style="text-align:center">Month</th>
 	<th style="text-align:center">Date</th>
@@ -6453,6 +6453,18 @@
 			<img class="lfs" width="80%" data-path="images/JPL-RL06-294.jpg">
 		</span>
 	</td>
+</tr>
+<tr class="tooltip">
+	<td class="tooltip__dates" style="text-align:center">295</td>
+	<td style="text-align:center">Jul2026</td>
+	<td class="tooltip" style="text-align:center">2026_182&ndash;2026_212
+		<span class="tooltip">
+			<img class="lfs" width="80%" data-path="images/CSR-RL06-295.jpg">
+		</span>
+	</td>
+	<td class="tooltip__missing" style="text-align:center">**missing**</td>
+	<td class="tooltip__missing" style="text-align:center">**missing**</td>
+	<td class="tooltip__missing" style="text-align:center">**missing**</td>
 </tr>
 </tbody>
 </table>
