@@ -1,17 +1,14 @@
-PROC	GSFC			#-- Processing Center
-DREL	rl06v1.0		#-- GSFC Data Version
-DSET	GSM				#-- Data Product
-MEAN	13,108		#-- Start and End Month for mean (or None)
-DIRECTORY	../images
-PRANGE		-100,100,20
-CRANGE		-200,200,20
-BOUNDARY	None
-CBUNITS		cm
-CBTITLE		GRACE_GSFC_Release-6_Version_1.0
-CBFORMAT	{0:g}
-SCALE_FACTOR	1.0
-CPT_FILE	   None
-COLOR_MAP	cm.PRGn
-ALPHA		1.0
-FIGURE_DPI	180
-FIGURE_FORMAT	jpg
+--center GSFC            #-- Processing Center
+--release rl06v1.0        #-- GSFC Data Version
+--product GSM                #-- Data Product
+--mean    13 108        #-- start and end months for mean
+--output-directory ../images
+--plot-range -100 100 20
+--cbunits cm
+--cbtitle GRACE_GSFC_Release-6_Version_1.0
+--cbformat {0:g}
+#--cpt-file None
+--colormap PRGn
+--alpha 1.0
+--figure-dpi 180
+--figure-format jpg

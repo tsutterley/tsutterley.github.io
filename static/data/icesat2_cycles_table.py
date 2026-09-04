@@ -19,6 +19,7 @@ import pathlib
 import lxml.etree
 import urllib.request
 
+
 def element(el, c="tooltip", s="text-align:center", t=None):
     # build element
     cls = f' class="{c}"' if c is not None else ""
@@ -26,8 +27,10 @@ def element(el, c="tooltip", s="text-align:center", t=None):
     title = f' title="{t}"' if t is not None else ""
     return f"<{el}{cls}{sty}{title}>"
 
+
 def close(el):
     return f"</{el}>"
+
 
 def main():
     # directory setup
@@ -43,19 +46,18 @@ def main():
     print("cycle,start,end", file=f2)
 
     # print table headers
-    print(element('table', s=None), file=f1)
+    print(element("table", s=None), file=f1)
     today = time.strftime("%Y-%m-%d", time.localtime())
     title = f"Table last modified {today}"
-    print(element('thead', c=None, s=None, t=title), file=f1)
-    print(element('tr', c=None, s=None), file=f1)
+    print(element("thead", c=None, s=None, t=title), file=f1)
+    print(element("tr", c=None, s=None), file=f1)
     print(f"\t{element('th', c=None)}ICESat-2 Cycle{close('th')}", file=f1)
     print(f"\t{element('th', c=None)}Start Date{close('th')}", file=f1)
     print(f"\t{element('th', c=None)}End Date{close('th')}", file=f1)
-    print(close('tr'), file=f1)
-    print(close('thead'), file=f1)
+    print(close("tr"), file=f1)
+    print(close("thead"), file=f1)
     # print table body
-    print(element('tbody', c=None, s=None), file=f1)
-
+    print(element("tbody", c=None, s=None), file=f1)
 
     # read the data spec page
     parser = lxml.etree.HTMLParser()
@@ -70,7 +72,7 @@ def main():
     # for each ycle
     for c in cycles:
         # printing table lines to file
-        print(element('tr', s=None), file=f1)
+        print(element("tr", s=None), file=f1)
         cycle, date = c.split(":")
         cycle = cycle.strip()
         # extract cycle number and date range
@@ -96,11 +98,11 @@ def main():
         end_iso = time.strftime("%G-%m-%d", etime)
         print(f"{cycle_number},{start_iso},{end_iso}", file=f2)
         # end of table row
-        print(close('tr'), file=f1)
+        print(close("tr"), file=f1)
     # print table body footer text
-    print(close('tbody'), file=f1)
-    print(close('table'), file=f1)
-    
+    print(close("tbody"), file=f1)
+    print(close("table"), file=f1)
+
     # close output table and csv files
     f1.close()
     f2.close()

@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 """
 plot_GSFC_global_mascons.py
-Written by Tyler Sutterley (11/2024)
+Written by Tyler Sutterley (09/2026)
 Creates a series of GMT-like plots of GSFC GRACE mascon data for the globe in a
     Plate Carree (Equirectangular) projection
 
@@ -20,6 +20,11 @@ PYTHON DEPENDENCIES:
         https://github.com/GeospatialPython/pyshp
 
 UPDATE HISTORY:
+    Updated 09/2026: switch from parameter files to argparse arguments
+        use upstream file logger for verbose output
+        use pathlib to define and operate on paths
+        place some imports behind try/except statements
+        added color palette table (cpt) file reader from tools
     Updated 11/2024: automatically parse for latest GSFC mascon file
     Updated 09/2024: added newer GSFC mascons for RL06v2.0
     Updated 04/2023: added newer GSFC mascons for RL06v2.0
@@ -53,53 +58,89 @@ import re
 import h5py
 import copy
 import argparse
+import logging
+import pathlib
+import traceback
 import numpy as np
-import matplotlib
-import matplotlib.font_manager
-import matplotlib.pyplot as plt
-import matplotlib.cm as cm
-import matplotlib.colors as colors
-import matplotlib.patches as patches
-from matplotlib.collections import PatchCollection
-from matplotlib.offsetbox import AnchoredText
-import cartopy.crs as ccrs
 import gravity_toolkit as gravtk
-from read_cpt import read_cpt
+from GSFC_grace_date import GSFC_mascon_list
 
-# rebuild the matplotlib fonts and set parameters
-matplotlib.font_manager._load_fontmanager()
-matplotlib.rcParams["axes.linewidth"] = 1.5
-matplotlib.rcParams["font.family"] = "sans-serif"
-matplotlib.rcParams["font.sans-serif"] = ["Helvetica"]
-matplotlib.rcParams["mathtext.default"] = "regular"
+# attempt imports
+try:
+    import cartopy.crs as ccrs
+except ModuleNotFoundError:
+    warnings.warn("cartopy not available", ImportWarning)
+try:
+    import matplotlib
+    import matplotlib.font_manager
+    import matplotlib.pyplot as plt
+    import matplotlib.cm as cm
+    import matplotlib.colors as colors
+    import matplotlib.patches as patches
+    from matplotlib.collections import PatchCollection
+
+    # rebuild the matplotlib fonts and set parameters
+    matplotlib.font_manager._load_fontmanager()
+    matplotlib.rcParams["axes.linewidth"] = 1.5
+    matplotlib.rcParams["font.family"] = "sans-serif"
+    matplotlib.rcParams["font.sans-serif"] = ["Helvetica"]
+    matplotlib.rcParams["mathtext.default"] = "regular"
+except ModuleNotFoundError:
+    warnings.warn("matplotlib not available", ImportWarning)
+
+
+# PURPOSE: keep track of threads
+def info(args):
+    # get logger
+    logger = logging.getLogger(__name__)
+    logger.info(pathlib.Path(sys.argv[0]).name)
+    logger.info(args)
+    logger.info(f"module name: {__name__}")
+    if hasattr(os, "getppid"):
+        logger.info(f"parent process: {os.getppid():d}")
+    logger.info(f"process id: {os.getpid():d}")
 
 
 # plot mascon program
-def plot_mascon(base_dir, parameters):
+def plot_mascon(
+    base_dir,
+    PROC,
+    DREL,
+    DSET,
+    RANGE=None,
+    COLOR_MAP=None,
+    CPT_FILE=None,
+    PLOT_RANGE=None,
+    BOUNDARY=None,
+    ALPHA=1.0,
+    CBEXTEND=None,
+    CBTITLE=None,
+    CBUNITS=None,
+    CBFORMAT=None,
+    OUTPUT_DIRECTORY=None,
+    FIGURE_FORMAT=None,
+    FIGURE_DPI=None,
+    MODE=0o775,
+):
+    # get logger
+    logger = logging.getLogger(__name__)
     # output directory setup
-    DIRECTORY = os.path.expanduser(parameters["DIRECTORY"])
-    if not os.access(DIRECTORY, os.F_OK):
-        os.makedirs(DIRECTORY)
+    OUTPUT_DIRECTORY = pathlib.Path(OUTPUT_DIRECTORY).expanduser().absolute()
+    # verify output directory exists
+    if not OUTPUT_DIRECTORY.exists():
+        OUTPUT_DIRECTORY.mkdir(mode=MODE, parents=True, exist_ok=True)
 
     # import GRACE file
     # set the GRACE directory
-    VERSION = parameters["DREL"]
-    grace_dir = os.path.join(
-        base_dir, parameters["PROC"], parameters["DREL"], parameters["DSET"]
-    )
-    # GRACE HDF5 file
-    grace_file = {}
-    grace_file["v02.4"] = "GSFC.glb.200301_201607_v02.4.hdf"
-    grace_file["rl06v1.0"] = "GSFC.glb_.200204_202110_RL06v1.0_OBP-ICE6GD_0.h5"
-    # get latest GSFC GRACE mascons
-    (url,) = gravtk.utilities.gsfc_list(pattern=r"obp-ice6gd\.h5")
-    m = re.search(r"(rl\d+(v\d+(\.\d+)?)?)", url, re.IGNORECASE)
-    grace_file[m.group(0)] = gravtk.utilities.url_split(url)[-1]
+    grace_dir = os.path.join(base_dir, PROC, DREL, DSET)
+    # query for the HDF5 file (as list)
+    URL = GSFC_mascon_list(DREL)
+    grace_file = URL[-1]
     # valid date string (HDF5 attribute: 'days since 2002-01-00T00:00:00')
     date_string = "days since 2002-01-01T00:00:00"
     epoch, to_secs = gravtk.time.parse_date_string(date_string)
     # read the HDF5 file
-    with h5py.File(os.path.join(grace_dir, grace_file[VERSION]), "r") as fileID:
+    with h5py.File(os.path.join(grace_dir, grace_file), "r") as fileID:
         nmas, nt = fileID["solution"]["cmwe"].shape
         cmwe = fileID["solution"]["cmwe"][:, :].copy()
         lat_center = fileID["mascon"]["lat_center"][:].flatten()
@@ -137,21 +178,18 @@ def plot_mascon(base_dir, parameters):
 
     # use a mean range for the static field to remove
     MEAN = np.zeros((nmas))
-    if parameters["MEAN"].title() != "None":
-        START, END = np.array(parameters["MEAN"].split(","), dtype=np.int64)
-        (ind,) = np.nonzero((grace_month >= START) & (grace_month <= END))
+    if RANGE is not None:
+        ind = np.flatnonzero((grace_month >= RANGE[0]) & (grace_month <= RANGE[-1]))
         for i in range(nmas):
             MEAN[i] = np.mean(cmwe[i, ind])
 
     # read CPT or use color map
-    if parameters["CPT_FILE"].title() != "None":
+    if CPT_FILE is not None:
         # cpt file
-        cpt = read_cpt(os.path.expanduser(parameters["CPT_FILE"]))
-        cmap = colors.LinearSegmentedColormap("cpt_import", cpt)
+        cmap = gravtk.tools.from_cpt(CPT_FILE)
     else:
         # colormap
-        cmap = copy.copy(eval(parameters["COLOR_MAP"]))
-
+        cmap = plt.get_cmap(COLOR_MAP).copy()
     # grey color map for bad values
     cmap.set_bad("w", 0.5)
 
@@ -161,17 +199,19 @@ def plot_mascon(base_dir, parameters):
         num=1, figsize=(5.5, 3.5), subplot_kw=dict(projection=projection)
     )
 
-    # set transparency ALPHA
-    ALPHA = np.float64(parameters["ALPHA"])
-    if parameters["BOUNDARY"].title() == "None":
+    # set normalization for colormap
+    if BOUNDARY is None:
         # contours
-        PRANGE = np.array(parameters["PRANGE"].split(","), dtype=np.float64)
-        levels = np.arange(PRANGE[0], PRANGE[1] + PRANGE[2], PRANGE[2])
-        norm = colors.Normalize(vmin=PRANGE[0], vmax=PRANGE[1])
+        levels = np.arange(
+            PLOT_RANGE[0],
+            PLOT_RANGE[1] + PLOT_RANGE[2],
+            PLOT_RANGE[2],
+        )
+        norm = colors.Normalize(vmin=PLOT_RANGE[0], vmax=PLOT_RANGE[1])
     else:
         # boundary between contours
-        levels = np.array(parameters["BOUNDARY"].split(","), dtype=np.float64)
-        norm = colors.BoundaryNorm(levels, ncolors=256)
+        levels = np.array(BOUNDARY, dtype=np.float64)
+        norm = colors.BoundaryNorm(BOUNDARY, ncolors=256)
 
     # polygon and colors
     poly_list = []
@@ -213,7 +253,7 @@ def plot_mascon(base_dir, parameters):
     cbar = plt.colorbar(
         sm,
         ax=ax1,
-        extend="both",
+        extend=CBEXTEND,
         extendfrac=0.0375,
         orientation="horizontal",
         pad=0.025,
@@ -224,17 +264,21 @@ def plot_mascon(base_dir, parameters):
     # rasterized colorbar to remove lines
     cbar.solids.set_rasterized(True)
     # Add label to the colorbar
-    CBTITLE = " ".join(parameters["CBTITLE"].split("_"))
+    CBTITLE = " ".join(CBTITLE.split("_"))
     cbar.ax.set_title(CBTITLE, fontsize=13, rotation=0, y=-1.65, va="top")
-    if parameters["CBUNITS"].title() != "None":
-        CBUNITS = " ".join(parameters["CBUNITS"].split("_"))
-        cbar.ax.set_xlabel(CBUNITS, fontsize=13, rotation=0, va="center")
-        cbar.ax.xaxis.set_label_coords(1.075, 0.5)
+    cbar.ax.set_xlabel(CBUNITS, fontsize=13, rotation=0, va="center")
+    cbar.ax.xaxis.set_label_coords(1.075, 0.5)
     # Set the tick levels for the colorbar
     cbar.set_ticks(levels)
-    cbar.set_ticklabels([parameters["CBFORMAT"].format(ct) for ct in levels])
+    cbar.set_ticklabels([CBFORMAT.format(ct) for ct in levels])
     # ticks lines all the way across
-    cbar.ax.tick_params(which="both", width=1, length=15, labelsize=13, direction="in")
+    cbar.ax.tick_params(
+        which="both",
+        width=1,
+        length=15,
+        labelsize=13,
+        direction="in",
+    )
 
     # set x and y limits
     ax1.set_xlim(-180, 180)
@@ -264,9 +308,6 @@ def plot_mascon(base_dir, parameters):
     # adjust subplot within figure
     fig.subplots_adjust(left=0.02, right=0.98, bottom=0.05, top=0.98)
 
-    # replace data and contours to create figure frames
-    dpi = np.int64(parameters["FIGURE_DPI"])
-    format = parameters["FIGURE_FORMAT"]
     # for each date
     for t, mon in enumerate(grace_month):
         # data for time with mean removed
@@ -278,66 +319,240 @@ def plot_mascon(base_dir, parameters):
         args = (cal_date["year"][t], cal_date["month"][t])
         time_text.set_text(r"\textbf{{{0:4.0f}--{1:02.0f}}}".format(*args))
         # output to file
-        args = (parameters["PROC"], VERSION, mon, format)
-        FIGURE_FILE = "{0}-{1}-{2:003d}.{3}".format(*args)
-        plt.savefig(os.path.join(DIRECTORY, FIGURE_FILE), dpi=dpi, format=format)
+        FIGURE_FILE = f"{PROC}-{DREL}-{mon:003d}.{FIGURE_FORMAT}"
+        OUTPUT_FILE = OUTPUT_DIRECTORY.joinpath(FIGURE_FILE)
+        plt.savefig(OUTPUT_FILE, dpi=FIGURE_DPI, format=FIGURE_FORMAT)
     # clear all figure axes
     plt.cla()
     plt.clf()
     plt.close()
 
 
-# PURPOSE: help module to describe the optional input parameters
-def usage():
-    print("\nHelp: {}".format(os.path.basename(sys.argv[0])))
-    print(" -D X, --directory=X\tWorking data directory\n")
-
-
-# This is the main part of the program that calls the individual modules
-def main():
-    # Read the system arguments listed after the program
+# PURPOSE: create argument parser
+def arguments():
     parser = argparse.ArgumentParser(
-        description="""Creates a series of GMT-like plots of GSFC GRACE mascon
-            data on a global Plate Carr\u00e9e (Equirectangular) projection
-            """
+        description="""Creates a series of GMT-like plots of GRACE data on a
+            global Plate Carr\u00e9e (Equirectangular) projection
+            """,
+        fromfile_prefix_chars="@",
     )
-    # command line parameters
-    parser.add_argument(
-        "parameters",
-        type=lambda p: os.path.abspath(os.path.expanduser(p)),
-        nargs="+",
-        help="Parameter files containing specific variables for each analysis",
-    )
+    parser.convert_arg_line_to_args = gravtk.utilities.convert_arg_line_to_args
     # working data directory
     parser.add_argument(
         "--directory",
         "-D",
-        type=lambda p: os.path.abspath(os.path.expanduser(p)),
-        default=os.getcwd(),
+        type=pathlib.Path,
+        default=gravtk.utilities.get_cache_path(ensure_exists=False),
         help="Working data directory",
     )
-    args = parser.parse_args()
+    parser.add_argument(
+        "--output-directory",
+        "-O",
+        type=pathlib.Path,
+        default=pathlib.Path().cwd(),
+        help="Output directory for spatial files",
+    )
+    # Data processing center or satellite mission
+    parser.add_argument(
+        "--center",
+        "-c",
+        metavar="PROC",
+        type=str,
+        required=True,
+        help="GRACE/GRACE-FO Processing Center",
+    )
+    # GRACE/GRACE-FO data release
+    parser.add_argument(
+        "--release",
+        "-r",
+        metavar="DREL",
+        type=str,
+        default="RL06",
+        help="GRACE/GRACE-FO Data Release",
+    )
+    # GRACE/GRACE-FO Level-2 data product
+    parser.add_argument(
+        "--product",
+        "-p",
+        metavar="DSET",
+        type=str,
+        default="GSM",
+        help="GRACE/GRACE-FO mascon product",
+    )
+    # start and end months for mean
+    parser.add_argument(
+        "--mean",
+        "-m",
+        metavar=("START", "END"),
+        type=int,
+        nargs=2,
+        default=[4, 108],
+        help="Start and end months for mean",
+    )
+    # plot range
+    parser.add_argument(
+        "--plot-range",
+        type=float,
+        nargs=3,
+        metavar=("MIN", "MAX", "STEP"),
+        help="Plot range and step size for normalization",
+    )
+    parser.add_argument(
+        "--boundary",
+        type=float,
+        nargs="+",
+        help="Plot boundary for normalization",
+    )
+    # color palette table or named color map
+    try:
+        cmap_set = set(cm.datad.keys()) | set(cm.cmaps_listed.keys())
+    except (ValueError, NameError) as exc:
+        cmap_set = []
+    parser.add_argument(
+        "--colormap",
+        metavar="COLORMAP",
+        type=str,
+        default="viridis",
+        choices=sorted(cmap_set),
+        help="Named Matplotlib colormap",
+    )
+    parser.add_argument(
+        "--cpt-file",
+        type=pathlib.Path,
+        help="Input Color Palette Table (.cpt) file",
+    )
+    # color map alpha
+    parser.add_argument(
+        "--alpha",
+        type=float,
+        default=1.0,
+        help="Named Matplotlib colormap",
+    )
+    # colorbar parameters
+    parser.add_argument(
+        "--cbextend",
+        type=str,
+        default="both",
+        choices=["neither", "both", "min", "max"],
+        help="Add extension triangles to colorbar",
+    )
+    parser.add_argument(
+        "--cbtitle",
+        type=str,
+        default="",
+        help="Title label for colorbar",
+    )
+    parser.add_argument(
+        "--cbunits",
+        type=str,
+        default="",
+        help="Units label for colorbar",
+    )
+    parser.add_argument(
+        "--cbformat",
+        type=str,
+        default="{0:0.0f}",
+        help="Tick format for colorbar",
+    )
+    # output file format and dpi
+    parser.add_argument(
+        "--figure-format",
+        type=str,
+        default="png",
+        choices=("pdf", "png", "jpg", "svg"),
+        help="Output figure format",
+    )
+    parser.add_argument(
+        "--figure-dpi",
+        type=int,
+        default=180,
+        help="Output figure resolution in dots per inch (dpi)",
+    )
+    # Output log file for each job in forms
+    # validrun_2002-04-01T00:00:00_PID-00000.log
+    # failedrun_2002-04-01T00:00:00_PID-00000.log
+    parser.add_argument(
+        "--log",
+        default=False,
+        action="store_true",
+        help="Output log file for each job",
+    )
+    # print information about each input and output file
+    parser.add_argument(
+        "--verbose",
+        "-V",
+        action="count",
+        default=0,
+        help="Verbose output of run",
+    )
+    # permissions mode of the local directories and files (number in octal)
+    parser.add_argument(
+        "--mode",
+        "-M",
+        type=lambda x: int(x, base=8),
+        default=0o775,
+        help="Permissions mode of output files",
+    )
+    # return the parser
+    return parser
 
-    # for each input parameter file
-    for parameter_file in args.parameters:
-        # keep track of progress
-        print(os.path.basename(parameter_file))
-        # variable with parameter definitions
-        parameters = {}
-        # Opening parameter file and assigning file ID number (fid)
-        fid = open(os.path.expanduser(parameter_file), "r")
-        # for each line in the file will extract the parameter (name and value)
-        for fileline in fid:
-            # Splitting the input line between parameter name and value
-            part = fileline.split()
-            # filling the parameter definition variable
-            parameters[part[0]] = part[1]
-        # close the parameter file
-        fid.close()
+
+# This is the main part of the program that calls the individual functions
+def main():
+    # Read the system arguments listed after the program
+    parser = arguments()
+    args, _ = parser.parse_known_args()
+
+    # create logger
+    loglevels = [logging.CRITICAL, logging.INFO, logging.DEBUG]
+    logger = gravtk.utilities.build_logger(__name__, level=loglevels[args.verbose])
+
+    # try to run the plot program with listed parameters
+    try:
+        info(args)
         # run plot program with parameters
-        plot_mascon(args.directory, parameters)
-        # clear parameters
-        parameters = None
+        output_files = plot_mascon(
+            args.directory,
+            args.center,
+            args.release,
+            args.product,
+            RANGE=args.mean,
+            COLOR_MAP=args.colormap,
+            CPT_FILE=args.cpt_file,
+            PLOT_RANGE=args.plot_range,
+            BOUNDARY=args.boundary,
+            ALPHA=args.alpha,
+            CBEXTEND=args.cbextend,
+            CBTITLE=args.cbtitle,
+            CBUNITS=args.cbunits,
+            CBFORMAT=args.cbformat,
+            OUTPUT_DIRECTORY=args.output_directory,
+            FIGURE_FORMAT=args.figure_format,
+            FIGURE_DPI=args.figure_dpi,
+            MODE=args.mode,
+        )
+    except Exception as exc:
+        # if there has been an error exception
+        # print the type, value, and stack trace of the
+        # current exception being handled
+        logger.critical(f"process id {os.getpid():d} failed")
+        logger.error(traceback.format_exc())
+        if args.log:  # write failed job completion log file
+            logfile = gravtk.utilities.create_log_file(
+                "failedrun",
+                filename=pathlib.Path(sys.argv[0]).name,
+                arguments=vars(args),
+            )
+            logger.info(logfile)
+    else:
+        if args.log:  # write successful job completion log file
+            logfile = gravtk.utilities.create_log_file(
+                "validrun",
+                filename=pathlib.Path(sys.argv[0]).name,
+                arguments=vars(args),
+                output=output_files,
+            )
+            logger.info(logfile)
 
 
 # run main program

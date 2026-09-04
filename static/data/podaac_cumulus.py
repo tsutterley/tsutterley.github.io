@@ -368,7 +368,7 @@ def arguments():
         "--directory",
         "-D",
         type=pathlib.Path,
-        default=pathlib.Path.cwd(),
+        default=gravtk.utilities.get_cache_path(),
         help="Working data directory",
     )
     # number of processes to run in parallel
