@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 """
 GSFC_grace_date.py
-Written by Tyler Sutterley (09/2026)
+Written by Tyler Sutterley (11/2026)
 
 Reads dates of GSFC GRACE mascon data file and assigns the month number
     reads the start and end date from the filename,
@@ -27,6 +27,7 @@ PROGRAM DEPENDENCIES:
     utilities.py: download and management utilities for syncing files
 
 UPDATE HISTORY:
+    Updated 11/2026: add an ignore case inline flag to the regex pattern
     Updated 09/2026: separate html query function to use in other programs
     Updated 11/2024: automatically parse for latest GSFC mascon file
     Updated 09/2024: added newer GSFC mascons for RL06v2.0
@@ -83,9 +84,9 @@ def GSFC_mascon_list(VERSION):
         "GSFC.glb_.200204_202110_RL06v1.0_OBP-ICE6GD_0.h5",
     ]
     # get latest GSFC GRACE mascons
-    (url,) = gravtk.utilities.gsfc_list(pattern=r"obp-ice6gd\.h5")
+    (url,) = gravtk.utilities.gsfc_list(pattern=r"(?i)obp-ice6gd\.h5")
     m = re.search(r"(rl\d+(v\d+(\.\d+)?)?)", url, re.IGNORECASE)
-    HOST[m.group(0)] = gravtk.utilities.url_split(url)
+    HOST[m.group(0).lower()] = gravtk.utilities.url_split(url)
     # return URL to the remote file
     return HOST[VERSION]
 

@@ -30,6 +30,9 @@ jobs:
     - uses: actions/checkout@v4
       with:
         lfs: true
+    - name: Set cache environment variable
+      run: |
+        echo "GRAVTK_CACHE_DIR=${{ runner.tool_cache }}" >> "$GITHUB_ENV"
     - name: Install dependencies
       run: |
         sudo apt-get update
@@ -52,6 +55,9 @@ jobs:
       run: |
         pixi run fetch
         pixi run date-index
+    - name: Copy GRACE/GRACE-FO date index
+      run: |
+        cp -p $GRAVTK_CACHE_DIR/GRACE_months.txt static/data/GRACE_months.txt
     - name: Archive GRACE/GRACE-FO dates
       uses: actions/upload-artifact@v4
       with:

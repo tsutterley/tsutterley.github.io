@@ -93,7 +93,8 @@ def podaac_cumulus(
         # format: PODAAC_sync_2002-04-01.log
         today = time.strftime("%Y-%m-%d", time.localtime())
         LOGFILE = DIRECTORY.joinpath(f"PODAAC_sync_{today}.log")
-        logging.basicConfig(filename=LOGFILE, level=logging.INFO)
+        with LOGFILE.open(mode="w", encoding="utf-8") as fid:
+            logging.basicConfig(stream=fid, level=logging.INFO)
         logging.info(f"PO.DAAC Cumulus Sync Log ({today})")
         logging.info("CENTERS={0}".format(",".join(PROC)))
         logging.info("RELEASES={0}".format(",".join(DREL)))
@@ -267,7 +268,13 @@ def podaac_cumulus(
 
 # PURPOSE: wrapper for running the sync program in multiprocessing mode
 def multiprocess_sync(
-    remote_file, remote_mtime, local_file, TIMEOUT=0, RETRY=5, GZIP=False, MODE=0o775
+    remote_file,
+    remote_mtime,
+    local_file,
+    TIMEOUT=0,
+    RETRY=5,
+    GZIP=False,
+    MODE=0o775,
 ):
     try:
         output = http_pull_file(
