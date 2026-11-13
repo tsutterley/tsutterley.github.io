@@ -1,5 +1,5 @@
 <table class="tooltip">
-<thead title="Table last modified 2026-09-04">
+<thead title="Table last modified 2026-11-13">
 <tr>
 	<th style="text-align:center">Month</th>
 	<th style="text-align:center">Date</th>
@@ -6407,7 +6407,11 @@
 			<img class="lfs" width="80%" data-path="images/GFZ-RL06-292.jpg">
 		</span>
 	</td>
-	<td class="tooltip__missing" style="text-align:center">**missing**</td>
+	<td class="tooltip" style="text-align:center">2026_091&ndash;2026_120
+		<span class="tooltip">
+			<img class="lfs" width="80%" data-path="images/GSFC-rl06v2.0-292.jpg">
+		</span>
+	</td>
 	<td class="tooltip" style="text-align:center">2026_091&ndash;2026_120
 		<span class="tooltip">
 			<img class="lfs" width="80%" data-path="images/JPL-RL06-292.jpg">
@@ -6427,7 +6431,11 @@
 			<img class="lfs" width="80%" data-path="images/GFZ-RL06-293.jpg">
 		</span>
 	</td>
-	<td class="tooltip__missing" style="text-align:center">**missing**</td>
+	<td class="tooltip" style="text-align:center">2026_121&ndash;2026_151
+		<span class="tooltip">
+			<img class="lfs" width="80%" data-path="images/GSFC-rl06v2.0-293.jpg">
+		</span>
+	</td>
 	<td class="tooltip" style="text-align:center">2026_121&ndash;2026_151
 		<span class="tooltip">
 			<img class="lfs" width="80%" data-path="images/JPL-RL06-293.jpg">
@@ -6447,7 +6455,11 @@
 			<img class="lfs" width="80%" data-path="images/GFZ-RL06-294.jpg">
 		</span>
 	</td>
-	<td class="tooltip__missing" style="text-align:center">**missing**</td>
+	<td class="tooltip" style="text-align:center">2026_152&ndash;2026_181
+		<span class="tooltip">
+			<img class="lfs" width="80%" data-path="images/GSFC-rl06v2.0-294.jpg">
+		</span>
+	</td>
 	<td class="tooltip" style="text-align:center">2026_152&ndash;2026_181
 		<span class="tooltip">
 			<img class="lfs" width="80%" data-path="images/JPL-RL06-294.jpg">
@@ -6462,9 +6474,57 @@
 			<img class="lfs" width="80%" data-path="images/CSR-RL06-295.jpg">
 		</span>
 	</td>
+	<td class="tooltip" style="text-align:center">2026_182&ndash;2026_212
+		<span class="tooltip">
+			<img class="lfs" width="80%" data-path="images/GFZ-RL06-295.jpg">
+		</span>
+	</td>
 	<td class="tooltip__missing" style="text-align:center">**missing**</td>
+	<td class="tooltip" style="text-align:center">2026_182&ndash;2026_212
+		<span class="tooltip">
+			<img class="lfs" width="80%" data-path="images/JPL-RL06-295.jpg">
+		</span>
+	</td>
+</tr>
+<tr class="tooltip">
+	<td class="tooltip__dates" style="text-align:center">296</td>
+	<td style="text-align:center">Aug2026</td>
+	<td class="tooltip" style="text-align:center">2026_213&ndash;2026_243
+		<span class="tooltip">
+			<img class="lfs" width="80%" data-path="images/CSR-RL06-296.jpg">
+		</span>
+	</td>
+	<td class="tooltip" style="text-align:center">2026_213&ndash;2026_243
+		<span class="tooltip">
+			<img class="lfs" width="80%" data-path="images/GFZ-RL06-296.jpg">
+		</span>
+	</td>
 	<td class="tooltip__missing" style="text-align:center">**missing**</td>
+	<td class="tooltip" style="text-align:center">2026_213&ndash;2026_243
+		<span class="tooltip">
+			<img class="lfs" width="80%" data-path="images/JPL-RL06-296.jpg">
+		</span>
+	</td>
+</tr>
+<tr class="tooltip">
+	<td class="tooltip__dates" style="text-align:center">297</td>
+	<td style="text-align:center">Sep2026</td>
+	<td class="tooltip" style="text-align:center">2026_244&ndash;2026_273
+		<span class="tooltip">
+			<img class="lfs" width="80%" data-path="images/CSR-RL06-297.jpg">
+		</span>
+	</td>
+	<td class="tooltip" style="text-align:center">2026_244&ndash;2026_273
+		<span class="tooltip">
+			<img class="lfs" width="80%" data-path="images/GFZ-RL06-297.jpg">
+		</span>
+	</td>
 	<td class="tooltip__missing" style="text-align:center">**missing**</td>
+	<td class="tooltip" style="text-align:center">2026_244&ndash;2026_273
+		<span class="tooltip">
+			<img class="lfs" width="80%" data-path="images/JPL-RL06-297.jpg">
+		</span>
+	</td>
 </tr>
 </tbody>
 </table>
