@@ -2,7 +2,7 @@
 BasicInfo:
   FirstName: Tyler C.
   LastName: Sutterley
-  Photo: img/2023_APL_headshot.jpg
+  Photo: img/PXL_20261014_121154336.jpg
   Contacts:
     - Icon: fas fa-globe
       Info: <a class="links__link" href="https://polargeodesy.github.io" target="_blank">UW/APL Polar Geodesy Lab</a>
