@@ -1,5 +1,5 @@
 <table class="tooltip">
-<thead title="Table last modified 2026-09-19">
+<thead title="Table last modified 2026-11-20">
 <tr>
 	<th style="text-align:center">ICESat-2 Cycle</th>
 	<th style="text-align:center">Start Date</th>
@@ -176,6 +176,11 @@
 	<td class="tooltip__dates" style="text-align:center">Cycle 34</td>
 	<td style="text-align:center">Dec 12 2026</td>
 	<td style="text-align:center">Mar 13 2027</td>
+</tr>
+<tr class="tooltip">
+	<td class="tooltip__dates" style="text-align:center">Cycle 35</td>
+	<td style="text-align:center">Mar 13 2027</td>
+	<td style="text-align:center">Jun 12 2027</td>
 </tr>
 </tbody>
 </table>
